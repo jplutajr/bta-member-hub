@@ -106,9 +106,8 @@ main{padding:22px 0 50px}
 }
 
 .person .ph{
-  height:140px;
-  background:
-    linear-gradient(180deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
+  height:170px; /* slightly taller = less “zoomed” */
+  background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
   display:flex;
   align-items:center;
   justify-content:center;
@@ -116,12 +115,13 @@ main{padding:22px 0 50px}
 }
 
 /* 🔑 THIS IS THE FIX */
-.person img{
+.person .ph img{
   width:100%;
   height:100%;
-  object-fit:cover;
-  object-position:center 20%; /* prevents forehead crop */
+  object-fit:contain;      /* <-- KEY: shows full headshot */
+  object-position:center;
   display:block;
+  background:rgba(0,0,0,.35);
 }
 
 .person .info{padding:12px}
