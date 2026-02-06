@@ -21,7 +21,7 @@ body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background:
-    /* subtle gold “sparkle” pattern */
+    /* subtle gold sparkle pattern */
     radial-gradient(circle at 15% 20%, rgba(212,175,55,.08) 1px, transparent 1px),
     radial-gradient(circle at 75% 30%, rgba(212,175,55,.06) 1px, transparent 1px),
     radial-gradient(circle at 40% 80%, rgba(212,175,55,.05) 1px, transparent 1px),
@@ -33,7 +33,6 @@ body{
     radial-gradient(900px 600px at 50% 100%, rgba(212,175,55,.08), transparent 55%),
 
     var(--bg);
-
   background-size:
     180px 180px,
     220px 220px,
@@ -104,10 +103,37 @@ nav{
 
 main{padding:22px 0 50px}
 
+/* ---------- Gold section divider ---------- */
+.divider{
+  margin:16px 0 10px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.divider::before,
+.divider::after{
+  content:"";
+  height:1px;
+  flex:1;
+  background:linear-gradient(90deg, transparent, rgba(212,175,55,.55), transparent);
+}
+.divider .dot{
+  width:10px; height:10px;
+  border-radius:999px;
+  background:radial-gradient(circle at 30% 30%, rgba(255,230,150,.95), rgba(212,175,55,.65));
+  box-shadow:0 0 16px rgba(212,175,55,.35);
+}
+.divider .label{
+  color:rgba(245,224,138,.95);
+  font-size:12px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+/* ---------- Hero / panels ---------- */
 .hero{
   border:1px solid rgba(212,175,55,.28);
-  background:
-    linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
+  background:linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
   border-radius:var(--radius);
   box-shadow:
     var(--shadow),
@@ -118,6 +144,61 @@ main{padding:22px 0 50px}
 
 .hero h2{margin:0 0 8px; font-size:22px}
 .hero .sub{color:#bbb; margin-bottom:14px}
+
+/* Crest-style header for Union Officers */
+.crest{
+  position:relative;
+  overflow:hidden;
+}
+.crest::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(700px 240px at 15% 15%, rgba(212,175,55,.18), transparent 60%),
+    radial-gradient(520px 220px at 80% 40%, rgba(255,215,0,.10), transparent 62%),
+    linear-gradient(180deg, rgba(18,18,18,.96), rgba(10,10,10,.96));
+  z-index:0;
+}
+.crest::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  /* faint “crest” pattern using repeating gradients (no images) */
+  background:
+    repeating-linear-gradient(135deg, rgba(212,175,55,.07) 0 6px, transparent 6px 18px);
+  opacity:.35;
+  mix-blend-mode:screen;
+  z-index:0;
+}
+.crest > *{position:relative; z-index:1}
+
+.crestRow{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.crestMark{
+  width:56px;
+  height:56px;
+  border-radius:16px;
+  border:1px solid rgba(212,175,55,.45);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,230,150,.28), transparent 55%),
+    linear-gradient(180deg, rgba(212,175,55,.22), rgba(0,0,0,.55));
+  box-shadow:0 10px 25px rgba(0,0,0,.45), 0 0 22px rgba(212,175,55,.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.crestMark img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  padding:8px;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
+}
 
 .btn{
   display:inline-flex;
@@ -139,6 +220,7 @@ main{padding:22px 0 50px}
   text-decoration:none;
 }
 
+/* ---------- Staff / officers cards ---------- */
 .staff-grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
@@ -170,11 +252,7 @@ main{padding:22px 0 50px}
 
 .person .ph{
   height:170px;
-  background:linear-gradient(
-    135deg,
-    rgba(212,175,55,.28),
-    rgba(0,0,0,.65)
-  );
+  background:linear-gradient(135deg, rgba(212,175,55,.28), rgba(0,0,0,.65));
   display:flex;
   align-items:center;
   justify-content:center;
@@ -204,6 +282,7 @@ footer{
 
 @media (max-width: 900px){
   .person{grid-column:span 6}
+  .crestRow{align-items:flex-start}
 }
 
 @media (max-width: 520px){
