@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BTA Member Hub</title>
+  <meta name="description" content="Bridgehampton Teachers Association — member news, events, documents, and resources." />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="wrap top">
+      <div class="brand">
+        <div class="badge" aria-hidden="true"></div>
+        <div>
+          <h1>Bridgehampton Teachers Association</h1>
+          <p>Member hub · news · events · documents · directory</p>
+        </div>
+      </div>
+      <nav class="nav" id="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+
+  <main class="wrap" id="app"></main>
+
+  <footer>
+    <div class="wrap">
+      <div>© <span id="yr"></span> Bridgehampton Teachers Association. Built as a static site for free hosting.</div>
+      <div style="margin-top:6px;">If you publish this publicly, assume anything here is visible to the entire internet.</div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("yr").textContent = new Date().getFullYear();
+    if(!location.hash) location.hash = "#home";
+  </script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
