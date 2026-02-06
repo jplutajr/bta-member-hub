@@ -21,10 +21,26 @@ body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background:
-    radial-gradient(900px 500px at 20% 0%, rgba(212,175,55,.16), transparent 55%),
-    radial-gradient(700px 400px at 80% 10%, rgba(255,215,0,.10), transparent 50%),
-    radial-gradient(900px 600px at 50% 100%, rgba(212,175,55,.06), transparent 55%),
+    /* subtle gold “sparkle” pattern */
+    radial-gradient(circle at 15% 20%, rgba(212,175,55,.08) 1px, transparent 1px),
+    radial-gradient(circle at 75% 30%, rgba(212,175,55,.06) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(212,175,55,.05) 1px, transparent 1px),
+    radial-gradient(circle at 85% 85%, rgba(212,175,55,.04) 1px, transparent 1px),
+
+    /* large glow layers */
+    radial-gradient(900px 500px at 20% 0%, rgba(212,175,55,.18), transparent 55%),
+    radial-gradient(700px 400px at 80% 10%, rgba(255,215,0,.12), transparent 50%),
+    radial-gradient(900px 600px at 50% 100%, rgba(212,175,55,.08), transparent 55%),
+
     var(--bg);
+
+  background-size:
+    180px 180px,
+    220px 220px,
+    260px 260px,
+    300px 300px,
+    auto;
+
   color:var(--ink);
   line-height:1.4;
 }
@@ -36,7 +52,7 @@ header{
   position:sticky;
   top:0;
   z-index:50;
-  background:rgba(10,10,10,.92);
+  background:rgba(10,10,10,.94);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
 }
@@ -73,50 +89,53 @@ nav{
 }
 
 .nav a.active{
-  background:linear-gradient(180deg, rgba(212,175,55,.30), rgba(212,175,55,.12));
-  border-color:rgba(212,175,55,.65);
+  background:linear-gradient(180deg, rgba(212,175,55,.35), rgba(212,175,55,.14));
+  border-color:rgba(212,175,55,.70);
   box-shadow:
-    0 0 0 1px rgba(212,175,55,.22) inset,
-    0 10px 25px rgba(0,0,0,.35);
+    0 0 0 1px rgba(212,175,55,.25) inset,
+    0 12px 30px rgba(0,0,0,.45);
 }
 
 .nav a:hover{
-  background:rgba(212,175,55,.12);
-  border-color:rgba(212,175,55,.30);
+  background:rgba(212,175,55,.14);
+  border-color:rgba(212,175,55,.35);
   text-decoration:none;
 }
 
 main{padding:22px 0 50px}
 
 .hero{
-  border:1px solid rgba(212,175,55,.22);
-  background:linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
+  border:1px solid rgba(212,175,55,.28);
+  background:
+    linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
   border-radius:var(--radius);
   box-shadow:
     var(--shadow),
-    0 0 0 1px rgba(212,175,55,.10) inset;
+    0 0 0 1px rgba(212,175,55,.14) inset,
+    0 0 40px rgba(212,175,55,.12);
   padding:22px;
 }
 
 .hero h2{margin:0 0 8px; font-size:22px}
 .hero .sub{color:#bbb; margin-bottom:14px}
 
-/* Optional: if your app uses .btn anywhere, make it gold and fun */
 .btn{
   display:inline-flex;
   gap:8px;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(180deg, rgba(212,175,55,.36), rgba(212,175,55,.14));
-  border:1px solid rgba(212,175,55,.60);
+  background:linear-gradient(180deg, rgba(212,175,55,.45), rgba(212,175,55,.18));
+  border:1px solid rgba(212,175,55,.70);
   color:var(--ink);
   padding:10px 12px;
   border-radius:12px;
   cursor:pointer;
-  box-shadow:0 10px 25px rgba(0,0,0,.35);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.45),
+    0 0 18px rgba(212,175,55,.20);
 }
 .btn:hover{
-  filter:brightness(1.08);
+  filter:brightness(1.1);
   text-decoration:none;
 }
 
@@ -129,36 +148,44 @@ main{padding:22px 0 50px}
 
 .person{
   grid-column:span 4;
-  border:1px solid rgba(212,175,55,.22);
+  border:1px solid rgba(212,175,55,.25);
   background:rgba(18,18,18,.85);
   border-radius:var(--radius);
   overflow:hidden;
   box-shadow:var(--shadow);
-  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
 }
 
 .person:hover{
-  border-color:rgba(212,175,55,.55);
-  transform:translateY(-2px);
+  border-color:rgba(212,175,55,.65);
+  transform:translateY(-3px);
   box-shadow:
-    0 14px 35px rgba(0,0,0,.60),
-    0 0 0 1px rgba(212,175,55,.12) inset;
+    0 18px 40px rgba(0,0,0,.65),
+    0 0 0 1px rgba(212,175,55,.18) inset,
+    0 0 26px rgba(212,175,55,.18);
 }
 
 .person .ph{
-  height:170px; /* slightly taller = less “zoomed” */
-  background:linear-gradient(135deg, rgba(212,175,55,.22), rgba(0,0,0,.60));
+  height:170px;
+  background:linear-gradient(
+    135deg,
+    rgba(212,175,55,.28),
+    rgba(0,0,0,.65)
+  );
   display:flex;
   align-items:center;
   justify-content:center;
-  border-bottom:1px solid rgba(212,175,55,.18);
+  border-bottom:1px solid rgba(212,175,55,.22);
 }
 
-/* PHOTO FIX (do not change) */
+/* DO NOT CHANGE – photo fix */
 .person .ph img{
   width:100%;
   height:100%;
-  object-fit:contain;      /* shows full headshot */
+  object-fit:contain;
   object-position:center;
   display:block;
   background:rgba(0,0,0,.35);
@@ -169,7 +196,7 @@ main{padding:22px 0 50px}
 .person .small{color:#bbb; font-size:12px; margin-top:4px}
 
 footer{
-  border-top:1px solid rgba(212,175,55,.18);
+  border-top:1px solid rgba(212,175,55,.22);
   padding:18px 0;
   color:#aaa;
   font-size:12px;
