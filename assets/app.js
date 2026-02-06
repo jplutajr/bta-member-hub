@@ -32,7 +32,7 @@ function fmtDate(iso){
   const d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString(undefined, {weekday:"short", year:"numeric", month:"short", day:"numeric"});
 }
-function esc(s){ return (s ?? "").toString().replace(/[&<>"\']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return (s ?? "").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function setActiveNav(){
   const h = location.hash || "#home";
@@ -198,10 +198,46 @@ function paintDocs(){
   $("#docRows").innerHTML = rows || `<tr><td colspan="3" class="meta">No documents match your filters.</td></tr>`;
 }
 
+
+function findStaff(name){
+  return (state.staff || []).find(s => (s.name || "").trim().toLowerCase() === (name || "").trim().toLowerCase()) || null;
+}
+
+function officerCard({title, name}){
+  const s = findStaff(name);
+  const photo = s && s.photo
+    ? `<img src="${esc(s.photo)}" alt="${esc(name)}" loading="lazy" />`
+    : `<div style="font-size:34px; color:rgba(230,237,243,.85); font-weight:800;">${esc(initials(name))}</div>`;
+
+  return `
+    <div class="person">
+      <div class="ph">${photo}</div>
+      <div class="info">
+        <div class="name">${esc(name)}</div>
+        <div class="small">${esc(title)}</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderOfficers(){
+  const executive = [
+    { title: "Secondary President", name: "Joe Pluta" },
+    { title: "Elementary President", name: "Caite Hansen" },
+    { title: "Secretary", name: "Allie Federico" },
+    { title: "Treasurer", name: "Pat Aiello" }
+  ];
+
+  const reps = [
+    { title: "Secondary Rep", name: "Karen Knight" },
+    { title: "Elementary Rep", name: "Hamra Ozsu" },
+    { title: "Specials Rep", name: "Lindsey Sanchez" }
+  ];
+
   return `
     <section class="hero">
-      <h2>Union Officers</h2>
+      <span class="pill">Leadership</span>
+      <h2 style="margin-top:10px;">Union Officers</h2>
       <p class="sub">Executive Board and Representatives</p>
     </section>
 
@@ -209,66 +245,14 @@ function renderOfficers(){
       <div class="card" style="grid-column: span 12;">
         <h3>Executive Board</h3>
         <div class="staff-grid" style="margin-top:12px;">
-          <div class="person">
-            <div class="ph"><img src="assets/staff/JosephPlutaASC.jpg" alt="Joe Pluta" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Joe Pluta</div>
-              <div class="small">Secondary President</div>
-            </div>
-          </div>
-
-          <div class="person">
-            <div class="ph"><img src="assets/staff/CaitlinHansenASC.jpg" alt="Caite Hansen" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Caite Hansen</div>
-              <div class="small">Elementary President</div>
-            </div>
-          </div>
-
-          <div class="person">
-            <div class="ph"><img src="assets/staff/AllisonFedericoASC.jpg" alt="Allie Federico" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Allie Federico</div>
-              <div class="small">Secretary</div>
-            </div>
-          </div>
-
-          <div class="person">
-            <div class="ph"><img src="assets/staff/PatrickAielloASC.jpg" alt="Pat Aiello" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Pat Aiello</div>
-              <div class="small">Treasurer</div>
-            </div>
-          </div>
+          ${executive.map(officerCard).join("")}
         </div>
       </div>
 
       <div class="card" style="grid-column: span 12;">
         <h3>Representatives</h3>
         <div class="staff-grid" style="margin-top:12px;">
-          <div class="person">
-            <div class="ph"><img src="assets/staff/KarenKnightASC.jpg" alt="Karen Knight" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Karen Knight</div>
-              <div class="small">Secondary Rep</div>
-            </div>
-          </div>
-
-          <div class="person">
-            <div class="ph"><img src="assets/staff/HamraOzsuASC.jpg" alt="Hamra Ozsu" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Hamra Ozsu</div>
-              <div class="small">Elementary Rep</div>
-            </div>
-          </div>
-
-          <div class="person">
-            <div class="ph"><img src="assets/staff/LindseySanchezASC.jpg" alt="Lindsey Sanchez" loading="lazy" /></div>
-            <div class="info">
-              <div class="name">Lindsey Sanchez</div>
-              <div class="small">Specials Rep</div>
-            </div>
-          </div>
+          ${reps.map(officerCard).join("")}
         </div>
       </div>
     </section>
@@ -317,7 +301,6 @@ function paintStaff(){
   const grid = items.map(s => {
     const photo = s.photo ? `<img src="${esc(s.photo)}" alt="${esc(s.name)}" loading="lazy" />` : `<div style="font-size:34px; color:rgba(230,237,243,.85); font-weight:800;">${esc(initials(s.name))}</div>`;
     const role = s.role ? esc(s.role) : "—";
-    const email = s.email ? `<a href="mailto:${esc(s.email)}">${esc(s.email)}</a>` : "—";
 
     return `
       <div class="person">
@@ -326,7 +309,6 @@ function paintStaff(){
           <div class="name">${esc(s.name)}</div>
           <div class="small">Building: ${esc(s.building||"")}</div>
           <div class="small">Role: ${role}</div>
-          <div class="small">Email: ${email}</div>
         </div>
       </div>
     `;
@@ -428,13 +410,12 @@ async function boot(){
     loadJSON("data/resources.json"),
     loadJSON("data/minutes.json"),
   ]);
-
-  state.news = news || [];
-  state.events = events || [];
-  state.docs = docs || [];
-  state.staff = staff || [];
-  state.resources = resources || [];
-  state.minutes = minutes || [];
+  state.news = news;
+  state.events = events;
+  state.docs = docs;
+  state.staff = staff;
+  state.resources = resources;
+  state.minutes = minutes;
 
   render();
   window.addEventListener("hashchange", render);
@@ -444,9 +425,10 @@ boot().catch(err => {
   console.error(err);
   $("#app").innerHTML = `
     <section class="hero">
-      <h2>Site error</h2>
-      <p class="sub">Something failed to load. Check the console for details.</p>
-      <p class="meta">${esc(err.message)}</p>
+      <span class="pill danger">Error</span>
+      <h2 style="margin-top:10px;">Site data failed to load</h2>
+      <p class="sub">Open the browser console to see the details. Most likely a missing file path.</p>
+      <p class="meta">${esc(err.message || String(err))}</p>
     </section>
   `;
 });
