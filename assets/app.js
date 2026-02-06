@@ -1,434 +1,383 @@
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+(() => {
+  const $ = (sel, root = document) => root.querySelector(sel);
 
-const routes = [
-  {hash:"#home", label:"Home"},
-  {hash:"#news", label:"News"},
-  {hash:"#events", label:"Events"},
-  {hash:"#docs", label:"Documents"},
-  {hash:"#officers", label:"Union Officers"},
-  {hash:"#staff", label:"Staff Directory"},
-  {hash:"#resources", label:"NYSUT & Links"},
-  {hash:"#minutes", label:"Meeting Minutes"},
-];
-
-const state = {
-  news: [],
-  events: [],
-  docs: [],
-  staff: [],
-  resources: [],
-  minutes: [],
-};
-
-async function loadJSON(path){
-  const res = await fetch(path, {cache:"no-store"});
-  if(!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`);
-  return await res.json();
-}
-
-function fmtDate(iso){
-  if(!iso) return "";
-  const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(undefined, {weekday:"short", year:"numeric", month:"short", day:"numeric"});
-}
-function esc(s){ return (s ?? "").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function setActiveNav(){
-  const h = location.hash || "#home";
-  $$(".nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === h));
-}
-
-function layout(){
-  const nav = routes.map(r => `<a href="${r.hash}">${esc(r.label)}</a>`).join("");
-  $("#nav").innerHTML = nav;
-  setActiveNav();
-}
-
-function renderHome(){
-  const upcoming = [...state.events]
-    .filter(e => e.date)
-    .sort((a,b) => (a.date||"").localeCompare(b.date||""))
-    .slice(0, 4);
-
-  const latest = [...state.news]
-    .filter(n => n.date)
-    .sort((a,b) => (b.date||"").localeCompare(a.date||""))
-    .slice(0, 4);
-
-  return `
-    <section class="hero">
-      <span class="pill">Member hub</span>
-      <h2 style="margin-top:10px;">Bridgehampton Teachers Association</h2>
-      <p class="sub">
-        This site is designed to be a one-stop shop for union news, events, documents, and NYSUT resources.
-        If something is missing, it should be added here — not buried in someone's inbox.
-      </p>
-      <div class="toolbar">
-        <a class="btn" href="#docs">Go to Documents</a>
-        <a class="btn" href="#staff">Find a Colleague</a>
-        <a class="btn" href="#resources">NYSUT Resources</a>
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <h3>Upcoming events</h3>
-        ${upcoming.length ? `
-          <ul>
-            ${upcoming.map(e => `<li><strong>${esc(e.title||"Event")}</strong> — ${esc(fmtDate(e.date))}${e.start?` (${esc(e.start)}${e.end?`–${esc(e.end)}`:""})`:""}${e.location?` · ${esc(e.location)}`:""}</li>`).join("")}
-          </ul>
-        ` : `<p class="meta">No events posted yet.</p>`}
-        <p class="meta"><a href="#events">View all events →</a></p>
-      </div>
-
-      <div class="card">
-        <h3>Latest updates</h3>
-        ${latest.length ? `
-          <ul>
-            ${latest.map(n => `<li><strong>${esc(n.title||"Update")}</strong> — ${esc(fmtDate(n.date))}</li>`).join("")}
-          </ul>
-        ` : `<p class="meta">No news posted yet.</p>`}
-        <p class="meta"><a href="#news">View all updates →</a></p>
-      </div>
-    </section>
-  `;
-}
-
-function renderNews(){
-  const items = [...state.news].sort((a,b)=> (b.date||"").localeCompare(a.date||""));
-  return `
-    <section class="hero">
-      <h2>News</h2>
-      <p class="sub">Short, factual posts. If it matters, it goes here.</p>
-    </section>
-    <section class="grid">
-      ${items.map(n => `
-        <article class="card" style="grid-column: span 12;">
-          <h3>${esc(n.title||"Update")}</h3>
-          <div class="meta">${esc(fmtDate(n.date))}${(n.tags||[]).length ? ` · ${(n.tags||[]).map(t=>`<span class="pill" style="margin-right:6px;">${esc(t)}</span>`).join("")}` : ""}</div>
-          ${n.body ? `<p>${esc(n.body)}</p>` : ""}
-        </article>
-      `).join("")}
-    </section>
-  `;
-}
-
-function renderEvents(){
-  const items = [...state.events].sort((a,b)=> (a.date||"").localeCompare(b.date||""));
-  return `
-    <section class="hero">
-      <h2>Events</h2>
-      <p class="sub">Union meetings, sunshine events, deadlines, and reminders.</p>
-    </section>
-
-    <table class="table" style="margin-top:14px;">
-      <thead>
-        <tr><th style="width:180px;">Date</th><th>Event</th><th style="width:220px;">Time / Location</th></tr>
-      </thead>
-      <tbody>
-        ${items.map(e => `
-          <tr>
-            <td>${esc(fmtDate(e.date))}</td>
-            <td>
-              <strong>${esc(e.title||"Event")}</strong>
-              ${e.details ? `<div class="meta">${esc(e.details)}</div>` : ""}
-            </td>
-            <td>
-              ${e.start ? `${esc(e.start)}${e.end?`–${esc(e.end)}`:""}` : ""}
-              ${e.location ? `<div class="meta">${esc(e.location)}</div>` : ""}
-            </td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderDocs(){
-  const cats = Array.from(new Set(state.docs.map(d=>d.category||"Other"))).sort();
-  const options = [`<option value="">All categories</option>`, ...cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`)].join("");
-
-  return `
-    <section class="hero">
-      <h2>Documents</h2>
-      <p class="sub">Contract, bylaws, MOAs, forms. Searchable. No hunting.</p>
-
-      <div class="toolbar">
-        <input id="docSearch" class="input" placeholder="Search documents (title, notes)..." />
-        <select id="docCat">${options}</select>
-      </div>
-      <p class="meta" style="margin-top:10px;">
-        Tip: For sensitive items, link to a restricted Google Drive file instead of uploading it publicly.
-      </p>
-    </section>
-
-    <table class="table" style="margin-top:14px;">
-      <thead>
-        <tr><th style="width:170px;">Category</th><th>Document</th><th style="width:180px;">Link</th></tr>
-      </thead>
-      <tbody id="docRows"></tbody>
-    </table>
-  `;
-}
-
-function paintDocs(){
-  const q = ($("#docSearch")?.value || "").trim().toLowerCase();
-  const cat = $("#docCat")?.value || "";
-
-  const rows = state.docs
-    .filter(d => !cat || (d.category||"") === cat)
-    .filter(d => {
-      if(!q) return true;
-      const blob = `${d.title||""} ${d.notes||""}`.toLowerCase();
-      return blob.includes(q);
-    })
-    .sort((a,b)=> (a.category||"").localeCompare(b.category||"") || (a.title||"").localeCompare(b.title||""))
-    .map(d => {
-      const link = d.url ? `<a href="${esc(d.url)}" target="_blank" rel="noopener">Open</a>` : `<span class="pill danger">Missing link</span>`;
-      return `
-        <tr>
-          <td>${esc(d.category||"Other")}</td>
-          <td><strong>${esc(d.title||"Document")}</strong>${d.notes?`<div class="meta">${esc(d.notes)}</div>`:""}</td>
-          <td>${link}</td>
-        </tr>
-      `;
-    }).join("");
-
-  $("#docRows").innerHTML = rows || `<tr><td colspan="3" class="meta">No documents match your filters.</td></tr>`;
-}
-
-
-function findStaff(name){
-  return (state.staff || []).find(s => (s.name || "").trim().toLowerCase() === (name || "").trim().toLowerCase()) || null;
-}
-
-function officerCard({title, name}){
-  const s = findStaff(name);
-  const photo = s && s.photo
-    ? `<img src="${esc(s.photo)}" alt="${esc(name)}" loading="lazy" />`
-    : `<div style="font-size:34px; color:rgba(230,237,243,.85); font-weight:800;">${esc(initials(name))}</div>`;
-
-  return `
-    <div class="person">
-      <div class="ph">${photo}</div>
-      <div class="info">
-        <div class="name">${esc(name)}</div>
-        <div class="small">${esc(title)}</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderOfficers(){
-  const executive = [
-    { title: "Secondary President", name: "Joe Pluta" },
-    { title: "Elementary President", name: "Caite Hansen" },
-    { title: "Secretary", name: "Allie Federico" },
-    { title: "Treasurer", name: "Pat Aiello" }
+  const nav = [
+    { id: "home", label: "Home" },
+    { id: "news", label: "News" },
+    { id: "events", label: "Events" },
+    { id: "documents", label: "Documents" },
+    { id: "officers", label: "Union Officers" },
+    { id: "directory", label: "Staff Directory" },
+    { id: "resources", label: "NYSUT & Links" },
   ];
 
-  const reps = [
-    { title: "Secondary Rep", name: "Karen Knight" },
-    { title: "Elementary Rep", name: "Hamra Ozsu" },
-    { title: "Specials Rep", name: "Lindsey Sanchez" }
-  ];
+  const routes = {
+    home: renderHome,
+    news: () => renderListPage("News", "data/news.json"),
+    events: () => renderListPage("Events", "data/events.json"),
+    documents: renderDocuments,
+    officers: renderOfficers,
+    directory: renderDirectory,
+    resources: () => renderResources("NYSUT & Links", "data/resources.json"),
+  };
 
-  return `
-    <section class="hero">
-      <span class="pill">Leadership</span>
-      <h2 style="margin-top:10px;">Union Officers</h2>
-      <p class="sub">Executive Board and Representatives</p>
-    </section>
+  function setActiveNav() {
+    const cur = (location.hash || "#home").replace("#", "");
+    const navEl = $("#nav");
+    navEl.innerHTML = nav
+      .map(
+        (n) =>
+          `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`
+      )
+      .join("");
+  }
 
-    <section class="grid">
-      <div class="card" style="grid-column: span 12;">
-        <h3>Executive Board</h3>
-        <div class="staff-grid" style="margin-top:12px;">
-          ${executive.map(officerCard).join("")}
-        </div>
-      </div>
+  async function fetchJSON(path) {
+    const res = await fetch(path, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to load ${path}`);
+    return await res.json();
+  }
 
-      <div class="card" style="grid-column: span 12;">
-        <h3>Representatives</h3>
-        <div class="staff-grid" style="margin-top:12px;">
-          ${reps.map(officerCard).join("")}
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-function renderStaff(){
-  const buildings = Array.from(new Set(state.staff.map(s=>s.building||"Unknown"))).sort();
-  const options = [`<option value="">All buildings</option>`, ...buildings.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`)].join("");
-
-  return `
-    <section class="hero">
-      <h2>Staff directory</h2>
-      <p class="sub">Search and filter to help members learn who’s who.</p>
-
-      <div class="toolbar">
-        <input id="staffSearch" class="input" placeholder="Search by name (and later: role/email)..." />
-        <select id="staffBuilding">${options}</select>
-      </div>
-
-      <p class="meta" style="margin-top:10px;">
-        Note: This directory is only as accurate as the data file. Update <code>/data/staff.json</code> when staffing changes.
-      </p>
-    </section>
-
-    <section id="staffGrid" class="staff-grid"></section>
-  `;
-}
-
-function initials(name){
-  const parts = (name||"").trim().split(/\s+/).filter(Boolean);
-  const a = parts[0]?.[0] || "?";
-  const b = parts.length > 1 ? parts[parts.length-1][0] : "";
-  return (a+b).toUpperCase();
-}
-
-function paintStaff(){
-  const q = ($("#staffSearch")?.value || "").trim().toLowerCase();
-  const b = $("#staffBuilding")?.value || "";
-
-  const items = state.staff
-    .filter(s => !b || (s.building||"") === b)
-    .filter(s => !q || (s.name||"").toLowerCase().includes(q))
-    .sort((a,b)=> (a.name||"").localeCompare(b.name||""));
-
-  const grid = items.map(s => {
-    const photo = s.photo ? `<img src="${esc(s.photo)}" alt="${esc(s.name)}" loading="lazy" />` : `<div style="font-size:34px; color:rgba(230,237,243,.85); font-weight:800;">${esc(initials(s.name))}</div>`;
-    const role = s.role ? esc(s.role) : "—";
-
+  function divider(label) {
     return `
-      <div class="person">
-        <div class="ph">${photo}</div>
-        <div class="info">
-          <div class="name">${esc(s.name)}</div>
-          <div class="small">Building: ${esc(s.building||"")}</div>
-          <div class="small">Role: ${role}</div>
+      <div class="divider" role="separator" aria-label="${escapeHtml(label)}">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="label">${escapeHtml(label)}</span>
+        <span class="dot" aria-hidden="true"></span>
+      </div>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function hero({ pill, title, sub, extraClass = "" }) {
+    return `
+      <section class="hero ${extraClass}">
+        ${pill ? `<div style="margin-bottom:10px;"><span class="pill">${escapeHtml(pill)}</span></div>` : ""}
+        <h2>${escapeHtml(title)}</h2>
+        ${sub ? `<p class="sub">${escapeHtml(sub)}</p>` : ""}
+      </section>
+    `;
+  }
+
+  function pillClass(kind) {
+    return kind === "danger" ? "pill danger" : "pill";
+  }
+
+  // ---------- Pages ----------
+
+  async function renderHome() {
+    const app = $("#app");
+    const [news, events] = await Promise.all([
+      safeLoad("data/news.json", []),
+      safeLoad("data/events.json", []),
+    ]);
+
+    const latestNews = (news || []).slice(0, 3);
+    const upcoming = (events || []).slice(0, 3);
+
+    app.innerHTML = `
+      ${hero({
+        pill: "Member hub",
+        title: "Bridgehampton Teachers Association",
+        sub:
+          "This site is designed to be a one-stop shop for union news, events, documents, and NYSUT resources. If something is missing, it should be added here — not buried in someone's inbox.",
+      })}
+
+      ${divider("Quick links")}
+
+      <div class="staff-grid">
+        <div class="person" style="grid-column:span 6;">
+          <div class="ph" style="height:120px;">
+            <div style="padding:14px; text-align:center;">
+              <div style="font-weight:800; font-size:18px;">Go to Documents</div>
+              <div style="color:#bbb; font-size:12px; margin-top:6px;">Contracts, MOAs, bylaws, minutes</div>
+              <div style="margin-top:12px;"><a class="btn" href="#documents">Open</a></div>
+            </div>
+          </div>
+          <div class="info"><div class="small">Keep non-sensitive docs public. Member-only docs should be Drive-restricted.</div></div>
+        </div>
+
+        <div class="person" style="grid-column:span 6;">
+          <div class="ph" style="height:120px;">
+            <div style="padding:14px; text-align:center;">
+              <div style="font-weight:800; font-size:18px;">Find a Colleague</div>
+              <div style="color:#bbb; font-size:12px; margin-top:6px;">Search the staff directory</div>
+              <div style="margin-top:12px;"><a class="btn" href="#directory">Open</a></div>
+            </div>
+          </div>
+          <div class="info"><div class="small">Directory is only as accurate as <code>/data/staff.json</code>.</div></div>
+        </div>
+      </div>
+
+      ${divider("Latest")}
+
+      <div class="staff-grid">
+        <div class="person" style="grid-column:span 6;">
+          <div class="info">
+            <div class="name">Upcoming events</div>
+            <ul>
+              ${upcoming.length ? upcoming.map(e => `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}${e.time ? ` (${escapeHtml(e.time)})` : ""}${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`).join("") : "<li>No events yet.</li>"}
+            </ul>
+            <div class="small"><a href="#events">View all events →</a></div>
+          </div>
+        </div>
+
+        <div class="person" style="grid-column:span 6;">
+          <div class="info">
+            <div class="name">Latest updates</div>
+            <ul>
+              ${latestNews.length ? latestNews.map(n => `<li><b>${escapeHtml(n.title || "")}</b> — ${escapeHtml(n.date || "")}</li>`).join("") : "<li>No updates yet.</li>"}
+            </ul>
+            <div class="small"><a href="#news">View all updates →</a></div>
+          </div>
         </div>
       </div>
     `;
-  }).join("");
+  }
 
-  $("#staffGrid").innerHTML = grid || `<div class="card" style="grid-column: span 12;"><p class="meta">No staff match your search.</p></div>`;
-}
+  async function renderListPage(title, path) {
+    const app = $("#app");
+    const items = await safeLoad(path, []);
+    app.innerHTML = `
+      ${hero({ pill: title, title, sub: "" })}
+      ${divider(title)}
+      <div class="person" style="padding:0;">
+        <div class="info">
+          <table class="table" style="width:100%;">
+            <thead><tr><th>Date</th><th>Title</th><th>Details</th></tr></thead>
+            <tbody>
+              ${(items || []).map(i => `
+                <tr>
+                  <td>${escapeHtml(i.date || "")}</td>
+                  <td><b>${escapeHtml(i.title || "")}</b></td>
+                  <td>${escapeHtml(i.details || i.location || "")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
 
-function renderResources(){
-  const cats = Array.from(new Set(state.resources.map(r=>r.category||"Other"))).sort();
-  return `
-    <section class="hero">
-      <h2>NYSUT & helpful links</h2>
-      <p class="sub">Curated. Not a dumping ground.</p>
-    </section>
+  async function renderDocuments() {
+    const app = $("#app");
+    const docs = await safeLoad("data/docs.json", []);
+    app.innerHTML = `
+      ${hero({ pill: "Documents", title: "Documents", sub: "Contracts, MOAs, bylaws, meeting minutes, and more." })}
+      ${divider("Documents")}
+      <div class="person" style="padding:0;">
+        <div class="info">
+          <table class="table" style="width:100%;">
+            <thead><tr><th>Category</th><th>Document</th><th>Link</th></tr></thead>
+            <tbody>
+              ${(docs || []).map(d => `
+                <tr>
+                  <td>${escapeHtml(d.category || "")}</td>
+                  <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
+                  <td>${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <div class="small" style="margin-top:10px;">
+            Tip: Public docs can be hosted in this repo. Member-only docs should be Drive-restricted (see setup steps later).
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
-    <section class="grid">
-      ${cats.map(c => {
-        const items = state.resources.filter(r => (r.category||"Other")===c);
+  async function renderResources(title, path) {
+    const app = $("#app");
+    const items = await safeLoad(path, []);
+    app.innerHTML = `
+      ${hero({ pill: "Resources", title, sub: "Helpful links and NYSUT resources." })}
+      ${divider("Links")}
+      <div class="person" style="padding:0;">
+        <div class="info">
+          <table class="table" style="width:100%;">
+            <thead><tr><th>Title</th><th>Description</th><th>Link</th></tr></thead>
+            <tbody>
+              ${(items || []).map(r => `
+                <tr>
+                  <td><b>${escapeHtml(r.title || "")}</b></td>
+                  <td>${escapeHtml(r.description || "")}</td>
+                  <td>${r.url ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  async function renderDirectory() {
+    const app = $("#app");
+    const staff = await safeLoad("data/staff.json", []);
+    const buildings = ["All buildings", ...Array.from(new Set((staff || []).map(s => s.building).filter(Boolean)))];
+
+    app.innerHTML = `
+      ${hero({
+        pill: "Directory",
+        title: "Staff directory",
+        sub: "Search and filter to help members learn who’s who."
+      })}
+      ${divider("Search")}
+      <div class="person" style="padding:0;">
+        <div class="info">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+            <input id="q" class="input" placeholder="Search by name (and later: role)" />
+            <select id="bldg">
+              ${buildings.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("")}
+            </select>
+          </div>
+          <div class="small" style="margin-top:10px;">
+            Note: This directory is only as accurate as the data file. Update <code>/data/staff.json</code> when staffing changes.
+          </div>
+        </div>
+      </div>
+
+      ${divider("Staff")}
+
+      <div class="staff-grid" id="grid"></div>
+    `;
+
+    const grid = $("#grid");
+    const q = $("#q");
+    const bldg = $("#bldg");
+
+    function render() {
+      const term = (q.value || "").trim().toLowerCase();
+      const building = bldg.value;
+
+      const filtered = (staff || []).filter(s => {
+        const name = (s.name || "").toLowerCase();
+        const okName = !term || name.includes(term);
+        const okB = building === "All buildings" || s.building === building;
+        return okName && okB;
+      });
+
+      grid.innerHTML = filtered.map(s => {
+        const initials = (s.name || "?").split(" ").map(x => x[0]).slice(0,2).join("").toUpperCase();
         return `
-          <div class="card" style="grid-column: span 12;">
-            <h3>${esc(c)}</h3>
-            <ul>
-              ${items.map(r => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a></li>`).join("")}
-            </ul>
+          <div class="person">
+            <div class="ph">
+              ${s.photo
+                ? `<img src="${escapeHtml(s.photo)}" alt="${escapeHtml(s.name)}" loading="lazy" />`
+                : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
+              }
+            </div>
+            <div class="info">
+              <div class="name">${escapeHtml(s.name || "")}</div>
+              <div class="small">Building: ${escapeHtml(s.building || "—")}</div>
+              <div class="small">Role: ${escapeHtml(s.role || "—")}</div>
+            </div>
           </div>
         `;
-      }).join("")}
-    </section>
-  `;
-}
+      }).join("");
+    }
 
-function renderMinutes(){
-  const items = [...state.minutes].sort((a,b)=> (b.date||"").localeCompare(a.date||""));
-  return `
-    <section class="hero">
-      <h2>Meeting minutes</h2>
-      <p class="sub">Links to view-only minutes. (If the docs are restricted, members will need to be signed in.)</p>
-    </section>
-
-    <table class="table" style="margin-top:14px;">
-      <thead>
-        <tr><th style="width:180px;">Date</th><th>Minutes</th><th style="width:180px;">Link</th></tr>
-      </thead>
-      <tbody>
-        ${items.map(m => {
-          const link = m.url ? `<a href="${esc(m.url)}" target="_blank" rel="noopener">Open</a>` : `<span class="pill danger">Missing link</span>`;
-          return `
-            <tr>
-              <td>${esc(fmtDate(m.date))}</td>
-              <td><strong>${esc(m.title||"Meeting minutes")}</strong>${m.notes?`<div class="meta">${esc(m.notes)}</div>`:""}</td>
-              <td>${link}</td>
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function render(){
-  const h = (location.hash || "#home").toLowerCase();
-  setActiveNav();
-
-  let html="";
-  if(h === "#home") html = renderHome();
-  else if(h === "#news") html = renderNews();
-  else if(h === "#events") html = renderEvents();
-  else if(h === "#docs") html = renderDocs();
-  else if(h === "#officers") html = renderOfficers();
-  else if(h === "#staff") html = renderStaff();
-  else if(h === "#resources") html = renderResources();
-  else if(h === "#minutes") html = renderMinutes();
-  else { location.hash="#home"; return; }
-
-  $("#app").innerHTML = html;
-
-  // attach page-specific behavior
-  if(h === "#docs"){
-    $("#docSearch").addEventListener("input", paintDocs);
-    $("#docCat").addEventListener("change", paintDocs);
-    paintDocs();
+    q.addEventListener("input", render);
+    bldg.addEventListener("change", render);
+    render();
   }
-  if(h === "#staff"){
-    $("#staffSearch").addEventListener("input", paintStaff);
-    $("#staffBuilding").addEventListener("change", paintStaff);
-    paintStaff();
+
+  async function renderOfficers() {
+    const app = $("#app");
+
+    // These names must match staff.json exactly to pull photos.
+    const officers = {
+      "Executive Board": [
+        { title: "Secondary President", name: "Joe Pluta" },
+        { title: "Elementary President", name: "Caite Hansen" },
+        { title: "Secretary", name: "Allie Federico" },
+        { title: "Treasurer", name: "Pat Aiello" },
+      ],
+      "Representatives": [
+        { title: "Secondary Rep", name: "Karen Knight" },
+        { title: "Elementary Rep", name: "Hamra Ozsu" },
+        { title: "Specials Rep", name: "Lindsey Sanchez" },
+      ],
+    };
+
+    const staff = await safeLoad("data/staff.json", []);
+    const photoByName = new Map((staff || []).map(s => [s.name, s.photo]));
+
+    app.innerHTML = `
+      ${hero({
+        pill: "Leadership",
+        title: "Union Officers",
+        sub: "Executive Board and Representatives",
+        extraClass: "crest"
+      }).replace(
+        `<h2>Union Officers</h2>`,
+        `<div class="crestRow">
+           <div class="crestMark" aria-hidden="true">
+             <img src="assets/logo.png" alt="" />
+           </div>
+           <div>
+             <h2>Union Officers</h2>
+             <p class="sub">Executive Board and Representatives</p>
+           </div>
+         </div>`
+      )}
+
+      ${divider("Executive Board")}
+
+      <div class="staff-grid">
+        ${officers["Executive Board"].map(o => officerCard(o, photoByName.get(o.name))).join("")}
+      </div>
+
+      ${divider("Representatives")}
+
+      <div class="staff-grid">
+        ${officers["Representatives"].map(o => officerCard(o, photoByName.get(o.name))).join("")}
+      </div>
+    `;
   }
-}
 
-async function boot(){
-  layout();
-  // load all data in parallel
-  const [news, events, docs, staff, resources, minutes] = await Promise.all([
-    loadJSON("data/news.json"),
-    loadJSON("data/events.json"),
-    loadJSON("data/docs.json"),
-    loadJSON("data/staff.json"),
-    loadJSON("data/resources.json"),
-    loadJSON("data/minutes.json"),
-  ]);
-  state.news = news;
-  state.events = events;
-  state.docs = docs;
-  state.staff = staff;
-  state.resources = resources;
-  state.minutes = minutes;
+  function officerCard(officer, photo) {
+    const initials = (officer.name || "?").split(" ").map(x => x[0]).slice(0,2).join("").toUpperCase();
+    return `
+      <div class="person">
+        <div class="ph">
+          ${photo
+            ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(officer.name)}" loading="lazy" />`
+            : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
+          }
+        </div>
+        <div class="info">
+          <div class="name">${escapeHtml(officer.name || "")}</div>
+          <div class="small">${escapeHtml(officer.title || "")}</div>
+        </div>
+      </div>
+    `;
+  }
 
-  render();
-  window.addEventListener("hashchange", render);
-}
+  async function safeLoad(path, fallback) {
+    try {
+      return await fetchJSON(path);
+    } catch {
+      return fallback;
+    }
+  }
 
-boot().catch(err => {
-  console.error(err);
-  $("#app").innerHTML = `
-    <section class="hero">
-      <span class="pill danger">Error</span>
-      <h2 style="margin-top:10px;">Site data failed to load</h2>
-      <p class="sub">Open the browser console to see the details. Most likely a missing file path.</p>
-      <p class="meta">${esc(err.message || String(err))}</p>
-    </section>
-  `;
-});
+  function route() {
+    const id = (location.hash || "#home").replace("#", "");
+    setActiveNav();
+    (routes[id] || routes.home)();
+  }
+
+  window.addEventListener("hashchange", route);
+  route();
+})();
