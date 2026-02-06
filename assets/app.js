@@ -6,6 +6,7 @@ const routes = [
   {hash:"#news", label:"News"},
   {hash:"#events", label:"Events"},
   {hash:"#docs", label:"Documents"},
+  {hash:"#officers", label:"Union Officers"},
   {hash:"#staff", label:"Staff Directory"},
   {hash:"#resources", label:"NYSUT & Links"},
   {hash:"#minutes", label:"Meeting Minutes"},
@@ -31,7 +32,7 @@ function fmtDate(iso){
   const d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString(undefined, {weekday:"short", year:"numeric", month:"short", day:"numeric"});
 }
-function esc(s){ return (s ?? "").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return (s ?? "").toString().replace(/[&<>"\']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function setActiveNav(){
   const h = location.hash || "#home";
@@ -197,6 +198,83 @@ function paintDocs(){
   $("#docRows").innerHTML = rows || `<tr><td colspan="3" class="meta">No documents match your filters.</td></tr>`;
 }
 
+function renderOfficers(){
+  return `
+    <section class="hero">
+      <h2>Union Officers</h2>
+      <p class="sub">Executive Board and Representatives</p>
+    </section>
+
+    <section class="grid">
+      <div class="card" style="grid-column: span 12;">
+        <h3>Executive Board</h3>
+        <div class="staff-grid" style="margin-top:12px;">
+          <div class="person">
+            <div class="ph"><img src="assets/staff/JosephPlutaASC.jpg" alt="Joe Pluta" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Joe Pluta</div>
+              <div class="small">Secondary President</div>
+            </div>
+          </div>
+
+          <div class="person">
+            <div class="ph"><img src="assets/staff/CaitlinHansenASC.jpg" alt="Caite Hansen" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Caite Hansen</div>
+              <div class="small">Elementary President</div>
+            </div>
+          </div>
+
+          <div class="person">
+            <div class="ph"><img src="assets/staff/AllisonFedericoASC.jpg" alt="Allie Federico" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Allie Federico</div>
+              <div class="small">Secretary</div>
+            </div>
+          </div>
+
+          <div class="person">
+            <div class="ph"><img src="assets/staff/PatrickAielloASC.jpg" alt="Pat Aiello" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Pat Aiello</div>
+              <div class="small">Treasurer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="grid-column: span 12;">
+        <h3>Representatives</h3>
+        <div class="staff-grid" style="margin-top:12px;">
+          <div class="person">
+            <div class="ph"><img src="assets/staff/KarenKnightASC.jpg" alt="Karen Knight" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Karen Knight</div>
+              <div class="small">Secondary Rep</div>
+            </div>
+          </div>
+
+          <div class="person">
+            <div class="ph"><img src="assets/staff/HamraOzsuASC.jpg" alt="Hamra Ozsu" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Hamra Ozsu</div>
+              <div class="small">Elementary Rep</div>
+            </div>
+          </div>
+
+          <div class="person">
+            <div class="ph"><img src="assets/staff/LindseySanchezASC.jpg" alt="Lindsey Sanchez" loading="lazy" /></div>
+            <div class="info">
+              <div class="name">Lindsey Sanchez</div>
+              <div class="small">Specials Rep</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function renderStaff(){
   const buildings = Array.from(new Set(state.staff.map(s=>s.building||"Unknown"))).sort();
   const options = [`<option value="">All buildings</option>`, ...buildings.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`)].join("");
@@ -318,6 +396,7 @@ function render(){
   else if(h === "#news") html = renderNews();
   else if(h === "#events") html = renderEvents();
   else if(h === "#docs") html = renderDocs();
+  else if(h === "#officers") html = renderOfficers();
   else if(h === "#staff") html = renderStaff();
   else if(h === "#resources") html = renderResources();
   else if(h === "#minutes") html = renderMinutes();
@@ -349,12 +428,13 @@ async function boot(){
     loadJSON("data/resources.json"),
     loadJSON("data/minutes.json"),
   ]);
-  state.news = news;
-  state.events = events;
-  state.docs = docs;
-  state.staff = staff;
-  state.resources = resources;
-  state.minutes = minutes;
+
+  state.news = news || [];
+  state.events = events || [];
+  state.docs = docs || [];
+  state.staff = staff || [];
+  state.resources = resources || [];
+  state.minutes = minutes || [];
 
   render();
   window.addEventListener("hashchange", render);
@@ -364,10 +444,9 @@ boot().catch(err => {
   console.error(err);
   $("#app").innerHTML = `
     <section class="hero">
-      <span class="pill danger">Error</span>
-      <h2 style="margin-top:10px;">Site data failed to load</h2>
-      <p class="sub">Open the browser console to see the details. Most likely a missing file path.</p>
-      <p class="meta">${esc(err.message || String(err))}</p>
+      <h2>Site error</h2>
+      <p class="sub">Something failed to load. Check the console for details.</p>
+      <p class="meta">${esc(err.message)}</p>
     </section>
   `;
 });
