@@ -5,8 +5,8 @@
   --ink:#e6edf3;
   --muted:#9fb0c0;
   --line:rgba(255,255,255,.08);
-  --brand:#60a5fa;
-  --brand2:#22c55e;
+  --brand:#d4af37;
+  --brand2:#f6c453;
   --danger:#fb7185;
   --shadow:0 10px 30px rgba(0,0,0,.35);
   --radius:18px;
@@ -18,8 +18,8 @@ html,body{height:100%}
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  background: radial-gradient(1200px 600px at 20% 0%, rgba(96,165,250,.18), transparent 55%),
-              radial-gradient(900px 500px at 80% 10%, rgba(34,197,94,.14), transparent 50%),
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(212,175,55,.18), transparent 55%),
+              radial-gradient(900px 500px at 80% 10%, rgba(246,196,83,.14), transparent 50%),
               var(--bg);
   color:var(--ink);
   line-height:1.4;
@@ -39,6 +39,17 @@ header{
 .brand{
   display:flex; align-items:center; gap:10px;
 }
+
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  object-fit:contain;
+  background:rgba(212,175,55,.10);
+  border:1px solid rgba(212,175,55,.22);
+  box-shadow:var(--shadow);
+}
+
 .badge{
   width:40px; height:40px; border-radius:12px;
   background:linear-gradient(135deg, rgba(96,165,250,.95), rgba(34,197,94,.85));
@@ -155,20 +166,11 @@ main{padding:22px 0 50px}
 }
 .person .ph{
   height:140px;
-  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,197,94,.12));
+  background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(34,197,94,.12));
   display:flex; align-items:center; justify-content:center;
   border-bottom:1px solid var(--line);
 }
-
-/* FIX: show full portrait instead of cropping faces */
-.person img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  background:rgba(12,21,38,.85);
-  display:block;
-}
-
+.person img{width:100%; height:100%; object-fit:cover; display:block}
 .person .info{padding:12px}
 .person .name{font-weight:700}
 .person .small{color:var(--muted); font-size:12px; margin-top:4px}
