@@ -43,35 +43,69 @@ header{
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
 
-.top{display:flex; align-items:center; justify-content:space-between; gap:14px}
-
-.brand{display:flex; align-items:center; gap:12px}
-
-.badge{
-  width:44px; height:44px; border-radius:14px;
-  background:linear-gradient(135deg, rgba(212,175,55,.95), rgba(245,224,138,.65));
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  border:1px solid rgba(255,215,0,.35);
-  display:flex; align-items:center; justify-content:center;
+/* ✅ allow wrapping so nav can drop to next line */
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
 }
-.badge img{width:82%; height:82%; object-fit:contain; display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));}
 
-.brand h1{font-size:16px; margin:0}
-.brand p{margin:0; color:#aaa; font-size:12px}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:260px;
+}
 
-nav{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+/* ✅ new logo container (replaces inline styling in index.html) */
+.brandMark{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,215,0,.35);
+  background:rgba(0,0,0,.25);
+  box-shadow:var(--shadow);
+}
+.brandMark img{
+  width:82%;
+  height:82%;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
+
+.brandText h1{font-size:16px; margin:0}
+.brandText p{margin:0; color:#aaa; font-size:12px}
+
+/* Nav */
+nav{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+}
+
 .nav a{
   display:inline-flex; align-items:center; gap:8px;
-  padding:8px 12px; border-radius:12px;
+  padding:8px 12px;
+  border-radius:12px;
   color:var(--ink);
   border:1px solid transparent;
 }
+
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
   border-color:rgba(212,175,55,.60);
   box-shadow:0 0 0 1px rgba(212,175,55,.20) inset, 0 10px 25px rgba(0,0,0,.35);
 }
+
 .nav a:hover{
   background:rgba(212,175,55,.12);
   border-color:rgba(212,175,55,.35);
@@ -80,6 +114,7 @@ nav{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
 
 main{padding:22px 0 50px}
 
+/* Hero */
 .hero{
   border:1px solid var(--line);
   background:linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
@@ -90,6 +125,7 @@ main{padding:22px 0 50px}
 .hero h2{margin:0 0 8px; font-size:22px}
 .hero .sub{color:#d9d9d9; margin:0}
 
+/* Divider */
 .divider{
   display:flex; align-items:center; justify-content:center;
   gap:12px;
@@ -108,6 +144,7 @@ main{padding:22px 0 50px}
   font-size:11px;
 }
 
+/* Pills */
 .pill{
   display:inline-flex;
   padding:4px 10px;
@@ -123,6 +160,7 @@ main{padding:22px 0 50px}
   color:#fecdd3;
 }
 
+/* Grid / Cards */
 .staff-grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
@@ -138,12 +176,14 @@ main{padding:22px 0 50px}
   overflow:hidden;
   box-shadow:var(--shadow);
 }
+
 .person .ph{
   height:170px;
   background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
   display:flex; align-items:center; justify-content:center;
   border-bottom:1px solid var(--line);
 }
+
 /* ✅ image zoom fix stays */
 .person .ph img{
   width:100%;
@@ -177,7 +217,7 @@ main{padding:22px 0 50px}
   text-decoration:none;
 }
 
-/* ✅ Instagram icon + extra glow only when .ig */
+/* Instagram icon button */
 .btn.ig::before{
   content:"";
   width:18px; height:18px; display:inline-block;
@@ -187,39 +227,6 @@ main{padding:22px 0 50px}
 }
 .btn.ig:hover{
   box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
-}
-
-/* Calendar */
-.calWrap{
-  border:1px solid var(--line);
-  background:rgba(18,18,18,.78);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-.calTabs{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg, rgba(212,175,55,.10), rgba(0,0,0,0));
-}
-.calTabs .btn{
-  padding:8px 10px;
-}
-.calTabs .btn.activeBtn{
-  box-shadow:0 0 16px rgba(212,175,55,.65), 0 12px 25px rgba(0,0,0,.35);
-  filter:brightness(1.02);
-}
-.calFrame{
-  width:100%;
-  height:720px;
-  border:0;
-  display:block;
-  background:transparent;
-}
-@media (max-width: 700px){
-  .calFrame{ height:820px; }
 }
 
 /* Tables */
@@ -239,9 +246,16 @@ main{padding:22px 0 50px}
   vertical-align:top;
   text-align:left;
 }
-.table th{color:#e9d787; font-weight:900; font-size:12px; letter-spacing:.06em; text-transform:uppercase}
+.table th{
+  color:#e9d787;
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.06em;
+  text-transform:uppercase
+}
 .table tr:last-child td{border-bottom:none}
 
+/* Inputs */
 .input, select{
   background:rgba(10,10,10,.85);
   border:1px solid var(--line);
@@ -279,6 +293,30 @@ select{cursor:pointer}
 }
 .crestMark img{width:80%; height:80%; object-fit:contain; display:block;}
 
+/* Calendar embed */
+.calWrap{
+  border:1px solid var(--line);
+  background:rgba(18,18,18,.78);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.calTabs{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(212,175,55,.10), rgba(0,0,0,0));
+}
+.calTabs .btn{ padding:8px 10px; }
+.calFrame{
+  width:100%;
+  height:720px;
+  border:0;
+  display:block;
+  background:transparent;
+}
+
 footer{
   border-top:1px solid var(--line);
   padding:18px 0;
@@ -287,10 +325,20 @@ footer{
   text-align:center;
 }
 
+/* ✅ breakpoint: nav drops under brand */
 @media (max-width: 900px){
   .person{grid-column:span 6}
-  nav{justify-content:flex-start}
+  nav{
+    width:100%;
+    justify-content:flex-start;
+  }
 }
+
+/* ✅ smaller screens */
+@media (max-width: 700px){
+  .calFrame{ height:820px; }
+}
+
 @media (max-width: 520px){
   .person{grid-column:span 12}
   .input, select{min-width:100%}
