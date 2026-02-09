@@ -1,9 +1,7 @@
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
 
-  const CALENDAR_ID = "7e799d3cb530dec90c54e3e39f608d213d756dda4b474b3bbeb84f08e01278bf@group.calendar.google.com";
-  const CAL_TZ = "America/New_York";
-
+  // ---------- Nav / routing ----------
   const nav = [
     { id: "home", label: "Home" },
     { id: "news", label: "News" },
@@ -17,7 +15,7 @@
   const routes = {
     home: renderHome,
     news: () => renderListPage("News", "data/news.json"),
-    events: renderEventsCalendar, // <-- calendar-style events view
+    events: () => renderListPage("Events", "data/events.json"),
     documents: renderDocuments,
     officers: renderOfficers,
     directory: renderDirectory,
@@ -32,6 +30,7 @@
       .join("");
   }
 
+  // ---------- Data helpers ----------
   async function fetchJSON(path) {
     const res = await fetch(path, { cache: "no-store" });
     if (!res.ok) throw new Error(`Failed to load ${path}`);
@@ -55,6 +54,7 @@
       .replaceAll("'", "&#039;");
   }
 
+  // ---------- UI helpers ----------
   function divider(label) {
     return `
       <div class="divider" role="separator" aria-label="${escapeHtml(label)}">
@@ -75,35 +75,12 @@
     `;
   }
 
-  // --- Instagram embed helper (official embed.js, no API keys) ---
-  function ensureInstagramEmbedScript() {
-    if (document.querySelector("script[data-instgrm]")) return;
-    const s = document.createElement("script");
-    s.async = true;
-    s.defer = true;
-    s.src = "https://www.instagram.com/embed.js";
-    s.setAttribute("data-instgrm", "true");
-    document.body.appendChild(s);
-  }
-
-  function instagramEmbed(postUrl) {
-    if (!postUrl) return "";
-    ensureInstagramEmbedScript();
-    return `
-      <blockquote class="instagram-media" data-instgrm-permalink="${escapeHtml(postUrl)}" data-instgrm-version="14"
-        style="background:#fff; border:0; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); margin:0; width:100%; min-width:260px;">
-      </blockquote>
-    `;
-  }
-
   // ---------- Pages ----------
-
   async function renderHome() {
     const app = $("#app");
-    const [news, events, social] = await Promise.all([
+    const [news, events] = await Promise.all([
       safeLoad("data/news.json", []),
       safeLoad("data/events.json", []),
-      safeLoad("data/social.json", {}),
     ]);
 
     const latestNews = (news || []).slice(0, 3);
@@ -115,9 +92,18 @@
       <em>*We share the same mission as the United Federation of Teachers.</em>
     `;
 
-    const igHandle = (social && social.instagramHandle) ? social.instagramHandle : "bhsteachersassociation";
+    // Instagram (button only for now; preview area reserved for LightWidget later)
+    const igHandle = "bhsteachersassociation";
     const igUrl = `https://www.instagram.com/${igHandle}/`;
-    const igPostUrl = (social && social.instagramPostUrl) ? social.instagramPostUrl : "";
+
+    // Google Calendar embed (public/shared calendar)
+    const calendarId = "7e799d3cb530dec90c54e3e39f608d213d756dda4b474b3bbeb84f08e01278bf@group.calendar.google.com";
+    const tz = "America%2FNew_York";
+    const calBase = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(calendarId)}&ctz=${tz}`;
+
+    // Two views:
+    const calMonthUrl = `${calBase}&mode=MONTH`;
+    const calAgendaUrl = `${calBase}&mode=AGENDA`;
 
     app.innerHTML = `
       ${hero({
@@ -159,6 +145,7 @@
       ${divider("Connect")}
 
       <div class="staff-grid">
+        <!-- Left: Follow + Preview (stacked) -->
         <div class="person" style="grid-column:span 6;">
           <div class="ph" style="height:150px;">
             <div style="padding:16px;text-align:center;">
@@ -169,25 +156,18 @@
               </div>
             </div>
           </div>
-          <div class="info">
-            <div class="small">Union updates, reminders, highlights. Opens in a new tab.</div>
-          </div>
-        </div>
 
-        <div class="person" style="grid-column:span 6;">
           <div class="info">
             <div class="name">Instagram preview</div>
             <div class="small" style="margin-top:6px;">
-              Free embeds are for a <b>single post</b> unless you pay for a service or use an API.
+              (Paused) We’re switching this to LightWidget so it updates automatically without scraping.
             </div>
 
-            <div style="margin-top:12px;">
-              ${igPostUrl ? instagramEmbed(igPostUrl) : `
-                <div class="small">
-                  No preview post set yet.<br>
-                  Set it by editing <code>data/social.json</code> → <code>instagramPostUrl</code>.
-                </div>
-              `}
+            <!-- Placeholder: this is where you’ll paste the LightWidget iframe later -->
+            <div class="igPreviewBox" style="margin-top:12px;">
+              <div class="small" style="opacity:.9;">
+                Preview coming soon.
+              </div>
             </div>
 
             <div class="small" style="margin-top:12px;">
@@ -195,56 +175,59 @@
             </div>
           </div>
         </div>
-      </div>
-    `;
 
-    if (igPostUrl && window.instgrm?.Embeds?.process) {
-      try { window.instgrm.Embeds.process(); } catch {}
-    } else if (igPostUrl) {
-      setTimeout(() => {
-        if (window.instgrm?.Embeds?.process) {
-          try { window.instgrm.Embeds.process(); } catch {}
-        }
-      }, 900);
-    }
-  }
+        <!-- Right: Calendar -->
+        <div class="person" style="grid-column:span 6;">
+          <div class="info">
+            <div class="name">Event calendar</div>
+            <div class="small" style="margin-top:6px;">
+              This is the shared BTA Google Calendar (Month / Agenda view).
+            </div>
+          </div>
 
-  async function renderEventsCalendar() {
-    const app = $("#app");
+          <div class="calWrap" style="margin:0 12px 12px;">
+            <div class="calTabs">
+              <button class="btn" id="calMonth" type="button">Month</button>
+              <button class="btn" id="calAgenda" type="button">Agenda</button>
+              <a class="btn" style="margin-left:auto;" href="https://calendar.google.com/calendar/u/0?cid=N2U3OTlkM2NiNTMwZGVjOTBjNTRlM2UzOWY2MDhkMjEzZDc1NmRkYTRiNDc0YjNiYmViODRmMDhlMDEyNzhiZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">Open</a>
+            </div>
 
-    const src = encodeURIComponent(CALENDAR_ID);
-    const ctz = encodeURIComponent(CAL_TZ);
+            <iframe
+              id="calFrame"
+              class="calFrame"
+              title="BTA Calendar"
+              src="${escapeHtml(calMonthUrl)}"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
 
-    const monthUrl = `https://calendar.google.com/calendar/embed?src=${src}&ctz=${ctz}&mode=MONTH`;
-    const agendaUrl = `https://calendar.google.com/calendar/embed?src=${src}&ctz=${ctz}&mode=AGENDA`;
-
-    app.innerHTML = `
-      ${hero({
-        pill: "Events",
-        title: "Events Calendar",
-        subHtml: `Month + agenda views. <span class="small">(If you see a permission error, the calendar is not public.)</span>`
-      })}
-
-      ${divider("Calendar")}
-
-      <div class="calWrap">
-        <div class="calTabs">
-          <button class="btn" id="calMonth" type="button">Month view</button>
-          <button class="btn" id="calAgenda" type="button">Agenda view</button>
-          <div style="flex:1;"></div>
-          <a class="btn" href="${monthUrl}" target="_blank" rel="noopener">Open in Google Calendar</a>
+          <div class="info">
+            <div class="small">
+              If the calendar shows “not found / not public”, you need to adjust calendar sharing settings.
+            </div>
+          </div>
         </div>
-        <iframe class="calFrame" id="calFrame" title="BTA Events Calendar" src="${monthUrl}"></iframe>
-      </div>
-
-      <div class="small" style="margin-top:10px;">
-        If you want this to stay “internet-safe,” keep event titles generic and put details in the Documents tab.
       </div>
     `;
 
-    const frame = $("#calFrame");
-    $("#calMonth").addEventListener("click", () => frame.src = monthUrl);
-    $("#calAgenda").addEventListener("click", () => frame.src = agendaUrl);
+    // Calendar tab switching
+    const calFrame = $("#calFrame");
+    const btnMonth = $("#calMonth");
+    const btnAgenda = $("#calAgenda");
+
+    const setMode = (mode) => {
+      if (!calFrame) return;
+      calFrame.src = mode === "AGENDA" ? calAgendaUrl : calMonthUrl;
+
+      // visual active state (cheap + effective)
+      btnMonth?.classList.toggle("activeBtn", mode !== "AGENDA");
+      btnAgenda?.classList.toggle("activeBtn", mode === "AGENDA");
+    };
+
+    btnMonth?.addEventListener("click", () => setMode("MONTH"));
+    btnAgenda?.addEventListener("click", () => setMode("AGENDA"));
+    setMode("MONTH");
   }
 
   async function renderListPage(title, path) {
@@ -313,12 +296,12 @@
               ${(docs || []).map(d => {
                 const restricted = isRestricted(d);
                 return `
-                  <tr>
-                    <td>${restricted ? `<span class="lockTag">🔒 Member</span>` : `<span class="lockTag" style="opacity:.55">Public</span>`}</td>
-                    <td>${escapeHtml(d.category || "")}</td>
-                    <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
-                    <td>${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
-                  </tr>
+                <tr>
+                  <td>${restricted ? `<span class="lockTag">🔒 Member</span>` : `<span class="lockTag" style="opacity:.55">Public</span>`}</td>
+                  <td>${escapeHtml(d.category || "")}</td>
+                  <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
+                  <td>${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
+                </tr>
                 `;
               }).join("")}
             </tbody>
@@ -383,6 +366,7 @@
       </div>
 
       ${divider("Staff")}
+
       <div class="staff-grid" id="grid"></div>
     `;
 
