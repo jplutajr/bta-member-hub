@@ -5,7 +5,7 @@
   --ink:#f5f5f5;
   --muted:#c9b458;
   --line:rgba(255,215,0,.15);
-  --brand:#d4af37;
+  --brand:#d4af37; /* gold */
   --brand2:#f5e08a;
   --danger:#fb7185;
   --shadow:0 10px 30px rgba(0,0,0,.55);
@@ -19,69 +19,63 @@ html,body{height:100%}
 
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
   background:
-    radial-gradient(900px 500px at 20% 0%, rgba(212,175,55,.12), transparent 55%),
-    radial-gradient(700px 400px at 80% 10%, rgba(255,215,0,.08), transparent 50%),
-    var(--bg);
+    radial-gradient(900px 500px at 20% 0%, rgba(212,175,55,.14), transparent 55%),
+    radial-gradient(700px 400px at 80% 10%, rgba(255,215,0,.10), transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%23d4af37' stroke-opacity='0.07' stroke-width='2'%3E%3Cpath d='M36 26l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M108 26l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M72 78l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M36 130l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M108 130l18-10 18 10v20l-18 10-18-10z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat, no-repeat, repeat;
+  background-size:auto, auto, 180px 180px;
+  background-color:var(--bg);
   color:var(--ink);
-  line-height:1.4;
+  line-height:1.45;
 }
 
 a{color:var(--brand); text-decoration:none}
-a:hover{text-decoration:none}
+a:hover{text-decoration:underline}
 
 header{
-  position:sticky;
-  top:0;
-  z-index:50;
-  background:rgba(10,10,10,.9);
+  position:sticky; top:0; z-index:50;
+  background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
 }
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
 
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-}
+.top{display:flex; align-items:center; justify-content:space-between; gap:14px}
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.brand{display:flex; align-items:center; gap:12px}
+
+.badge{
+  width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(212,175,55,.95), rgba(245,224,138,.65));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  border:1px solid rgba(255,215,0,.35);
+  display:flex; align-items:center; justify-content:center;
 }
+.badge img{width:82%; height:82%; object-fit:contain; display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));}
 
 .brand h1{font-size:16px; margin:0}
 .brand p{margin:0; color:#aaa; font-size:12px}
 
-nav{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
+nav{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
 .nav a{
-  padding:8px 12px;
-  border-radius:12px;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:12px;
   color:var(--ink);
   border:1px solid transparent;
 }
-
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
   border-color:rgba(212,175,55,.60);
-  box-shadow:
-    0 0 0 1px rgba(212,175,55,.20) inset,
-    0 10px 25px rgba(0,0,0,.35);
+  box-shadow:0 0 0 1px rgba(212,175,55,.20) inset, 0 10px 25px rgba(0,0,0,.35);
 }
-
 .nav a:hover{
   background:rgba(212,175,55,.12);
   border-color:rgba(212,175,55,.35);
+  text-decoration:none;
 }
 
 main{padding:22px 0 50px}
@@ -93,31 +87,40 @@ main{padding:22px 0 50px}
   box-shadow:var(--shadow);
   padding:22px;
 }
-
 .hero h2{margin:0 0 8px; font-size:22px}
-.hero .sub{color:#ccc; margin-bottom:14px}
+.hero .sub{color:#d9d9d9; margin:0}
 
 .divider{
-  display:flex;
-  align-items:center;
+  display:flex; align-items:center; justify-content:center;
   gap:12px;
-  margin:28px 0 14px;
+  margin:26px 0 14px;
 }
-
 .divider .dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
+  width:7px; height:7px; border-radius:50%;
   background:var(--brand);
-  box-shadow:0 0 10px rgba(212,175,55,.8);
+  box-shadow:0 0 10px rgba(212,175,55,.7);
 }
-
 .divider .label{
   color:var(--brand);
-  font-weight:700;
-  letter-spacing:.04em;
+  font-weight:800;
+  letter-spacing:.08em;
   text-transform:uppercase;
+  font-size:11px;
+}
+
+.pill{
+  display:inline-flex;
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(212,175,55,.14);
+  border:1px solid rgba(212,175,55,.30);
+  color:#fff2b7;
   font-size:12px;
+}
+.pill.danger{
+  background:rgba(251,113,133,.14);
+  border-color:rgba(251,113,133,.25);
+  color:#fecdd3;
 }
 
 .staff-grid{
@@ -135,20 +138,13 @@ main{padding:22px 0 50px}
   overflow:hidden;
   box-shadow:var(--shadow);
 }
-
 .person .ph{
   height:170px;
-  background:linear-gradient(
-    135deg,
-    rgba(212,175,55,.18),
-    rgba(0,0,0,.55)
-  );
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
+  display:flex; align-items:center; justify-content:center;
   border-bottom:1px solid var(--line);
 }
-
+/* ✅ image zoom fix stays */
 .person .ph img{
   width:100%;
   height:100%;
@@ -159,51 +155,96 @@ main{padding:22px 0 50px}
 }
 
 .person .info{padding:12px}
-.person .name{font-weight:700}
-.person .small{color:#bbb; font-size:12px; margin-top:4px}
+.person .name{font-weight:800}
+.person .small{color:#cfcfcf; font-size:12px; margin-top:4px}
 
-/* --------------------
-   BUTTONS (UPGRADED)
--------------------- */
-
+/* Buttons */
 .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 16px;
-  border-radius:14px;
-  font-weight:700;
-  color:#111;
+  display:inline-flex; align-items:center; gap:10px;
   background:linear-gradient(180deg, var(--brand2), var(--brand));
-  border:1px solid rgba(255,215,0,.7);
+  border:1px solid rgba(255,215,0,.70);
+  color:#111;
+  padding:10px 14px;
+  border-radius:14px;
   cursor:pointer;
-  transition:
-    transform .18s ease,
-    box-shadow .18s ease,
-    filter .18s ease;
+  font-weight:800;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
 }
-
-/* Instagram icon */
-.btn::before{
-  content:"";
-  width:18px;
-  height:18px;
-  display:inline-block;
-  background:
-    radial-gradient(circle at 30% 30%, #fff 10%, transparent 11%),
-    linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
-  border-radius:4px;
-  box-shadow:inset 0 0 0 2px rgba(0,0,0,.35);
-}
-
-/* Gold glow hover */
 .btn:hover{
   transform:translateY(-2px);
-  box-shadow:
-    0 0 18px rgba(212,175,55,.9),
-    0 12px 25px rgba(0,0,0,.45);
+  box-shadow:0 0 18px rgba(212,175,55,.75), 0 12px 25px rgba(0,0,0,.45);
   filter:brightness(1.05);
+  text-decoration:none;
 }
+
+/* ✅ Instagram icon + extra glow only when .ig */
+.btn.ig::before{
+  content:"";
+  width:18px; height:18px; display:inline-block;
+  border-radius:5px;
+  background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.35);
+}
+.btn.ig:hover{
+  box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
+}
+
+/* Tables */
+.table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:rgba(18,18,18,.75);
+  box-shadow:var(--shadow);
+}
+.table th,.table td{
+  padding:12px 12px;
+  border-bottom:1px solid var(--line);
+  vertical-align:top;
+  text-align:left;
+}
+.table th{color:#e9d787; font-weight:900; font-size:12px; letter-spacing:.06em; text-transform:uppercase}
+.table tr:last-child td{border-bottom:none}
+
+.input, select{
+  background:rgba(10,10,10,.85);
+  border:1px solid var(--line);
+  color:var(--ink);
+  padding:10px 12px;
+  border-radius:12px;
+  min-width:240px;
+  outline:none;
+}
+select{cursor:pointer}
+
+/* 🔒 member doc tag */
+.lockTag{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  background:rgba(212,175,55,.14);
+  border:1px solid rgba(212,175,55,.30);
+  color:#fff2b7;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+
+/* Officers crest header */
+.crestRow{display:flex; align-items:center; gap:14px}
+.crestMark{
+  width:56px; height:56px;
+  border-radius:16px;
+  background:linear-gradient(135deg, rgba(212,175,55,.25), rgba(245,224,138,.10));
+  border:1px solid rgba(255,215,0,.35);
+  box-shadow:var(--shadow);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.crestMark img{width:80%; height:80%; object-fit:contain; display:block;}
 
 footer{
   border-top:1px solid var(--line);
@@ -215,8 +256,9 @@ footer{
 
 @media (max-width: 900px){
   .person{grid-column:span 6}
+  nav{justify-content:flex-start}
 }
-
 @media (max-width: 520px){
   .person{grid-column:span 12}
+  .input, select{min-width:100%}
 }
