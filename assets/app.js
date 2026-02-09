@@ -1,11 +1,8 @@
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
 
-  // =========================
-  // Config (edit these)
-  // =========================
-  // Leave blank until you have the Google Form link.
-  const MEMBER_ACCESS_FORM_URL = ""; // e.g. "https://forms.gle/...."
+  const CALENDAR_ID = "7e799d3cb530dec90c54e3e39f608d213d756dda4b474b3bbeb84f08e01278bf@group.calendar.google.com";
+  const CAL_TZ = "America/New_York";
 
   const nav = [
     { id: "home", label: "Home" },
@@ -20,16 +17,13 @@
   const routes = {
     home: renderHome,
     news: () => renderListPage("News", "data/news.json"),
-    events: () => renderListPage("Events", "data/events.json"),
+    events: renderEventsCalendar, // <-- calendar-style events view
     documents: renderDocuments,
     officers: renderOfficers,
     directory: renderDirectory,
     resources: () => renderResources("NYSUT & Links", "data/resources.json"),
   };
 
-  // =========================
-  // Helpers
-  // =========================
   function setActiveNav() {
     const cur = (location.hash || "#home").replace("#", "");
     const navEl = $("#nav");
@@ -40,7 +34,7 @@
 
   async function fetchJSON(path) {
     const res = await fetch(path, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Failed to load ${path} (${res.status})`);
+    if (!res.ok) throw new Error(`Failed to load ${path}`);
     return await res.json();
   }
 
@@ -71,7 +65,6 @@
     `;
   }
 
-  // NOTE: subHtml is intentionally NOT escaped so you can pass safe HTML like <br>, <em>, <b>.
   function hero({ pill, title, subHtml }) {
     return `
       <section class="hero">
@@ -82,77 +75,29 @@
     `;
   }
 
-  function renderError(err) {
-    const app = $("#app");
-    app.innerHTML = `
-      ${hero({ pill: "Error", title: "Something went wrong", subHtml: `<span style="color:#bbb;">${escapeHtml(err?.message || String(err))}</span>` })}
-      ${divider("Fix")}
-      <div class="person" style="padding:0;">
-        <div class="info">
-          <div class="name">What to do</div>
-          <ul>
-            <li>Make sure the file you edited saved correctly (no missing backticks <code>\`</code>).</li>
-            <li>Hard refresh the site (Ctrl+F5).</li>
-            <li>If this happened after editing <code>assets/app.js</code>, undo the last commit and re-apply changes carefully.</li>
-          </ul>
-        </div>
-      </div>
-    `;
-  }
-
-  // =========================
-  // Instagram embed helper (official embed.js, no API keys)
-  // =========================
-  function ensureInstagramEmbedScript(onReady) {
-    // If already loaded, just call onReady immediately.
-    if (window.instgrm?.Embeds?.process) {
-      try { window.instgrm.Embeds.process(); } catch {}
-      if (onReady) onReady();
-      return;
-    }
-
-    // If script tag exists but not loaded yet, wait a moment and retry.
-    const existing = document.querySelector("script[data-instgrm]");
-    if (existing) {
-      setTimeout(() => {
-        if (window.instgrm?.Embeds?.process) {
-          try { window.instgrm.Embeds.process(); } catch {}
-          if (onReady) onReady();
-        }
-      }, 900);
-      return;
-    }
-
+  // --- Instagram embed helper (official embed.js, no API keys) ---
+  function ensureInstagramEmbedScript() {
+    if (document.querySelector("script[data-instgrm]")) return;
     const s = document.createElement("script");
     s.async = true;
     s.defer = true;
     s.src = "https://www.instagram.com/embed.js";
     s.setAttribute("data-instgrm", "true");
-    s.onload = () => {
-      if (window.instgrm?.Embeds?.process) {
-        try { window.instgrm.Embeds.process(); } catch {}
-      }
-      if (onReady) onReady();
-    };
     document.body.appendChild(s);
   }
 
   function instagramEmbed(postUrl) {
     if (!postUrl) return "";
-    // process after render
     ensureInstagramEmbedScript();
     return `
-      <blockquote class="instagram-media"
-        data-instgrm-permalink="${escapeHtml(postUrl)}"
-        data-instgrm-version="14"
+      <blockquote class="instagram-media" data-instgrm-permalink="${escapeHtml(postUrl)}" data-instgrm-version="14"
         style="background:#fff; border:0; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); margin:0; width:100%; min-width:260px;">
       </blockquote>
     `;
   }
 
-  // =========================
-  // Pages
-  // =========================
+  // ---------- Pages ----------
+
   async function renderHome() {
     const app = $("#app");
     const [news, events, social] = await Promise.all([
@@ -188,17 +133,9 @@
           <div class="info">
             <div class="name">Upcoming events</div>
             <ul>
-              ${
-                upcoming.length
-                  ? upcoming
-                      .map(
-                        (e) =>
-                          `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}${
-                            e.time ? ` (${escapeHtml(e.time)})` : ""
-                          }${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`
-                      )
-                      .join("")
-                  : "<li>No events posted yet.</li>"
+              ${upcoming.length
+                ? upcoming.map(e => `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}${e.time ? ` (${escapeHtml(e.time)})` : ""}${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`).join("")
+                : "<li>No events posted yet.</li>"
               }
             </ul>
             <div class="small"><a href="#events">View all events →</a></div>
@@ -209,12 +146,9 @@
           <div class="info">
             <div class="name">Latest updates</div>
             <ul>
-              ${
-                latestNews.length
-                  ? latestNews
-                      .map((n) => `<li><b>${escapeHtml(n.title || "")}</b> — ${escapeHtml(n.date || "")}</li>`)
-                      .join("")
-                  : "<li>No updates posted yet.</li>"
+              ${latestNews.length
+                ? latestNews.map(n => `<li><b>${escapeHtml(n.title || "")}</b> — ${escapeHtml(n.date || "")}</li>`).join("")
+                : "<li>No updates posted yet.</li>"
               }
             </ul>
             <div class="small"><a href="#news">View all updates →</a></div>
@@ -231,9 +165,7 @@
               <div style="font-weight:900;font-size:18px;">Follow us on Instagram</div>
               <div class="small" style="margin-top:6px;">@${escapeHtml(igHandle)}</div>
               <div style="margin-top:14px;">
-                <a class="btn ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer">
-                  Open Instagram
-                </a>
+                <a class="btn ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener">Open Instagram</a>
               </div>
             </div>
           </div>
@@ -246,32 +178,73 @@
           <div class="info">
             <div class="name">Instagram preview</div>
             <div class="small" style="margin-top:6px;">
-              Free embeds are for a <b>single post</b> (not a full feed) unless you pay for a service or use an API.
+              Free embeds are for a <b>single post</b> unless you pay for a service or use an API.
             </div>
 
             <div style="margin-top:12px;">
-              ${
-                igPostUrl
-                  ? instagramEmbed(igPostUrl)
-                  : `
+              ${igPostUrl ? instagramEmbed(igPostUrl) : `
                 <div class="small">
                   No preview post set yet.<br>
                   Set it by editing <code>data/social.json</code> → <code>instagramPostUrl</code>.
                 </div>
-              `
-              }
+              `}
             </div>
 
             <div class="small" style="margin-top:12px;">
-              <a href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer">View the full profile →</a>
+              <a href="${escapeHtml(igUrl)}" target="_blank" rel="noopener">View the full profile →</a>
             </div>
           </div>
         </div>
       </div>
     `;
 
-    // Force a process once the script is ready (handles first-load cases)
-    if (igPostUrl) ensureInstagramEmbedScript();
+    if (igPostUrl && window.instgrm?.Embeds?.process) {
+      try { window.instgrm.Embeds.process(); } catch {}
+    } else if (igPostUrl) {
+      setTimeout(() => {
+        if (window.instgrm?.Embeds?.process) {
+          try { window.instgrm.Embeds.process(); } catch {}
+        }
+      }, 900);
+    }
+  }
+
+  async function renderEventsCalendar() {
+    const app = $("#app");
+
+    const src = encodeURIComponent(CALENDAR_ID);
+    const ctz = encodeURIComponent(CAL_TZ);
+
+    const monthUrl = `https://calendar.google.com/calendar/embed?src=${src}&ctz=${ctz}&mode=MONTH`;
+    const agendaUrl = `https://calendar.google.com/calendar/embed?src=${src}&ctz=${ctz}&mode=AGENDA`;
+
+    app.innerHTML = `
+      ${hero({
+        pill: "Events",
+        title: "Events Calendar",
+        subHtml: `Month + agenda views. <span class="small">(If you see a permission error, the calendar is not public.)</span>`
+      })}
+
+      ${divider("Calendar")}
+
+      <div class="calWrap">
+        <div class="calTabs">
+          <button class="btn" id="calMonth" type="button">Month view</button>
+          <button class="btn" id="calAgenda" type="button">Agenda view</button>
+          <div style="flex:1;"></div>
+          <a class="btn" href="${monthUrl}" target="_blank" rel="noopener">Open in Google Calendar</a>
+        </div>
+        <iframe class="calFrame" id="calFrame" title="BTA Events Calendar" src="${monthUrl}"></iframe>
+      </div>
+
+      <div class="small" style="margin-top:10px;">
+        If you want this to stay “internet-safe,” keep event titles generic and put details in the Documents tab.
+      </div>
+    `;
+
+    const frame = $("#calFrame");
+    $("#calMonth").addEventListener("click", () => frame.src = monthUrl);
+    $("#calAgenda").addEventListener("click", () => frame.src = agendaUrl);
   }
 
   async function renderListPage(title, path) {
@@ -285,17 +258,13 @@
           <table class="table" style="width:100%;">
             <thead><tr><th>Date</th><th>Title</th><th>Details</th></tr></thead>
             <tbody>
-              ${(items || [])
-                .map(
-                  (i) => `
+              ${(items || []).map(i => `
                 <tr>
                   <td>${escapeHtml(i.date || "")}</td>
                   <td><b>${escapeHtml(i.title || "")}</b></td>
                   <td>${escapeHtml(i.details || i.location || "")}</td>
                 </tr>
-              `
-                )
-                .join("")}
+              `).join("")}
             </tbody>
           </table>
         </div>
@@ -313,14 +282,8 @@
       return c.includes("restricted") || n.includes("member");
     }
 
-    const hasForm = !!(MEMBER_ACCESS_FORM_URL && MEMBER_ACCESS_FORM_URL.startsWith("http"));
-
     app.innerHTML = `
-      ${hero({
-        pill: "Documents",
-        title: "Documents",
-        subHtml: "Contracts, MOAs, bylaws, meeting minutes, and more."
-      })}
+      ${hero({ pill: "Documents", title: "Documents", subHtml: "Contracts, MOAs, bylaws, meeting minutes, and more." })}
       ${divider("Documents")}
 
       <div class="person" style="margin-bottom:14px;">
@@ -335,11 +298,9 @@
           </div>
 
           <div style="margin-top:12px;">
-            ${
-              hasForm
-                ? `<a class="btn" href="${escapeHtml(MEMBER_ACCESS_FORM_URL)}" target="_blank" rel="noopener noreferrer">Request member access</a>`
-                : `<button class="btn" type="button" disabled style="opacity:.6; cursor:not-allowed;">Request member access (add form link)</button>`
-            }
+            <a class="btn" href="PASTE_GOOGLE_FORM_LINK_HERE" target="_blank" rel="noopener">
+              Request member access
+            </a>
           </div>
         </div>
       </div>
@@ -349,30 +310,19 @@
           <table class="table" style="width:100%;">
             <thead><tr><th>Access</th><th>Category</th><th>Document</th><th>Link</th></tr></thead>
             <tbody>
-              ${(docs || [])
-                .map((d) => {
-                  const restricted = isRestricted(d);
-                  return `
-                    <tr>
-                      <td>${
-                        restricted
-                          ? `<span class="lockTag">🔒 Member</span>`
-                          : `<span class="lockTag" style="opacity:.55">Public</span>`
-                      }</td>
-                      <td>${escapeHtml(d.category || "")}</td>
-                      <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
-                      <td>${
-                        d.url
-                          ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener noreferrer">Open</a>`
-                          : "—"
-                      }</td>
-                    </tr>
-                  `;
-                })
-                .join("")}
+              ${(docs || []).map(d => {
+                const restricted = isRestricted(d);
+                return `
+                  <tr>
+                    <td>${restricted ? `<span class="lockTag">🔒 Member</span>` : `<span class="lockTag" style="opacity:.55">Public</span>`}</td>
+                    <td>${escapeHtml(d.category || "")}</td>
+                    <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
+                    <td>${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
+                  </tr>
+                `;
+              }).join("")}
             </tbody>
           </table>
-
           <div class="small" style="margin-top:10px;">
             🔒 Member documents are stored in Google Drive with restricted access. If you get a “Request access” screen, you’re not added yet.
           </div>
@@ -392,17 +342,13 @@
           <table class="table" style="width:100%;">
             <thead><tr><th>Title</th><th>Description</th><th>Link</th></tr></thead>
             <tbody>
-              ${(items || [])
-                .map(
-                  (r) => `
+              ${(items || []).map(r => `
                 <tr>
                   <td><b>${escapeHtml(r.title || "")}</b></td>
                   <td>${escapeHtml(r.description || "")}</td>
-                  <td>${r.url ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">Open</a>` : "—"}</td>
+                  <td>${r.url ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
                 </tr>
-              `
-                )
-                .join("")}
+              `).join("")}
             </tbody>
           </table>
         </div>
@@ -413,7 +359,7 @@
   async function renderDirectory() {
     const app = $("#app");
     const staff = await safeLoad("data/staff.json", []);
-    const buildings = ["All buildings", ...Array.from(new Set((staff || []).map((s) => s.building).filter(Boolean)))];
+    const buildings = ["All buildings", ...Array.from(new Set((staff || []).map(s => s.building).filter(Boolean)))];
 
     app.innerHTML = `
       ${hero({
@@ -427,7 +373,7 @@
           <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
             <input id="q" class="input" placeholder="Search by name (and later: role)" />
             <select id="bldg">
-              ${buildings.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("")}
+              ${buildings.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("")}
             </select>
           </div>
           <div class="small" style="margin-top:10px;">
@@ -448,40 +394,31 @@
       const term = (q.value || "").trim().toLowerCase();
       const building = bldg.value;
 
-      const filtered = (staff || []).filter((s) => {
+      const filtered = (staff || []).filter(s => {
         const name = (s.name || "").toLowerCase();
         const okName = !term || name.includes(term);
         const okB = building === "All buildings" || s.building === building;
         return okName && okB;
       });
 
-      grid.innerHTML = filtered
-        .map((s) => {
-          const initials = (s.name || "?")
-            .split(" ")
-            .map((x) => x[0])
-            .slice(0, 2)
-            .join("")
-            .toUpperCase();
-
-          return `
-            <div class="person">
-              <div class="ph">
-                ${
-                  s.photo
-                    ? `<img src="${escapeHtml(s.photo)}" alt="${escapeHtml(s.name)}" loading="lazy" />`
-                    : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
-                }
-              </div>
-              <div class="info">
-                <div class="name">${escapeHtml(s.name || "")}</div>
-                <div class="small">Building: ${escapeHtml(s.building || "—")}</div>
-                <div class="small">Role: ${escapeHtml(s.role || "—")}</div>
-              </div>
+      grid.innerHTML = filtered.map(s => {
+        const initials = (s.name || "?").split(" ").map(x => x[0]).slice(0,2).join("").toUpperCase();
+        return `
+          <div class="person">
+            <div class="ph">
+              ${s.photo
+                ? `<img src="${escapeHtml(s.photo)}" alt="${escapeHtml(s.name)}" loading="lazy" />`
+                : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
+              }
             </div>
-          `;
-        })
-        .join("");
+            <div class="info">
+              <div class="name">${escapeHtml(s.name || "")}</div>
+              <div class="small">Building: ${escapeHtml(s.building || "—")}</div>
+              <div class="small">Role: ${escapeHtml(s.role || "—")}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
 
     q.addEventListener("input", render);
@@ -499,7 +436,7 @@
         { title: "Secretary", name: "Allie Federico" },
         { title: "Treasurer", name: "Pat Aiello" },
       ],
-      Representatives: [
+      "Representatives": [
         { title: "Secondary Rep", name: "Karen Knight" },
         { title: "Elementary Rep", name: "Hamra Ozsu" },
         { title: "Specials Rep", name: "Lindsey Sanchez" },
@@ -507,7 +444,7 @@
     };
 
     const staff = await safeLoad("data/staff.json", []);
-    const photoByName = new Map((staff || []).map((s) => [s.name, s.photo]));
+    const photoByName = new Map((staff || []).map(s => [s.name, s.photo]));
 
     app.innerHTML = `
       ${hero({
@@ -529,31 +466,24 @@
 
       ${divider("Executive Board")}
       <div class="staff-grid">
-        ${officers["Executive Board"].map((o) => officerCard(o, photoByName.get(o.name))).join("")}
+        ${officers["Executive Board"].map(o => officerCard(o, photoByName.get(o.name))).join("")}
       </div>
 
       ${divider("Representatives")}
       <div class="staff-grid">
-        ${officers["Representatives"].map((o) => officerCard(o, photoByName.get(o.name))).join("")}
+        ${officers["Representatives"].map(o => officerCard(o, photoByName.get(o.name))).join("")}
       </div>
     `;
   }
 
   function officerCard(officer, photo) {
-    const initials = (officer.name || "?")
-      .split(" ")
-      .map((x) => x[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-
+    const initials = (officer.name || "?").split(" ").map(x => x[0]).slice(0,2).join("").toUpperCase();
     return `
       <div class="person">
         <div class="ph">
-          ${
-            photo
-              ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(officer.name)}" loading="lazy" />`
-              : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
+          ${photo
+            ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(officer.name)}" loading="lazy" />`
+            : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
           }
         </div>
         <div class="info">
@@ -564,17 +494,10 @@
     `;
   }
 
-  // =========================
-  // Routing
-  // =========================
   function route() {
     const id = (location.hash || "#home").replace("#", "");
     setActiveNav();
-
-    const fn = routes[id] || routes.home;
-    Promise.resolve()
-      .then(() => fn())
-      .catch(renderError);
+    (routes[id] || routes.home)();
   }
 
   window.addEventListener("hashchange", route);
