@@ -57,111 +57,49 @@
       .replaceAll("'", "&#039;");
   }
 
-  function hero({ pill, title, sub, extraClass = "" }) {
+  // NOTE:
+  // hero() escapes "sub" by default. If you want HTML in sub (like <em>),
+  // pass subIsHtml: true (ONLY for content you control).
+  function hero({ pill, title, sub, extraClass = "", subIsHtml = false }) {
+    const subHtml = subIsHtml ? String(sub ?? "") : escapeHtml(sub);
     return `
       <section class="hero ${extraClass}">
-        ${pill ? `<div style="margin-bottom:10px;"><span class="pill">${escapeHtml(pill)}</span></div>` : ""}
+        ${
+          pill
+            ? `<div style="margin-bottom:10px;"><span class="pill">${escapeHtml(
+                pill
+              )}</span></div>`
+            : ""
+        }
         <h2>${escapeHtml(title)}</h2>
-        ${sub ? `<p class="sub">${escapeHtml(sub)}</p>` : ""}
+        ${sub ? `<p class="sub">${subHtml}</p>` : ""}
       </section>
     `;
   }
 
-  function pillClass(kind) {
-    return kind === "danger" ? "pill danger" : "pill";
-  }
-
   // ---------- Pages ----------
 
- async function renderHome() {
-  const app = $("#app");
-  const [news, events] = await Promise.all([
-    safeLoad("data/news.json", []),
-    safeLoad("data/events.json", []),
-  ]);
-
-  const latestNews = (news || []).slice(0, 3);
-  const upcoming = (events || []).slice(0, 3);
-
-  app.innerHTML = `
-    ${hero({
-      pill: "Member hub",
-      title: "Bridgehampton Teachers Association",
-      sub:
-        "Mission: The BTA is a union of professionals that champions fairness; democracy; economic opportunity; and high-quality public education, healthcare and public services for our students, their families and our communities.<br><br><em>*We share the same mission as the United Federation of Teachers.</em>"
-    })}
-
-    ${divider("Quick links")}
-
-    <div class="staff-grid">
-      <div class="person" style="grid-column:span 6;">
-        <div class="ph" style="height:120px;">
-          <div style="padding:14px; text-align:center;">
-            <div style="font-weight:800; font-size:18px;">Go to Documents</div>
-            <div style="color:#bbb; font-size:12px; margin-top:6px;">Contracts, MOAs, bylaws, minutes</div>
-            <div style="margin-top:12px;"><a class="btn" href="#documents">Open</a></div>
-          </div>
-        </div>
-        <div class="info">
-          <div class="small">🔒 Some documents require member Google Drive access.</div>
-        </div>
-      </div>
-
-      <div class="person" style="grid-column:span 6;">
-        <div class="ph" style="height:120px;">
-          <div style="padding:14px; text-align:center;">
-            <div style="font-weight:800; font-size:18px;">Find a Colleague</div>
-            <div style="color:#bbb; font-size:12px; margin-top:6px;">Search the staff directory</div>
-            <div style="margin-top:12px;"><a class="btn" href="#directory">Open</a></div>
-          </div>
-        </div>
-        <div class="info">
-          <div class="small">Staff directory maintained by the union.</div>
-        </div>
-      </div>
-    </div>
-
-    ${divider("Latest")}
-
-    <div class="staff-grid">
-      <div class="person" style="grid-column:span 6;">
-        <div class="info">
-          <div class="name">Upcoming events</div>
-          <ul>
-            ${upcoming.length
-              ? upcoming.map(e => `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}</li>`).join("")
-              : "<li>No events posted yet.</li>"
-            }
-          </ul>
-          <div class="small"><a href="#events">View all events →</a></div>
-        </div>
-      </div>
-
-      <div class="person" style="grid-column:span 6;">
-        <div class="info">
-          <div class="name">Latest updates</div>
-          <ul>
-            ${latestNews.length
-              ? latestNews.map(n => `<li><b>${escapeHtml(n.title || "")}</b> — ${escapeHtml(n.date || "")}</li>`).join("")
-              : "<li>No updates posted yet.</li>"
-            }
-          </ul>
-          <div class="small"><a href="#news">View all updates →</a></div>
-        </div>
-      </div>
-    </div>
-  `;
-}
+  async function renderHome() {
+    const app = $("#app");
+    const [news, events] = await Promise.all([
+      safeLoad("data/news.json", []),
+      safeLoad("data/events.json", []),
+    ]);
 
     const latestNews = (news || []).slice(0, 3);
     const upcoming = (events || []).slice(0, 3);
+
+    const missionHtml = `
+      <b>Mission:</b> The BTA is a union of professionals that champions fairness; democracy; economic opportunity; and high-quality public education, healthcare and public services for our students, their families and our communities. <br><br>
+      <em>*We share the same mission as the United Federation of Teachers.</em>
+    `;
 
     app.innerHTML = `
       ${hero({
         pill: "Member hub",
         title: "Bridgehampton Teachers Association",
-        sub:
-          "This site is designed to be a one-stop shop for union news, events, documents, and NYSUT resources. If something is missing, it should be added here — not buried in someone's inbox.",
+        sub: missionHtml,
+        subIsHtml: true
       })}
 
       ${divider("Quick links")}
@@ -175,7 +113,9 @@
               <div style="margin-top:12px;"><a class="btn" href="#documents">Open</a></div>
             </div>
           </div>
-          <div class="info"><div class="small">Keep non-sensitive docs public. Member-only docs should be Drive-restricted.</div></div>
+          <div class="info">
+            <div class="small">🔒 Some documents require member Google Drive access.</div>
+          </div>
         </div>
 
         <div class="person" style="grid-column:span 6;">
@@ -186,7 +126,9 @@
               <div style="margin-top:12px;"><a class="btn" href="#directory">Open</a></div>
             </div>
           </div>
-          <div class="info"><div class="small">Directory is only as accurate as <code>/data/staff.json</code>.</div></div>
+          <div class="info">
+            <div class="small">Staff directory maintained by the union.</div>
+          </div>
         </div>
       </div>
 
@@ -197,7 +139,20 @@
           <div class="info">
             <div class="name">Upcoming events</div>
             <ul>
-              ${upcoming.length ? upcoming.map(e => `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}${e.time ? ` (${escapeHtml(e.time)})` : ""}${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`).join("") : "<li>No events yet.</li>"}
+              ${
+                upcoming.length
+                  ? upcoming
+                      .map(
+                        (e) =>
+                          `<li><b>${escapeHtml(
+                            e.title || ""
+                          )}</b> — ${escapeHtml(e.date || "")}${
+                            e.time ? ` (${escapeHtml(e.time)})` : ""
+                          }${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`
+                      )
+                      .join("")
+                  : "<li>No events posted yet.</li>"
+              }
             </ul>
             <div class="small"><a href="#events">View all events →</a></div>
           </div>
@@ -207,7 +162,18 @@
           <div class="info">
             <div class="name">Latest updates</div>
             <ul>
-              ${latestNews.length ? latestNews.map(n => `<li><b>${escapeHtml(n.title || "")}</b> — ${escapeHtml(n.date || "")}</li>`).join("") : "<li>No updates yet.</li>"}
+              ${
+                latestNews.length
+                  ? latestNews
+                      .map(
+                        (n) =>
+                          `<li><b>${escapeHtml(
+                            n.title || ""
+                          )}</b> — ${escapeHtml(n.date || "")}</li>`
+                      )
+                      .join("")
+                  : "<li>No updates posted yet.</li>"
+              }
             </ul>
             <div class="small"><a href="#news">View all updates →</a></div>
           </div>
@@ -227,13 +193,17 @@
           <table class="table" style="width:100%;">
             <thead><tr><th>Date</th><th>Title</th><th>Details</th></tr></thead>
             <tbody>
-              ${(items || []).map(i => `
+              ${(items || [])
+                .map(
+                  (i) => `
                 <tr>
                   <td>${escapeHtml(i.date || "")}</td>
                   <td><b>${escapeHtml(i.title || "")}</b></td>
                   <td>${escapeHtml(i.details || i.location || "")}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </div>
@@ -245,25 +215,36 @@
     const app = $("#app");
     const docs = await safeLoad("data/docs.json", []);
     app.innerHTML = `
-      ${hero({ pill: "Documents", title: "Documents", sub: "Contracts, MOAs, bylaws, meeting minutes, and more." })}
+      ${hero({
+        pill: "Documents",
+        title: "Documents",
+        sub: "Contracts, MOAs, bylaws, meeting minutes, and more."
+      })}
       ${divider("Documents")}
       <div class="person" style="padding:0;">
         <div class="info">
           <table class="table" style="width:100%;">
             <thead><tr><th>Category</th><th>Document</th><th>Link</th></tr></thead>
             <tbody>
-              ${(docs || []).map(d => `
+              ${(docs || [])
+                .map(
+                  (d) => `
                 <tr>
                   <td>${escapeHtml(d.category || "")}</td>
                   <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
-                  <td>${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
+                  <td>${
+                    d.url
+                      ? `<a href="${escapeHtml(
+                          d.url
+                        )}" target="_blank" rel="noopener">Open</a>`
+                      : "—"
+                  }</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
-          <div class="small" style="margin-top:10px;">
-            Tip: Public docs can be hosted in this repo. Member-only docs should be Drive-restricted (see setup steps later).
-          </div>
         </div>
       </div>
     `;
@@ -280,13 +261,23 @@
           <table class="table" style="width:100%;">
             <thead><tr><th>Title</th><th>Description</th><th>Link</th></tr></thead>
             <tbody>
-              ${(items || []).map(r => `
+              ${(items || [])
+                .map(
+                  (r) => `
                 <tr>
                   <td><b>${escapeHtml(r.title || "")}</b></td>
                   <td>${escapeHtml(r.description || "")}</td>
-                  <td>${r.url ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
+                  <td>${
+                    r.url
+                      ? `<a href="${escapeHtml(
+                          r.url
+                        )}" target="_blank" rel="noopener">Open</a>`
+                      : "—"
+                  }</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </div>
@@ -297,7 +288,10 @@
   async function renderDirectory() {
     const app = $("#app");
     const staff = await safeLoad("data/staff.json", []);
-    const buildings = ["All buildings", ...Array.from(new Set((staff || []).map(s => s.building).filter(Boolean)))];
+    const buildings = [
+      "All buildings",
+      ...Array.from(new Set((staff || []).map((s) => s.building).filter(Boolean))),
+    ];
 
     app.innerHTML = `
       ${hero({
@@ -311,7 +305,9 @@
           <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
             <input id="q" class="input" placeholder="Search by name (and later: role)" />
             <select id="bldg">
-              ${buildings.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("")}
+              ${buildings
+                .map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`)
+                .join("")}
             </select>
           </div>
           <div class="small" style="margin-top:10px;">
@@ -333,21 +329,32 @@
       const term = (q.value || "").trim().toLowerCase();
       const building = bldg.value;
 
-      const filtered = (staff || []).filter(s => {
+      const filtered = (staff || []).filter((s) => {
         const name = (s.name || "").toLowerCase();
         const okName = !term || name.includes(term);
         const okB = building === "All buildings" || s.building === building;
         return okName && okB;
       });
 
-      grid.innerHTML = filtered.map(s => {
-        const initials = (s.name || "?").split(" ").map(x => x[0]).slice(0,2).join("").toUpperCase();
-        return `
+      grid.innerHTML = filtered
+        .map((s) => {
+          const initials = (s.name || "?")
+            .split(" ")
+            .map((x) => x[0])
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
+          return `
           <div class="person">
             <div class="ph">
-              ${s.photo
-                ? `<img src="${escapeHtml(s.photo)}" alt="${escapeHtml(s.name)}" loading="lazy" />`
-                : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
+              ${
+                s.photo
+                  ? `<img src="${escapeHtml(s.photo)}" alt="${escapeHtml(
+                      s.name
+                    )}" loading="lazy" />`
+                  : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(
+                      initials
+                    )}</div>`
               }
             </div>
             <div class="info">
@@ -357,7 +364,8 @@
             </div>
           </div>
         `;
-      }).join("");
+        })
+        .join("");
     }
 
     q.addEventListener("input", render);
@@ -368,7 +376,6 @@
   async function renderOfficers() {
     const app = $("#app");
 
-    // These names must match staff.json exactly to pull photos.
     const officers = {
       "Executive Board": [
         { title: "Secondary President", name: "Joe Pluta" },
@@ -376,7 +383,7 @@
         { title: "Secretary", name: "Allie Federico" },
         { title: "Treasurer", name: "Pat Aiello" },
       ],
-      "Representatives": [
+      Representatives: [
         { title: "Secondary Rep", name: "Karen Knight" },
         { title: "Elementary Rep", name: "Hamra Ozsu" },
         { title: "Specials Rep", name: "Lindsey Sanchez" },
@@ -384,7 +391,7 @@
     };
 
     const staff = await safeLoad("data/staff.json", []);
-    const photoByName = new Map((staff || []).map(s => [s.name, s.photo]));
+    const photoByName = new Map((staff || []).map((s) => [s.name, s.photo]));
 
     app.innerHTML = `
       ${hero({
@@ -408,25 +415,39 @@
       ${divider("Executive Board")}
 
       <div class="staff-grid">
-        ${officers["Executive Board"].map(o => officerCard(o, photoByName.get(o.name))).join("")}
+        ${officers["Executive Board"]
+          .map((o) => officerCard(o, photoByName.get(o.name)))
+          .join("")}
       </div>
 
       ${divider("Representatives")}
 
       <div class="staff-grid">
-        ${officers["Representatives"].map(o => officerCard(o, photoByName.get(o.name))).join("")}
+        ${officers["Representatives"]
+          .map((o) => officerCard(o, photoByName.get(o.name)))
+          .join("")}
       </div>
     `;
   }
 
   function officerCard(officer, photo) {
-    const initials = (officer.name || "?").split(" ").map(x => x[0]).slice(0,2).join("").toUpperCase();
+    const initials = (officer.name || "?")
+      .split(" ")
+      .map((x) => x[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
     return `
       <div class="person">
         <div class="ph">
-          ${photo
-            ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(officer.name)}" loading="lazy" />`
-            : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(initials)}</div>`
+          ${
+            photo
+              ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(
+                  officer.name
+                )}" loading="lazy" />`
+              : `<div style="font-weight:900; font-size:44px; color:rgba(255,255,255,.75);">${escapeHtml(
+                  initials
+                )}</div>`
           }
         </div>
         <div class="info">
