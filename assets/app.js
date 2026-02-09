@@ -73,12 +73,85 @@
 
   // ---------- Pages ----------
 
-  async function renderHome() {
-    const app = $("#app");
-    const [news, events] = await Promise.all([
-      safeLoad("data/news.json", []),
-      safeLoad("data/events.json", []),
-    ]);
+ async function renderHome() {
+  const app = $("#app");
+  const [news, events] = await Promise.all([
+    safeLoad("data/news.json", []),
+    safeLoad("data/events.json", []),
+  ]);
+
+  const latestNews = (news || []).slice(0, 3);
+  const upcoming = (events || []).slice(0, 3);
+
+  app.innerHTML = `
+    ${hero({
+      pill: "Member hub",
+      title: "Bridgehampton Teachers Association",
+      sub:
+        "Mission: The BTA is a union of professionals that champions fairness; democracy; economic opportunity; and high-quality public education, healthcare and public services for our students, their families and our communities.<br><br><em>*We share the same mission as the United Federation of Teachers.</em>"
+    })}
+
+    ${divider("Quick links")}
+
+    <div class="staff-grid">
+      <div class="person" style="grid-column:span 6;">
+        <div class="ph" style="height:120px;">
+          <div style="padding:14px; text-align:center;">
+            <div style="font-weight:800; font-size:18px;">Go to Documents</div>
+            <div style="color:#bbb; font-size:12px; margin-top:6px;">Contracts, MOAs, bylaws, minutes</div>
+            <div style="margin-top:12px;"><a class="btn" href="#documents">Open</a></div>
+          </div>
+        </div>
+        <div class="info">
+          <div class="small">🔒 Some documents require member Google Drive access.</div>
+        </div>
+      </div>
+
+      <div class="person" style="grid-column:span 6;">
+        <div class="ph" style="height:120px;">
+          <div style="padding:14px; text-align:center;">
+            <div style="font-weight:800; font-size:18px;">Find a Colleague</div>
+            <div style="color:#bbb; font-size:12px; margin-top:6px;">Search the staff directory</div>
+            <div style="margin-top:12px;"><a class="btn" href="#directory">Open</a></div>
+          </div>
+        </div>
+        <div class="info">
+          <div class="small">Staff directory maintained by the union.</div>
+        </div>
+      </div>
+    </div>
+
+    ${divider("Latest")}
+
+    <div class="staff-grid">
+      <div class="person" style="grid-column:span 6;">
+        <div class="info">
+          <div class="name">Upcoming events</div>
+          <ul>
+            ${upcoming.length
+              ? upcoming.map(e => `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}</li>`).join("")
+              : "<li>No events posted yet.</li>"
+            }
+          </ul>
+          <div class="small"><a href="#events">View all events →</a></div>
+        </div>
+      </div>
+
+      <div class="person" style="grid-column:span 6;">
+        <div class="info">
+          <div class="name">Latest updates</div>
+          <ul>
+            ${latestNews.length
+              ? latestNews.map(n => `<li><b>${escapeHtml(n.title || "")}</b> — ${escapeHtml(n.date || "")}</li>`).join("")
+              : "<li>No updates posted yet.</li>"
+            }
+          </ul>
+          <div class="small"><a href="#news">View all updates →</a></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
     const latestNews = (news || []).slice(0, 3);
     const upcoming = (events || []).slice(0, 3);
