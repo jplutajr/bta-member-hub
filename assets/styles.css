@@ -43,69 +43,35 @@ header{
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
 
-/* ✅ allow wrapping so nav can drop to next line */
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  flex-wrap:wrap;
-}
+.top{display:flex; align-items:center; justify-content:space-between; gap:14px}
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:260px;
-}
+.brand{display:flex; align-items:center; gap:12px}
 
-/* ✅ new logo container (replaces inline styling in index.html) */
-.brandMark{
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(255,215,0,.35);
-  background:rgba(0,0,0,.25);
+.badge{
+  width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(212,175,55,.95), rgba(245,224,138,.65));
   box-shadow:var(--shadow);
+  overflow:hidden;
+  border:1px solid rgba(255,215,0,.35);
+  display:flex; align-items:center; justify-content:center;
 }
-.brandMark img{
-  width:82%;
-  height:82%;
-  object-fit:contain;
-  display:block;
-  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
-}
+.badge img{width:82%; height:82%; object-fit:contain; display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));}
 
-.brandText h1{font-size:16px; margin:0}
-.brandText p{margin:0; color:#aaa; font-size:12px}
+.brand h1{font-size:16px; margin:0}
+.brand p{margin:0; color:#aaa; font-size:12px}
 
-/* Nav */
-nav{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-  align-items:center;
-}
-
+nav{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
 .nav a{
   display:inline-flex; align-items:center; gap:8px;
-  padding:8px 12px;
-  border-radius:12px;
+  padding:8px 12px; border-radius:12px;
   color:var(--ink);
   border:1px solid transparent;
 }
-
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
   border-color:rgba(212,175,55,.60);
   box-shadow:0 0 0 1px rgba(212,175,55,.20) inset, 0 10px 25px rgba(0,0,0,.35);
 }
-
 .nav a:hover{
   background:rgba(212,175,55,.12);
   border-color:rgba(212,175,55,.35);
@@ -114,7 +80,6 @@ nav{
 
 main{padding:22px 0 50px}
 
-/* Hero */
 .hero{
   border:1px solid var(--line);
   background:linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
@@ -125,7 +90,6 @@ main{padding:22px 0 50px}
 .hero h2{margin:0 0 8px; font-size:22px}
 .hero .sub{color:#d9d9d9; margin:0}
 
-/* Divider */
 .divider{
   display:flex; align-items:center; justify-content:center;
   gap:12px;
@@ -144,7 +108,6 @@ main{padding:22px 0 50px}
   font-size:11px;
 }
 
-/* Pills */
 .pill{
   display:inline-flex;
   padding:4px 10px;
@@ -160,7 +123,6 @@ main{padding:22px 0 50px}
   color:#fecdd3;
 }
 
-/* Grid / Cards */
 .staff-grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
@@ -176,14 +138,12 @@ main{padding:22px 0 50px}
   overflow:hidden;
   box-shadow:var(--shadow);
 }
-
 .person .ph{
   height:170px;
   background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
   display:flex; align-items:center; justify-content:center;
   border-bottom:1px solid var(--line);
 }
-
 /* ✅ image zoom fix stays */
 .person .ph img{
   width:100%;
@@ -217,7 +177,7 @@ main{padding:22px 0 50px}
   text-decoration:none;
 }
 
-/* Instagram icon button */
+/* ✅ Instagram icon + extra glow only when .ig */
 .btn.ig::before{
   content:"";
   width:18px; height:18px; display:inline-block;
@@ -227,6 +187,81 @@ main{padding:22px 0 50px}
 }
 .btn.ig:hover{
   box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
+}
+
+/* Calendar */
+.calWrap{
+  border:1px solid var(--line);
+  background:rgba(18,18,18,.78);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.calTabs{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(212,175,55,.10), rgba(0,0,0,0));
+}
+.calTabs .btn{
+  padding:8px 10px;
+}
+.calTabs .btn.activeBtn{
+  box-shadow:0 0 16px rgba(212,175,55,.65), 0 12px 25px rgba(0,0,0,.35);
+  filter:brightness(1.02);
+}
+.calFrame{
+  width:100%;
+  height:720px;
+  border:0;
+  display:block;
+  background:transparent;
+}
+
+/* ---------- Mobile responsiveness (adds without changing desktop) ---------- */
+
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.55);
+  color:var(--ink);
+  cursor:pointer;
+}
+.navToggle:hover{
+  box-shadow:0 0 16px rgba(212,175,55,.35);
+}
+.navToggle .bars{
+  width:18px; height:14px; position:relative;
+}
+.navToggle .bars::before,
+.navToggle .bars::after,
+.navToggle .bars span{
+  content:"";
+  position:absolute;
+  left:0; right:0;
+  height:2px;
+  background:rgba(245,240,210,.85);
+  border-radius:2px;
+}
+.navToggle .bars::before{ top:0; }
+.navToggle .bars span{ top:6px; }
+.navToggle .bars::after{ bottom:0; }
+
+/* Tables: allow horizontal scroll on small screens */
+.tableWrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+
+@media (max-width: 700px){
+  .calFrame{ height:820px; }
 }
 
 /* Tables */
@@ -246,16 +281,9 @@ main{padding:22px 0 50px}
   vertical-align:top;
   text-align:left;
 }
-.table th{
-  color:#e9d787;
-  font-weight:900;
-  font-size:12px;
-  letter-spacing:.06em;
-  text-transform:uppercase
-}
+.table th{color:#e9d787; font-weight:900; font-size:12px; letter-spacing:.06em; text-transform:uppercase}
 .table tr:last-child td{border-bottom:none}
 
-/* Inputs */
 .input, select{
   background:rgba(10,10,10,.85);
   border:1px solid var(--line);
@@ -293,30 +321,6 @@ select{cursor:pointer}
 }
 .crestMark img{width:80%; height:80%; object-fit:contain; display:block;}
 
-/* Calendar embed */
-.calWrap{
-  border:1px solid var(--line);
-  background:rgba(18,18,18,.78);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-.calTabs{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg, rgba(212,175,55,.10), rgba(0,0,0,0));
-}
-.calTabs .btn{ padding:8px 10px; }
-.calFrame{
-  width:100%;
-  height:720px;
-  border:0;
-  display:block;
-  background:transparent;
-}
-
 footer{
   border-top:1px solid var(--line);
   padding:18px 0;
@@ -325,21 +329,146 @@ footer{
   text-align:center;
 }
 
-/* ✅ breakpoint: nav drops under brand */
 @media (max-width: 900px){
   .person{grid-column:span 6}
-  nav{
-    width:100%;
-    justify-content:flex-start;
-  }
+  nav{justify-content:flex-start}
 }
-
-/* ✅ smaller screens */
-@media (max-width: 700px){
-  .calFrame{ height:820px; }
-}
-
 @media (max-width: 520px){
   .person{grid-column:span 12}
   .input, select{min-width:100%}
+}
+
+/* ---------- Mobile responsiveness (adds without changing desktop) ---------- */
+
+/* Table safety: allow horizontal scroll on small screens (keeps desktop identical) */
+.tableWrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.table{ min-width:680px; }
+
+/* Mobile nav: hamburger + collapsible links */
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.55);
+  color:var(--ink);
+  cursor:pointer;
+}
+.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
+.navToggle:active{ transform:translateY(1px); }
+
+.navToggle .bars{
+  width:18px;
+  height:12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.navToggle .bars span{
+  height:2px;
+  border-radius:2px;
+  background:rgba(255,242,183,.9);
+  box-shadow:0 0 10px rgba(212,175,55,.35);
+}
+
+@media (max-width: 900px){
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  .navToggle{ display:inline-flex; }
+
+  /* Collapsed by default */
+  nav.nav{ display:none; width:100%; }
+  nav.nav.open{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(10,10,10,.92);
+  }
+  .nav a{ width:100%; justify-content:flex-start; }
+
+  /* Reduce table min width a bit on tablets */
+  .table{ min-width:620px; }
+}
+
+@media (max-width: 520px){
+  .wrap{ padding:14px; }
+  .badge{ width:40px; height:40px; border-radius:14px; }
+  .hero{ padding:18px; }
+  .table{ min-width:560px; }
+}
+
+/* ---------- Mobile responsiveness (adds without changing desktop) ---------- */
+
+/* Table safety: allow horizontal scroll on small screens (keeps desktop identical) */
+.tableWrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.table{ min-width:680px; }
+
+/* Mobile nav: hamburger + collapsible links */
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.55);
+  color:var(--ink);
+  cursor:pointer;
+  user-select:none;
+}
+.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
+.navToggle:active{ transform:translateY(1px); }
+
+.navToggle .bars{
+  width:18px; height:12px; position:relative; display:inline-block;
+}
+.navToggle .bars::before,
+.navToggle .bars::after,
+.navToggle .bars span{
+  content:"";
+  position:absolute; left:0; right:0;
+  height:2px; border-radius:2px;
+  background:rgba(255,215,0,.85);
+}
+.navToggle .bars::before{ top:0; }
+.navToggle .bars span{ top:5px; }
+.navToggle .bars::after{ bottom:0; }
+
+@media (max-width: 900px){
+  .top{ flex-wrap:wrap; }
+  .brand{ flex:1 1 auto; }
+  .navToggle{ display:inline-flex; }
+
+  /* collapse nav into a dropdown panel */
+  .nav{
+    display:none;
+    width:100%;
+    order:3;
+    margin-top:12px;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(10,10,10,.92);
+  }
+  .nav.open{ display:flex; flex-direction:column; }
+  .nav a{ width:100%; justify-content:flex-start; }
+
+  /* help inputs and cards breathe */
+  .wrap{ padding:14px; }
+}
+
+@media (max-width: 700px){
+  .table{ min-width:600px; }
+}
+
+@media (max-width: 520px){
+  .table{ min-width:560px; }
 }
