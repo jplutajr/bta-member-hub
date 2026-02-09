@@ -28,6 +28,26 @@
     navEl.innerHTML = nav
       .map((n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`)
       .join("");
+
+    // Mobile nav toggle (only shows on small screens)
+    const t = document.getElementById("navToggle");
+    if (t && !t.__bound) {
+      t.__bound = true;
+      t.addEventListener("click", () => {
+        navEl.classList.toggle("open");
+        t.setAttribute("aria-expanded", navEl.classList.contains("open") ? "true" : "false");
+      });
+    }
+    if (t) {
+      navEl.querySelectorAll("a").forEach((a) => {
+        a.addEventListener("click", () => {
+          if (window.innerWidth <= 900) {
+            navEl.classList.remove("open");
+            t.setAttribute("aria-expanded", "false");
+          }
+        });
+      });
+    }
   }
 
   // ---------- Data helpers ----------
@@ -238,7 +258,7 @@
       ${divider(title)}
       <div class="person" style="padding:0;">
         <div class="info">
-          <table class="table" style="width:100%;">
+          <div class="tableWrap"><table class="table">
             <thead><tr><th>Date</th><th>Title</th><th>Details</th></tr></thead>
             <tbody>
               ${(items || []).map(i => `
@@ -249,7 +269,7 @@
                 </tr>
               `).join("")}
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
     `;
@@ -290,7 +310,7 @@
 
       <div class="person" style="padding:0;">
         <div class="info">
-          <table class="table" style="width:100%;">
+          <div class="tableWrap"><table class="table">
             <thead><tr><th>Access</th><th>Category</th><th>Document</th><th>Link</th></tr></thead>
             <tbody>
               ${(docs || []).map(d => {
@@ -305,7 +325,7 @@
                 `;
               }).join("")}
             </tbody>
-          </table>
+          </table></div>
           <div class="small" style="margin-top:10px;">
             🔒 Member documents are stored in Google Drive with restricted access. If you get a “Request access” screen, you’re not added yet.
           </div>
@@ -322,7 +342,7 @@
       ${divider("Links")}
       <div class="person" style="padding:0;">
         <div class="info">
-          <table class="table" style="width:100%;">
+          <div class="tableWrap"><table class="table">
             <thead><tr><th>Title</th><th>Description</th><th>Link</th></tr></thead>
             <tbody>
               ${(items || []).map(r => `
@@ -333,7 +353,7 @@
                 </tr>
               `).join("")}
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
     `;
@@ -478,8 +498,16 @@
     `;
   }
 
+
   function route() {
     const id = (location.hash || "#home").replace("#", "");
+
+    // Close mobile nav on navigation
+    const navEl = $("#nav");
+    const t = document.getElementById("navToggle");
+    if (navEl) navEl.classList.remove("open");
+    if (t) t.setAttribute("aria-expanded", "false");
+
     setActiveNav();
     (routes[id] || routes.home)();
   }
