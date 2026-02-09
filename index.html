@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BTA Member Hub</title>
   <meta name="description" content="Bridgehampton Teachers Association — member news, events, documents, and resources." />
-  <link rel="stylesheet" href="assets/styles.css?v=4" />
+  <link rel="stylesheet" href="assets/styles.css?v=5" />
 </head>
 <body>
   <header>
     <div class="wrap top">
       <div class="brand">
         <!-- Union logo -->
-        <img 
-          src="assets/logo.png" 
-          alt="Bridgehampton Teachers Association logo" 
-          style="height:40px; width:auto; display:block;"
-        />
-        <div>
+        <div class="brandMark" aria-hidden="true">
+          <img src="assets/logo.png" alt="" />
+        </div>
+
+        <div class="brandText">
           <h1>Bridgehampton Teachers Association</h1>
           <p>Member hub · news · events · documents · directory</p>
         </div>
       </div>
+
       <nav class="nav" id="nav" aria-label="Primary"></nav>
     </div>
   </header>
@@ -41,6 +41,8 @@
     document.getElementById("yr").textContent = new Date().getFullYear();
     if (!location.hash) location.hash = "#home";
   </script>
-  <script src="assets/app.js"></script>
+
+  <!-- cache-bust JS too -->
+  <script src="assets/app.js?v=5"></script>
 </body>
 </html>
