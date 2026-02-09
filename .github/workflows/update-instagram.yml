@@ -1,0 +1,40 @@
+name: Update Instagram Latest Post
+
+on:
+  schedule:
+    # Daily at 9:15 AM Eastern-ish (13:15 UTC during standard time)
+    # If DST shifts, it will drift by an hour — not a big deal.
+    - cron: "15 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run updater
+        env:
+          IG_HANDLE: bhsteachersassociation
+          SOCIAL_PATH: data/social.json
+          # You can override this if Picuki ever fails:
+          # FEED_URL: https://rsshub.app/picnob/profile/bhsteachersassociation
+          FEED_URL: https://rsshub.app/picuki/profile/bhsteachersassociation
+        run: node scripts/update-instagram.mjs
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/social.json
+          git diff --cached --quiet || git commit -m "Auto-update Instagram latest post"
+          git push
