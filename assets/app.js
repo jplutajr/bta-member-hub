@@ -20,65 +20,29 @@
     resources: () => renderResources("NYSUT & Links", "data/resources.json"),
   };
 
-  function isMobileNav() {
-    // Match your CSS breakpoint for mobile nav behavior
-    return window.matchMedia("(max-width: 768px)").matches;
-  }
-
-  function closeMobileNav() {
-    const navEl = $("#nav");
-    const t = document.getElementById("navToggle");
-    if (navEl) navEl.classList.remove("open");
-    if (t) t.setAttribute("aria-expanded", "false");
-  }
-
   function setActiveNav() {
     const cur = (location.hash || "#home").replace("#", "");
     const navEl = $("#nav");
     navEl.innerHTML = nav
-      .map(
-        (n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`
-      )
+      .map((n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`)
       .join("");
 
-    // Mobile nav toggle
+    // Mobile nav toggle (only shows on small screens)
     const t = document.getElementById("navToggle");
     if (t && !t.__bound) {
       t.__bound = true;
-
-      t.addEventListener("click", (e) => {
-        e.preventDefault();
-        const open = navEl.classList.toggle("open");
-        t.setAttribute("aria-expanded", open ? "true" : "false");
-      });
-
-      // Close on outside click (mobile only)
-      document.addEventListener("click", (e) => {
-        if (!isMobileNav()) return;
-        const btn = document.getElementById("navToggle");
-        const navNode = document.getElementById("nav");
-        if (!btn || !navNode) return;
-
-        const isOpen = navNode.classList.contains("open");
-        if (!isOpen) return;
-
-        const clickInsideNav = navNode.contains(e.target);
-        const clickInsideBtn = btn.contains(e.target);
-        if (!clickInsideNav && !clickInsideBtn) closeMobileNav();
-      });
-
-      // Close on ESC (mobile only)
-      document.addEventListener("keydown", (e) => {
-        if (!isMobileNav()) return;
-        if (e.key === "Escape") closeMobileNav();
+      t.addEventListener("click", () => {
+        navEl.classList.toggle("open");
+        t.setAttribute("aria-expanded", navEl.classList.contains("open") ? "true" : "false");
       });
     }
-
-    // Close when a nav link is tapped (mobile only)
     if (t) {
       navEl.querySelectorAll("a").forEach((a) => {
         a.addEventListener("click", () => {
-          if (isMobileNav()) closeMobileNav();
+          if (window.innerWidth <= 900) {
+            navEl.classList.remove("open");
+            t.setAttribute("aria-expanded", "false");
+          }
         });
       });
     }
@@ -130,6 +94,39 @@
     `;
   }
 
+  // ---------- Calendar scaler (keeps month-grid on mobile portrait) ----------
+  function bindCalendarScaler(baseW, baseH) {
+    const viewport = document.getElementById("calViewport");
+    const iframe = document.getElementById("calFrame");
+    if (!viewport || !iframe) return () => {};
+
+    // Force iframe to render "desktop" size, then scale down to viewport width.
+    iframe.style.width = `${baseW}px`;
+    iframe.style.height = `${baseH}px`;
+    iframe.style.transformOrigin = "0 0";
+
+    const apply = () => {
+      const w = viewport.clientWidth || baseW;
+
+      // Never upscale above 1 (desktop stays crisp and unchanged).
+      const scale = Math.min(1, w / baseW);
+
+      iframe.style.transform = `scale(${scale})`;
+      viewport.style.height = `${Math.round(baseH * scale)}px`;
+    };
+
+    // Apply now + on resize/orientation changes.
+    apply();
+    window.addEventListener("resize", apply, { passive: true });
+    window.addEventListener("orientationchange", apply, { passive: true });
+
+    // Return cleanup function (not strictly needed, but good hygiene).
+    return () => {
+      window.removeEventListener("resize", apply);
+      window.removeEventListener("orientationchange", apply);
+    };
+  }
+
   // ---------- Pages ----------
   async function renderHome() {
     const app = $("#app");
@@ -151,16 +148,11 @@
     const igHandle = "bhsteachersassociation";
     const igUrl = `https://www.instagram.com/${igHandle}/`;
 
-    // Google Calendar embed
-    // Add safe display params; then force AGENDA on mobile (Month view looks bad on phones).
+    // Google Calendar embed (your exact embed base, America/New_York)
     const calBase =
       "https://calendar.google.com/calendar/embed?src=7e799d3cb530dec90c54e3e39f608d213d756dda4b474b3bbeb84f08e01278bf%40group.calendar.google.com&ctz=America%2FNew_York";
-
-    const calParams =
-      "&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0";
-
-    const calMonth = `${calBase}${calParams}&mode=MONTH`;
-    const calAgenda = `${calBase}${calParams}&mode=AGENDA`;
+    const calMonth = `${calBase}`; // month grid default
+    const calAgenda = `${calBase}&mode=AGENDA`;
 
     app.innerHTML = `
       ${hero({
@@ -181,11 +173,9 @@
                   ? upcoming
                       .map(
                         (e) =>
-                          `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(
-                            e.date || ""
-                          )}${e.time ? ` (${escapeHtml(e.time)})` : ""}${
-                            e.location ? ` · ${escapeHtml(e.location)}` : ""
-                          }</li>`
+                          `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}${
+                            e.time ? ` (${escapeHtml(e.time)})` : ""
+                          }${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`
                       )
                       .join("")
                   : "<li>No events posted yet.</li>"
@@ -226,9 +216,7 @@
               <div style="font-weight:900;font-size:18px;">Follow us on Instagram</div>
               <div class="small" style="margin-top:6px;">@${escapeHtml(igHandle)}</div>
               <div style="margin-top:14px;">
-                <a class="btn ig" href="${escapeHtml(
-                  igUrl
-                )}" target="_blank" rel="noopener">Follow us on Instagram</a>
+                <a class="btn ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener">Follow us on Instagram</a>
               </div>
 
               <div class="igReserve" style="margin-top:14px;">
@@ -252,77 +240,43 @@
               <button class="btn" id="calAgendaBtn" type="button">Agenda</button>
               <a class="btn" href="#events" style="margin-left:auto;">Events tab</a>
             </div>
-            <iframe class="calFrame" id="calFrame" src="${calMonth}" style="border:0" frameborder="0" scrolling="no"></iframe>
+
+            <!-- IMPORTANT: viewport wrapper lets us scale the iframe on mobile portrait -->
+            <div class="calViewport" id="calViewport">
+              <iframe class="calFrame" id="calFrame" src="${calMonth}" style="border:0" frameborder="0" scrolling="no"></iframe>
+            </div>
           </div>
         </div>
       </div>
     `;
 
+    // Calendar tab switch
     const calFrame = $("#calFrame");
     const mBtn = $("#calMonthBtn");
     const aBtn = $("#calAgendaBtn");
 
-    // Calendar behavior:
-    // - Desktop: Month/Agenda toggles work
-    // - Mobile: force Agenda (Month view looks bad), hide Month button
-    let lastIsMobile = isMobileNav();
+    // Keep the embed "desktop-shaped" so portrait doesn't flip into the ugly mobile agenda layout.
+    // These are the base render dimensions the iframe will use (scaled down on phones).
+    const BASE_W = 1100;
+    const BASE_H = 780;
 
-    function applyCalendarModeForViewport() {
-      const nowMobile = isMobileNav();
-      if (!calFrame || !mBtn || !aBtn) return;
+    // Bind scaler once per renderHome call
+    bindCalendarScaler(BASE_W, BASE_H);
 
-      // Always force AGENDA on mobile
-      if (nowMobile) {
-        mBtn.style.display = "none";
-        aBtn.style.display = "";
-        aBtn.classList.add("activeBtn");
-        mBtn.classList.remove("activeBtn");
-        calFrame.setAttribute("scrolling", "yes"); // helps on iOS
-        calFrame.src = calAgenda;
-      } else {
-        mBtn.style.display = "";
-        aBtn.style.display = "";
-        calFrame.setAttribute("scrolling", "no");
-
-        // Keep current selection if user changed it; default to MONTH
-        // If we're coming from mobile, reset to MONTH for a nicer desktop experience
-        if (lastIsMobile) {
-          mBtn.classList.add("activeBtn");
-          aBtn.classList.remove("activeBtn");
-          calFrame.src = calMonth;
-        } else {
-          // keep whichever button is active
-          if (aBtn.classList.contains("activeBtn")) calFrame.src = calAgenda;
-          else calFrame.src = calMonth;
-        }
-      }
-
-      lastIsMobile = nowMobile;
-    }
-
-    // Bind tab switches (desktop only; mobile is forced agenda)
     if (calFrame && mBtn && aBtn) {
       mBtn.addEventListener("click", () => {
-        if (isMobileNav()) return; // forced agenda on mobile
         mBtn.classList.add("activeBtn");
         aBtn.classList.remove("activeBtn");
         calFrame.src = calMonth;
+        // give the iframe a tick to load, then re-apply scale
+        setTimeout(() => bindCalendarScaler(BASE_W, BASE_H), 50);
       });
 
       aBtn.addEventListener("click", () => {
         aBtn.classList.add("activeBtn");
         mBtn.classList.remove("activeBtn");
         calFrame.src = calAgenda;
-      });
-
-      // Initialize mode for current viewport
-      applyCalendarModeForViewport();
-
-      // Update on resize/orientation change (debounced)
-      let rT = null;
-      window.addEventListener("resize", () => {
-        clearTimeout(rT);
-        rT = setTimeout(applyCalendarModeForViewport, 120);
+        setTimeout(() => bindCalendarScaler(BASE_W, BASE_H), 50);
       });
     }
   }
@@ -367,11 +321,7 @@
     }
 
     app.innerHTML = `
-      ${hero({
-        pill: "Documents",
-        title: "Documents",
-        subHtml: "Contracts, MOAs, bylaws, meeting minutes, and more.",
-      })}
+      ${hero({ pill: "Documents", title: "Documents", subHtml: "Contracts, MOAs, bylaws, meeting minutes, and more." })}
       ${divider("Documents")}
 
       <div class="person" style="margin-bottom:14px;">
@@ -409,14 +359,8 @@
                       : `<span class="lockTag" style="opacity:.55">Public</span>`
                   }</td>
                   <td>${escapeHtml(d.category || "")}</td>
-                  <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(
-                    d.note || ""
-                  )}</div></td>
-                  <td>${
-                    d.url
-                      ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>`
-                      : "—"
-                  }</td>
+                  <td><b>${escapeHtml(d.title || "")}</b><div class="small">${escapeHtml(d.note || "")}</div></td>
+                  <td>${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
                 </tr>
                 `;
                 })
@@ -448,11 +392,7 @@
                 <tr>
                   <td><b>${escapeHtml(r.title || "")}</b></td>
                   <td>${escapeHtml(r.description || "")}</td>
-                  <td>${
-                    r.url
-                      ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Open</a>`
-                      : "—"
-                  }</td>
+                  <td>${r.url ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Open</a>` : "—"}</td>
                 </tr>
               `
                 )
@@ -592,16 +532,12 @@
 
       ${divider("Executive Board")}
       <div class="staff-grid">
-        ${officers["Executive Board"]
-          .map((o) => officerCard(o, photoByName.get(o.name)))
-          .join("")}
+        ${officers["Executive Board"].map((o) => officerCard(o, photoByName.get(o.name))).join("")}
       </div>
 
       ${divider("Representatives")}
       <div class="staff-grid">
-        ${officers["Representatives"]
-          .map((o) => officerCard(o, photoByName.get(o.name)))
-          .join("")}
+        ${officers["Representatives"].map((o) => officerCard(o, photoByName.get(o.name))).join("")}
       </div>
     `;
   }
@@ -638,7 +574,10 @@
     const id = (location.hash || "#home").replace("#", "");
 
     // Close mobile nav on navigation
-    closeMobileNav();
+    const navEl = $("#nav");
+    const t = document.getElementById("navToggle");
+    if (navEl) navEl.classList.remove("open");
+    if (t) t.setAttribute("aria-expanded", "false");
 
     setActiveNav();
     (routes[id] || routes.home)();
