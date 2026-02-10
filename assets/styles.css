@@ -41,6 +41,8 @@ header{
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
+  padding-top:4px;
+  padding-bottom:4px;
 }
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
@@ -56,22 +58,42 @@ header{
   display:flex;
   align-items:center;
   gap:12px;
-  min-width:240px;
 }
 
-.brandLogo{
-  height:40px;
-  width:auto;
+.badge{
+  width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(212,175,55,.95), rgba(245,224,138,.65));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  border:1px solid rgba(255,215,0,.35);
+  display:flex; align-items:center; justify-content:center;
+}
+.badge img{
+  width:82%;
+  height:82%;
+  object-fit:contain;
   display:block;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
 }
 
 .brand h1{font-size:16px; margin:0}
 .brand p{margin:0; color:#aaa; font-size:12px}
 
-/* ✅ Desktop nav (one row + prevents active pill clipping) */
-nav.nav{
+/* Desktop nav: one row, horizontal scroll if needed.
+   IMPORTANT: padding-block prevents pill/glow from being clipped by the scroll container. */
+nav{
   display:flex;
   align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex:1 1 auto;
+  overflow:visible; /* prevent clipping of active pill glow */
+  min-width:0;
+}
+
+/* Inner flex row handles horizontal scroll without clipping vertical glow */
+.navInner{
+  display:flex;
   gap:8px;
   flex-wrap:nowrap;
   justify-content:flex-end;
@@ -79,16 +101,14 @@ nav.nav{
   overflow-y:visible;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-
-  /* key fix: give space so the active pill isn't clipped inside the overflow container */
-  padding:6px 2px;
-  margin:-6px -2px;
+  padding:6px 2px 8px; /* extra bottom pad = no clipped active pill */
 }
-nav.nav::-webkit-scrollbar{display:none}
+.navInner::-webkit-scrollbar{display:none}
 
 .nav a{
   display:inline-flex;
   align-items:center;
+  gap:8px;
   padding:8px 12px;
   border-radius:12px;
   color:var(--ink);
@@ -100,7 +120,9 @@ nav.nav::-webkit-scrollbar{display:none}
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
   border-color:rgba(212,175,55,.60);
-  box-shadow:0 0 0 1px rgba(212,175,55,.20) inset, 0 10px 25px rgba(0,0,0,.35);
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,.20) inset,
+    0 10px 25px rgba(0,0,0,.35);
 }
 
 .nav a:hover{
@@ -108,44 +130,6 @@ nav.nav::-webkit-scrollbar{display:none}
   border-color:rgba(212,175,55,.35);
   text-decoration:none;
 }
-
-/* Hamburger (hidden on desktop) */
-.navToggle{
-  display:none;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:8px 12px;
-  border-radius:12px;
-  border:1px solid rgba(212,175,55,.45);
-  background:rgba(18,18,18,.55);
-  color:var(--ink);
-  cursor:pointer;
-  user-select:none;
-}
-.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
-.navToggle:active{ transform:translateY(1px); }
-
-.navToggle .bars{
-  width:18px;
-  height:12px;
-  position:relative;
-  display:inline-block;
-}
-.navToggle .bars::before,
-.navToggle .bars::after,
-.navToggle .bars span{
-  content:"";
-  position:absolute;
-  left:0; right:0;
-  height:2px;
-  border-radius:2px;
-  background:rgba(255,215,0,.85);
-  box-shadow:0 0 10px rgba(212,175,55,.35);
-}
-.navToggle .bars::before{ top:0; }
-.navToggle .bars span{ top:5px; }
-.navToggle .bars::after{ bottom:0; }
 
 main{padding:22px 0 50px}
 
@@ -217,7 +201,8 @@ main{padding:22px 0 50px}
   justify-content:center;
   border-bottom:1px solid var(--line);
 }
-/* image zoom fix */
+
+/* ✅ image zoom fix stays */
 .person .ph img{
   width:100%;
   height:100%;
@@ -252,7 +237,7 @@ main{padding:22px 0 50px}
   text-decoration:none;
 }
 
-/* Instagram icon */
+/* Instagram icon + extra glow only when .ig */
 .btn.ig::before{
   content:"";
   width:18px; height:18px; display:inline-block;
@@ -292,12 +277,11 @@ main{padding:22px 0 50px}
   background:transparent;
 }
 
-@media (max-width: 700px){
-  .calFrame{ height:820px; }
-}
-
 /* Tables */
-.tableWrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.tableWrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
 .table{
   width:100%;
   min-width:680px;
@@ -320,7 +304,7 @@ main{padding:22px 0 50px}
   font-weight:900;
   font-size:12px;
   letter-spacing:.06em;
-  text-transform:uppercase;
+  text-transform:uppercase
 }
 .table tr:last-child td{border-bottom:none}
 
@@ -335,7 +319,7 @@ main{padding:22px 0 50px}
 }
 select{cursor:pointer}
 
-/* member doc tag */
+/* Member doc tag */
 .lockTag{
   display:inline-flex;
   align-items:center;
@@ -371,48 +355,103 @@ footer{
   text-align:center;
 }
 
-/* Responsive grid */
+/* ---------- Responsive ---------- */
+
 @media (max-width: 900px){
   .person{grid-column:span 6}
+
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  nav{ justify-content:flex-start; }
+
+  /* keep nav links from crushing the layout on smaller widths */
+  .wrap{ padding:14px; }
 }
+
+@media (max-width: 700px){
+  .calFrame{ height:820px; }
+  .table{ min-width:600px; }
+}
+
 @media (max-width: 520px){
   .person{grid-column:span 12}
   .input, select{min-width:100%}
+  .hero{ padding:18px; }
   .table{ min-width:560px; }
 }
 
-/* ✅ Mobile nav ONLY under 768px (slide/fade dropdown) */
+
+/* ---------------- Mobile hamburger nav (≤768px) ---------------- */
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.55);
+  color:var(--ink);
+  cursor:pointer;
+  user-select:none;
+  line-height:1;
+}
+.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
+.navToggle:active{ transform:translateY(1px); }
+
+.navToggle .bars{
+  width:18px; height:12px;
+  display:flex; flex-direction:column;
+  justify-content:space-between;
+}
+.navToggle .bars span{
+  height:2px;
+  border-radius:2px;
+  background:rgba(255,242,183,.9);
+  box-shadow:0 0 10px rgba(212,175,55,.35);
+}
+
+/* Collapsible nav panel (animated) */
 @media (max-width: 768px){
   .top{ flex-wrap:wrap; align-items:flex-start; }
-  .brand{ flex:1 1 auto; }
+  .brand{ flex:1 1 260px; }
   .navToggle{ display:inline-flex; }
 
   nav.nav{
-    display:block;
     width:100%;
     order:3;
+    justify-content:flex-start;
+  }
+
+  /* closed by default */
+  nav.nav .navInner{
+    flex-direction:column;
+    justify-content:flex-start;
     overflow:visible;
-    padding:0;
-    margin:0;
     max-height:0;
     opacity:0;
     transform:translateY(-6px);
-    pointer-events:none;
+    padding:0;
     transition: max-height .22s ease, opacity .18s ease, transform .18s ease;
-    border:1px solid transparent;
-    border-radius:14px;
+    pointer-events:none;
   }
 
-  nav.nav.open{
-    max-height:520px;
+  nav.nav.open .navInner{
+    max-height:420px;
     opacity:1;
     transform:translateY(0);
+    padding:10px 0 2px;
     pointer-events:auto;
-    border-color:var(--line);
-    background:rgba(10,10,10,.92);
-    padding:10px;
-    margin-top:12px;
   }
 
-  .nav a{ width:100%; justify-content:flex-start; }
+  .nav a{
+    width:100%;
+    justify-content:flex-start;
+  }
+}
+
+/* Keep cards readable on small screens */
+@media (max-width: 520px){
+  .wrap{ padding:14px; }
+  .hero{ padding:18px; }
 }
