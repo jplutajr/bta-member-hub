@@ -4,8 +4,6 @@
   // ---------- Nav / routing ----------
   const nav = [
     { id: "home", label: "Home" },
-    { id: "news", label: "News" },
-    { id: "events", label: "Events" },
     { id: "documents", label: "Documents" },
     { id: "officers", label: "Union Officers" },
     { id: "directory", label: "Staff Directory" },
@@ -75,9 +73,10 @@
   }
 
   // ---------- UI helpers ----------
-  function divider(label) {
+  function divider(label, align = 'center') {
+    const cls = align === 'left' ? 'divider dividerLeft' : 'divider';
     return `
-      <div class="divider" role="separator" aria-label="${escapeHtml(label)}">
+      <div class="${cls}" role="separator" aria-label="${escapeHtml(label)}">
         <span class="dot" aria-hidden="true"></span>
         <span class="label">${escapeHtml(label)}</span>
         <span class="dot" aria-hidden="true"></span>
@@ -307,7 +306,7 @@
     const items = await safeLoad(path, []);
     app.innerHTML = `
       ${hero({ pill: "Resources", title, subHtml: "Helpful links and NYSUT resources." })}
-      ${divider("Links")}
+      ${divider("Links", 'left')}
       <div class="person" style="padding:0;">
         <div class="info">
           <div class="tableWrap"><table class="table">
