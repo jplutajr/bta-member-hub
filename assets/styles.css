@@ -41,8 +41,7 @@ header{
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
-  padding-top:4px;
-  padding-bottom:4px;
+  padding:10px 0; /* enough vertical room so pills never clip */
 }
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
@@ -79,36 +78,35 @@ header{
 .brand h1{font-size:16px; margin:0}
 .brand p{margin:0; color:#aaa; font-size:12px}
 
-/* Desktop nav: one row, horizontal scroll if needed.
-   IMPORTANT: padding-block prevents pill/glow from being clipped by the scroll container. */
-nav{
+/* Desktop nav: single row, scroll if needed, NEVER wrap */
+nav.nav{
   display:flex;
+  align-items:center;
   gap:8px;
-  flex-wrap:nowrap;
-  justify-content:flex-end;
+  margin-left:auto;
 
-  overflow-x:auto;                 /* keep single row */
+  flex-wrap:nowrap;
+  white-space:nowrap;
+
+  overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 
-  /* Give the nav row breathing room so the active pill/glow never gets clipped */
-  padding:8px 10px;
-  scroll-padding-left:10px;
-  scroll-padding-right:10px;
-  overscroll-behavior-x:contain;
+  /* IMPORTANT: give the scroll container padding so the active pill/glow is not clipped */
+  padding:8px 12px;
 }
-nav::-webkit-scrollbar{display:none}
+nav.nav::-webkit-scrollbar{display:none}
 
 .nav a{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  padding:8px 12px;
+  padding:10px 14px;
   border-radius:12px;
   color:var(--ink);
   border:1px solid transparent;
   white-space:nowrap;
-  line-height:1.2;
+  line-height:1.1;
 }
 
 .nav a.active{
@@ -172,12 +170,16 @@ main{padding:22px 0 50px}
   color:#fecdd3;
 }
 
+/* Grid */
 .staff-grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
   gap:14px;
   margin-top:14px;
 }
+
+/* Use classes, not inline span styles, so mobile can override */
+.col6{ grid-column:span 6; }
 
 .person{
   grid-column:span 4;
@@ -195,8 +197,6 @@ main{padding:22px 0 50px}
   justify-content:center;
   border-bottom:1px solid var(--line);
 }
-
-/* ✅ image zoom fix stays */
 .person .ph img{
   width:100%;
   height:100%;
@@ -205,7 +205,6 @@ main{padding:22px 0 50px}
   display:block;
   background:rgba(0,0,0,.35);
 }
-
 .person .info{padding:12px}
 .person .name{font-weight:800}
 .person .small{color:#cfcfcf; font-size:12px; margin-top:4px}
@@ -243,6 +242,14 @@ main{padding:22px 0 50px}
   box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
 }
 
+/* Instagram preview placeholder block */
+.igReserve{
+  border:1px dashed rgba(255,215,0,.35);
+  border-radius:14px;
+  padding:12px;
+  background:rgba(0,0,0,.20);
+}
+
 /* Calendar */
 .calWrap{
   border:1px solid var(--line);
@@ -250,7 +257,6 @@ main{padding:22px 0 50px}
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   overflow:hidden;
-  min-width:0; /* avoid iOS flex overflow quirks */
 }
 .calTabs{
   display:flex;
@@ -266,18 +272,14 @@ main{padding:22px 0 50px}
 }
 .calFrame{
   width:100%;
-  height:720px;
+  height:780px;
   border:0;
   display:block;
   background:transparent;
-  min-width:0;
 }
 
 /* Tables */
-.tableWrap{
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-}
+.tableWrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .table{
   width:100%;
   min-width:680px;
@@ -351,65 +353,6 @@ footer{
   text-align:center;
 }
 
-/* ---------- Responsive ---------- */
-
-@media (max-width: 900px){
-  .person{grid-column:span 6}
-
-  .top{ flex-wrap:wrap; align-items:flex-start; }
-  .brand{ flex:1 1 260px; }
-  nav{ justify-content:flex-start; }
-
-  /* keep nav links from crushing the layout on smaller widths */
-  .wrap{ padding:14px; }
-}
-
-@media (max-width: 700px){
-  .calFrame{ height:820px; }
-  .table{ min-width:600px; }
-}
-
-@media (max-width: 520px){
-  .person{grid-column:span 12}
-  .input, select{min-width:100%}
-  .hero{ padding:18px; }
-  .table{ min-width:560px; }
-
-  /* Calendar controls wrap nicely on phones */
-  .calTabs{ flex-wrap:wrap; }
-  .calTabs .btn{ flex:1 1 auto; justify-content:center; }
-}
-
-/* =========================
-   Header/Nav polish (prevents top clipping + keeps NYSUT on same row)
-   ========================= */
-header{
-  padding:10px 0;
-}
-
-.top{ align-items:center; }
-
-nav.nav{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-left:auto;
-  flex-wrap:nowrap;
-  white-space:nowrap;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-
-  /* key: give the row a bit more vertical room so 'Home' isn't clipped */
-  padding:8px 6px;
-}
-nav.nav::-webkit-scrollbar{ display:none; }
-
-.nav a{
-  padding:10px 14px;
-  line-height:1.1;
-}
-
 /* Hamburger button (mobile only) */
 .navToggle{
   display:none;
@@ -422,15 +365,9 @@ nav.nav::-webkit-scrollbar{ display:none; }
   color:var(--ink);
   cursor:pointer;
   position:relative;
-  z-index:80; /* ensure it's always tappable */
+  z-index:60; /* ensure it’s clickable */
 }
-.navToggle .bars,
-.navToggle .bars *{
-  pointer-events:none; /* let the button receive the tap */
-}
-.navToggle:hover{
-  box-shadow:0 0 16px rgba(212,175,55,.35);
-}
+.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
 .navToggle .bars{
   width:18px;
   height:12px;
@@ -445,43 +382,56 @@ nav.nav::-webkit-scrollbar{ display:none; }
   box-shadow:0 0 10px rgba(212,175,55,.35);
 }
 
-/* Reserved Instagram preview placeholder */
-.igReserve{
-  border:1px dashed rgba(255,215,0,.35);
-  border-radius:14px;
-  padding:12px;
-  background:rgba(0,0,0,.20);
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px){
+  .person{grid-column:span 6}
+  nav.nav{justify-content:flex-start}
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  .wrap{ padding:14px; }
 }
 
-/* Calendar: a bit taller on desktop */
-.calFrame{ height:780px; }
+@media (max-width: 700px){
+  .calFrame{ height:860px; }
+  .table{ min-width:600px; }
+}
+
+@media (max-width: 520px){
+  .person{grid-column:span 12}
+  .col6{grid-column:span 12;} /* key: home cards go full width */
+  .input, select{min-width:100%}
+  .hero{ padding:18px; }
+  .table{ min-width:560px; }
+}
 
 /* Mobile nav collapses under 768px */
 @media (max-width: 768px){
-  .top{ flex-wrap:wrap; align-items:flex-start; }
-  .brand{ flex:1 1 260px; }
   .navToggle{ display:inline-flex; }
 
-  nav.nav{
-    display:none;
+  /* FORCE the hide/show so nothing overrides it */
+  nav.nav{ 
+    display:none !important;
     width:100%;
     margin-top:10px;
     padding:10px;
     border:1px solid var(--line);
     border-radius:14px;
-    background:rgba(10,10,10,.92);
+    background:rgba(10,10,10,.95);
   }
   nav.nav.open{
     display:flex !important;
     flex-direction:column;
+    gap:6px;
   }
   .nav a{
     width:100%;
     justify-content:flex-start;
   }
-}
 
-/* Calendar: taller on small screens */
-@media (max-width: 700px){
-  .calFrame{ height:860px; }
+  /* On mobile, make “half-width” home cards stack */
+  .col6{ grid-column:span 12; }
+
+  /* Calendar: a touch taller on small screens */
+  .calFrame{ height:900px; }
 }
