@@ -11,33 +11,19 @@
   <header>
     <div class="wrap top">
       <div class="brand">
-        <img
-          src="assets/logo.png"
-          alt="Bridgehampton Teachers Association logo"
-          style="height:40px;width:auto;"
-        />
+        <img src="assets/logo.png" alt="Bridgehampton Teachers Association logo" style="height:40px;width:auto;" />
         <div>
           <h1>Bridgehampton Teachers Association</h1>
           <p>Member hub · news · events · documents · directory</p>
         </div>
       </div>
 
-      <!-- Mobile hamburger -->
-      <button
-        class="navToggle"
-        id="navToggle"
-        aria-label="Menu"
-        aria-expanded="false"
-        aria-controls="nav"
-      >
+      <button class="navToggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="nav">
         <span class="bars" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </span>
       </button>
 
-      <!-- Navigation (populated by app.js) -->
       <nav class="nav" id="nav" aria-label="Primary"></nav>
     </div>
   </header>
@@ -51,19 +37,7 @@
   </footer>
 
   <script>
-    // Footer year
     document.getElementById("yr").textContent = new Date().getFullYear();
-
-    // Mobile nav toggle
-    const btn = document.getElementById("navToggle");
-    const nav = document.getElementById("nav");
-
-    btn.addEventListener("click", () => {
-      const isOpen = nav.classList.toggle("open");
-      btn.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    // Default route
     if (!location.hash) location.hash = "#home";
   </script>
 
