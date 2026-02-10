@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BTA Member Hub</title>
   <meta name="description" content="Bridgehampton Teachers Association — member news, events, documents, and resources." />
-  <link rel="stylesheet" href="assets/styles.css?v=5" />
+  <link rel="stylesheet" href="assets/styles.css?v=7" />
 </head>
 <body>
   <header>
@@ -15,18 +14,18 @@
         <img
           src="assets/logo.png"
           alt="Bridgehampton Teachers Association logo"
-          style="height:40px; width:auto; display:block;"
+          class="brandLogo"
         />
-        <div>
+        <div class="brandText">
           <h1>Bridgehampton Teachers Association</h1>
           <p>Member hub · news · events · documents · directory</p>
         </div>
       </div>
 
-      <!-- Mobile nav toggle (hidden on desktop via CSS) -->
-      <button class="navToggle" id="navToggle" type="button" aria-controls="nav" aria-expanded="false" aria-label="Menu">
-        <span class="navToggleIcon" aria-hidden="true"></span>
-        <span class="navToggleText">Menu</span>
+      <!-- Hamburger (only shows under 768px via CSS) -->
+      <button class="navToggle" id="navToggle" type="button" aria-controls="nav" aria-expanded="false">
+        <span class="bars" aria-hidden="true"><span></span></span>
+        <span class="navToggleLabel">Menu</span>
       </button>
 
       <nav class="nav" id="nav" aria-label="Primary"></nav>
@@ -38,7 +37,9 @@
   <footer>
     <div class="wrap">
       <div>© <span id="yr"></span> Bridgehampton Teachers Association. Built as a static site for free hosting.</div>
-      <div style="margin-top:6px;">If you publish this publicly, assume anything here is visible to the entire internet.</div>
+      <div style="margin-top:6px;">
+        If you publish this publicly, assume anything here is visible to the entire internet.
+      </div>
     </div>
   </footer>
 
