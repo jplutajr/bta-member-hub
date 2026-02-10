@@ -435,3 +435,20 @@ footer{
   /* Calendar: a touch taller on small screens */
   .calFrame{ height:900px; }
 }
+/* === Mobile: stack Home cards so calendar is full width === */
+@media (max-width: 768px){
+  /* your home sections and staff grids should become single column */
+  .staff-grid{
+    grid-template-columns: 1fr !important;
+  }
+  /* make every card span full width on mobile */
+  .staff-grid > *{
+    grid-column: 1 / -1 !important;
+  }
+
+  /* calendar iframe should use full width */
+  .calFrame{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
