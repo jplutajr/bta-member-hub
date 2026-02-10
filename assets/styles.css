@@ -1,13 +1,16 @@
 :root{
   --bg:#0b0b0b;
   --panel:#121212;
+  --panel2:#181818;
   --ink:#f5f5f5;
   --muted:#c9b458;
   --line:rgba(255,215,0,.15);
-  --brand:#d4af37;
+  --brand:#d4af37; /* gold */
   --brand2:#f5e08a;
+  --danger:#fb7185;
   --shadow:0 10px 30px rgba(0,0,0,.55);
   --radius:18px;
+  --radius2:12px;
   --max:1100px;
 }
 
@@ -16,10 +19,13 @@ html,body{height:100%}
 
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
   background:
     radial-gradient(900px 500px at 20% 0%, rgba(212,175,55,.14), transparent 55%),
-    radial-gradient(700px 400px at 80% 10%, rgba(255,215,0,.10), transparent 50%);
+    radial-gradient(700px 400px at 80% 10%, rgba(255,215,0,.10), transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%23d4af37' stroke-opacity='0.07' stroke-width='2'%3E%3Cpath d='M36 26l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M108 26l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M72 78l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M36 130l18-10 18 10v20l-18 10-18-10z'/%3E%3Cpath d='M108 130l18-10 18 10v20l-18 10-18-10z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat, no-repeat, repeat;
+  background-size:auto, auto, 180px 180px;
   background-color:var(--bg);
   color:var(--ink);
   line-height:1.45;
@@ -28,8 +34,6 @@ body{
 a{color:var(--brand); text-decoration:none}
 a:hover{text-decoration:underline}
 
-/* ---------- HEADER ---------- */
-
 header{
   position:sticky;
   top:0;
@@ -37,59 +41,78 @@ header{
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
+  padding-top:4px;
+  padding-bottom:4px;
 }
 
-.wrap{
-  max-width:var(--max);
-  margin:0 auto;
-  padding:18px;
-}
+.wrap{max-width:var(--max); margin:0 auto; padding:18px}
 
 .top{
   display:flex;
   align-items:center;
-  gap:18px;
-  min-height:64px; /* prevents clipping */
+  justify-content:space-between;
+  gap:14px;
 }
 
-/* Brand */
 .brand{
   display:flex;
   align-items:center;
   gap:12px;
-  flex-shrink:0;
 }
-.brand h1{font-size:16px;margin:0}
-.brand p{font-size:12px;margin:0;color:#aaa}
 
-/* ---------- NAV ---------- */
+.badge{
+  width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(212,175,55,.95), rgba(245,224,138,.65));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  border:1px solid rgba(255,215,0,.35);
+  display:flex; align-items:center; justify-content:center;
+}
+.badge img{
+  width:82%;
+  height:82%;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
 
-nav.nav{
+.brand h1{font-size:16px; margin:0}
+.brand p{margin:0; color:#aaa; font-size:12px}
+
+/* Desktop nav: one row, horizontal scroll if needed.
+   IMPORTANT: padding-block prevents pill/glow from being clipped by the scroll container. */
+nav{
   display:flex;
-  align-items:center;
   gap:8px;
-  margin-left:auto;
   flex-wrap:nowrap;
-  white-space:nowrap;
-  padding:6px 4px; /* fixes Home clipping */
-  overflow-x:auto;
+  justify-content:flex-end;
+
+  overflow-x:auto;                 /* keep single row */
+  -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
+
+  padding:6px 2px;                 /* ✅ FIX: prevents top clipping */
 }
-nav.nav::-webkit-scrollbar{display:none}
+nav::-webkit-scrollbar{display:none}
 
 .nav a{
   display:inline-flex;
   align-items:center;
-  padding:8px 14px;
+  gap:8px;
+  padding:8px 12px;
   border-radius:12px;
-  line-height:1.2;
-  border:1px solid transparent;
   color:var(--ink);
+  border:1px solid transparent;
+  white-space:nowrap;
+  line-height:1.2;
 }
 
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
-  border-color:rgba(212,175,55,.6);
+  border-color:rgba(212,175,55,.60);
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,.20) inset,
+    0 10px 25px rgba(0,0,0,.35);
 }
 
 .nav a:hover{
@@ -97,35 +120,6 @@ nav.nav::-webkit-scrollbar{display:none}
   border-color:rgba(212,175,55,.35);
   text-decoration:none;
 }
-
-/* ---------- HAMBURGER ---------- */
-
-.navToggle{
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:8px 12px;
-  border-radius:12px;
-  border:1px solid rgba(212,175,55,.45);
-  background:rgba(18,18,18,.6);
-  color:#fff;
-  cursor:pointer;
-}
-
-.navToggle .bars{
-  width:18px;
-  height:12px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.navToggle .bars span{
-  height:2px;
-  background:var(--brand);
-  border-radius:2px;
-}
-
-/* ---------- CONTENT ---------- */
 
 main{padding:22px 0 50px}
 
@@ -136,6 +130,43 @@ main{padding:22px 0 50px}
   box-shadow:var(--shadow);
   padding:22px;
 }
+.hero h2{margin:0 0 8px; font-size:22px}
+.hero .sub{color:#d9d9d9; margin:0}
+
+.divider{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:26px 0 14px;
+}
+.divider .dot{
+  width:7px; height:7px; border-radius:50%;
+  background:var(--brand);
+  box-shadow:0 0 10px rgba(212,175,55,.7);
+}
+.divider .label{
+  color:var(--brand);
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-size:11px;
+}
+
+.pill{
+  display:inline-flex;
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(212,175,55,.14);
+  border:1px solid rgba(212,175,55,.30);
+  color:#fff2b7;
+  font-size:12px;
+}
+.pill.danger{
+  background:rgba(251,113,133,.14);
+  border-color:rgba(251,113,133,.25);
+  color:#fecdd3;
+}
 
 .staff-grid{
   display:grid;
@@ -145,60 +176,166 @@ main{padding:22px 0 50px}
 }
 
 .person{
-  grid-column:span 6;
+  grid-column:span 4;
   border:1px solid var(--line);
   background:rgba(18,18,18,.85);
   border-radius:var(--radius);
   overflow:hidden;
   box-shadow:var(--shadow);
 }
-
 .person .ph{
-  height:180px;
+  height:170px;
+  background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
+  border-bottom:1px solid var(--line);
 }
 
-.person .info{padding:14px}
+/* ✅ image zoom fix stays */
+.person .ph img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  display:block;
+  background:rgba(0,0,0,.35);
+}
 
-/* ---------- BUTTONS ---------- */
+.person .info{padding:12px}
+.person .name{font-weight:800}
+.person .small{color:#cfcfcf; font-size:12px; margin-top:4px}
 
+/* Buttons */
 .btn{
   display:inline-flex;
   align-items:center;
   gap:10px;
   background:linear-gradient(180deg, var(--brand2), var(--brand));
-  border:1px solid rgba(255,215,0,.7);
+  border:1px solid rgba(255,215,0,.70);
   color:#111;
-  padding:10px 16px;
+  padding:10px 14px;
   border-radius:14px;
+  cursor:pointer;
   font-weight:800;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 18px rgba(212,175,55,.75), 0 12px 25px rgba(0,0,0,.45);
+  filter:brightness(1.05);
+  text-decoration:none;
 }
 
+/* Instagram icon + extra glow only when .ig */
 .btn.ig::before{
   content:"";
-  width:18px;height:18px;
+  width:18px; height:18px; display:inline-block;
   border-radius:5px;
-  background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5);
+  background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.35);
+}
+.btn.ig:hover{
+  box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
 }
 
-/* ---------- CALENDAR ---------- */
-
+/* Calendar */
 .calWrap{
   border:1px solid var(--line);
+  background:rgba(18,18,18,.78);
   border-radius:var(--radius);
-  overflow:hidden;
   box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.calTabs{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(212,175,55,.10), rgba(0,0,0,0));
+}
+.calTabs .btn{ padding:8px 10px; }
+.calTabs .btn.activeBtn{
+  box-shadow:0 0 16px rgba(212,175,55,.65), 0 12px 25px rgba(0,0,0,.35);
+  filter:brightness(1.02);
 }
 .calFrame{
   width:100%;
-  height:820px; /* BIGGER */
+  height:720px;
   border:0;
+  display:block;
+  background:transparent;
 }
 
-/* ---------- FOOTER ---------- */
+/* Tables */
+.tableWrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.table{
+  width:100%;
+  min-width:680px;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:rgba(18,18,18,.75);
+  box-shadow:var(--shadow);
+}
+.table th,.table td{
+  padding:12px 12px;
+  border-bottom:1px solid var(--line);
+  vertical-align:top;
+  text-align:left;
+}
+.table th{
+  color:#e9d787;
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.06em;
+  text-transform:uppercase
+}
+.table tr:last-child td{border-bottom:none}
+
+.input, select{
+  background:rgba(10,10,10,.85);
+  border:1px solid var(--line);
+  color:var(--ink);
+  padding:10px 12px;
+  border-radius:12px;
+  min-width:240px;
+  outline:none;
+}
+select{cursor:pointer}
+
+/* Member doc tag */
+.lockTag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  background:rgba(212,175,55,.14);
+  border:1px solid rgba(212,175,55,.30);
+  color:#fff2b7;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+
+/* Officers crest header */
+.crestRow{display:flex; align-items:center; gap:14px}
+.crestMark{
+  width:56px; height:56px;
+  border-radius:16px;
+  background:linear-gradient(135deg, rgba(212,175,55,.25), rgba(245,224,138,.10));
+  border:1px solid rgba(255,215,0,.35);
+  box-shadow:var(--shadow);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.crestMark img{width:80%; height:80%; object-fit:contain; display:block;}
 
 footer{
   border-top:1px solid var(--line);
@@ -208,20 +345,127 @@ footer{
   text-align:center;
 }
 
-/* ---------- MOBILE ---------- */
+/* ---------- Responsive ---------- */
 
-@media (max-width:768px){
-  .navToggle{display:inline-flex}
+@media (max-width: 900px){
+  .person{grid-column:span 6}
+
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  nav{ justify-content:flex-start; }
+
+  /* keep nav links from crushing the layout on smaller widths */
+  .wrap{ padding:14px; }
+}
+
+@media (max-width: 700px){
+  .calFrame{ height:820px; }
+  .table{ min-width:600px; }
+}
+
+@media (max-width: 520px){
+  .person{grid-column:span 12}
+  .input, select{min-width:100%}
+  .hero{ padding:18px; }
+  .table{ min-width:560px; }
+}
+
+/* =========================
+   Header/Nav polish (prevents top clipping + keeps NYSUT on same row)
+   ========================= */
+header{
+  padding:10px 0;
+}
+
+.top{ align-items:center; }
+
+nav.nav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+  flex-wrap:nowrap;
+  white-space:nowrap;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+
+  /* key: give the row a bit more vertical room so 'Home' isn't clipped */
+  padding:8px 6px;
+}
+nav.nav::-webkit-scrollbar{ display:none; }
+
+.nav a{
+  padding:10px 14px;
+  line-height:1.1;
+}
+
+/* Hamburger button (mobile only) */
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.60);
+  color:var(--ink);
+  cursor:pointer;
+}
+.navToggle:hover{
+  box-shadow:0 0 16px rgba(212,175,55,.35);
+}
+.navToggle .bars{
+  width:18px;
+  height:12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.navToggle .bars span{
+  height:2px;
+  background:rgba(255,242,183,.92);
+  border-radius:2px;
+  box-shadow:0 0 10px rgba(212,175,55,.35);
+}
+
+/* Reserved Instagram preview placeholder */
+.igReserve{
+  border:1px dashed rgba(255,215,0,.35);
+  border-radius:14px;
+  padding:12px;
+  background:rgba(0,0,0,.20);
+}
+
+/* Calendar: a bit taller on desktop */
+.calFrame{ height:780px; }
+
+/* Mobile nav collapses under 768px */
+@media (max-width: 768px){
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  .navToggle{ display:inline-flex; }
+
   nav.nav{
     display:none;
     width:100%;
-    flex-direction:column;
-    margin-top:12px;
-    padding:12px;
+    margin-top:10px;
+    padding:10px;
+    border:1px solid var(--line);
     border-radius:14px;
-    background:rgba(10,10,10,.95);
+    background:rgba(10,10,10,.92);
   }
-  nav.nav.open{display:flex}
-  .nav a{width:100%}
-  .top{flex-wrap:wrap}
+  nav.nav.open{
+    display:flex;
+    flex-direction:column;
+  }
+  .nav a{
+    width:100%;
+    justify-content:flex-start;
+  }
+}
+
+/* Calendar: taller on small screens */
+@media (max-width: 700px){
+  .calFrame{ height:860px; }
 }
