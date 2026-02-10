@@ -41,8 +41,9 @@ header{
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
-  padding:6px 0; /* prevents top-clipping on active tab */
-  overflow:visible;
+
+  /* FIX: real vertical space for active nav */
+  padding:10px 0;
 }
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
