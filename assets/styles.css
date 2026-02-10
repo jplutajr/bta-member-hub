@@ -82,6 +82,7 @@ nav::-webkit-scrollbar{display:none}
   color:var(--ink);
   border:1px solid transparent;
   white-space:nowrap;
+  line-height:1.2;
 }
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
