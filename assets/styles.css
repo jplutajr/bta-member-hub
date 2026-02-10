@@ -35,6 +35,7 @@ a{color:var(--brand); text-decoration:none}
 a:hover{text-decoration:underline}
 
 header{
+  overflow:visible;
   position:sticky;
   top:0;
   z-index:50;
@@ -83,27 +84,20 @@ header{
    IMPORTANT: padding-block prevents pill/glow from being clipped by the scroll container. */
 nav{
   display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:8px;
-  flex:1 1 auto;
-  overflow:visible; /* prevent clipping of active pill glow */
-  min-width:0;
-}
-
-/* Inner flex row handles horizontal scroll without clipping vertical glow */
-.navInner{
-  display:flex;
   gap:8px;
   flex-wrap:nowrap;
   justify-content:flex-end;
+  align-items:center;
+
+  /* Keep everything on one row. If the window is too narrow, scroll horizontally. */
   overflow-x:auto;
-  overflow-y:visible;
+  overflow-y:visible;              /* ✅ prevents vertical clipping of active pill */
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-  padding:6px 2px 8px; /* extra bottom pad = no clipped active pill */
+
+  padding:10px 2px;                /* ✅ more headroom so “Home” never clips */
 }
-.navInner::-webkit-scrollbar{display:none}
+nav::-webkit-scrollbar{display:none}
 
 .nav a{
   display:inline-flex;
@@ -378,80 +372,4 @@ footer{
   .input, select{min-width:100%}
   .hero{ padding:18px; }
   .table{ min-width:560px; }
-}
-
-
-/* ---------------- Mobile hamburger nav (≤768px) ---------------- */
-.navToggle{
-  display:none;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:8px 12px;
-  border-radius:12px;
-  border:1px solid rgba(212,175,55,.45);
-  background:rgba(18,18,18,.55);
-  color:var(--ink);
-  cursor:pointer;
-  user-select:none;
-  line-height:1;
-}
-.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
-.navToggle:active{ transform:translateY(1px); }
-
-.navToggle .bars{
-  width:18px; height:12px;
-  display:flex; flex-direction:column;
-  justify-content:space-between;
-}
-.navToggle .bars span{
-  height:2px;
-  border-radius:2px;
-  background:rgba(255,242,183,.9);
-  box-shadow:0 0 10px rgba(212,175,55,.35);
-}
-
-/* Collapsible nav panel (animated) */
-@media (max-width: 768px){
-  .top{ flex-wrap:wrap; align-items:flex-start; }
-  .brand{ flex:1 1 260px; }
-  .navToggle{ display:inline-flex; }
-
-  nav.nav{
-    width:100%;
-    order:3;
-    justify-content:flex-start;
-  }
-
-  /* closed by default */
-  nav.nav .navInner{
-    flex-direction:column;
-    justify-content:flex-start;
-    overflow:visible;
-    max-height:0;
-    opacity:0;
-    transform:translateY(-6px);
-    padding:0;
-    transition: max-height .22s ease, opacity .18s ease, transform .18s ease;
-    pointer-events:none;
-  }
-
-  nav.nav.open .navInner{
-    max-height:420px;
-    opacity:1;
-    transform:translateY(0);
-    padding:10px 0 2px;
-    pointer-events:auto;
-  }
-
-  .nav a{
-    width:100%;
-    justify-content:flex-start;
-  }
-}
-
-/* Keep cards readable on small screens */
-@media (max-width: 520px){
-  .wrap{ padding:14px; }
-  .hero{ padding:18px; }
 }
