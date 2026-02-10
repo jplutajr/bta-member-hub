@@ -34,8 +34,6 @@ body{
 a{color:var(--brand); text-decoration:none}
 a:hover{text-decoration:underline}
 
-/* ---------- Header + Nav (desktop) ---------- */
-
 header{
   position:sticky;
   top:0;
@@ -43,7 +41,7 @@ header{
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
-  padding:10px 0; /* enough vertical room so pills never clip */
+  padding:10px 0;
 }
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
@@ -69,25 +67,30 @@ header{
   border:1px solid rgba(255,215,0,.35);
   display:flex; align-items:center; justify-content:center;
 }
-.badge img{width:82%; height:82%; object-fit:contain; display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));}
+.badge img{
+  width:82%;
+  height:82%;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
 
 .brand h1{font-size:16px; margin:0}
 .brand p{margin:0; color:#aaa; font-size:12px}
 
-/* Key fix: nav uses flex-start so the first tab is never off-screen.
-   We still keep it visually on the right using margin-left:auto. */
+/* Desktop nav: one row, horizontal scroll if needed */
 nav.nav{
-  margin-left:auto;
   display:flex;
-  align-items:center;
   gap:8px;
   flex-wrap:nowrap;
-  white-space:nowrap;
-  justify-content:flex-start;
+  justify-content:flex-end;
+
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-  padding:8px 12px; /* prevents edge clipping + gives pill breathing room */
+
+  /* key: prevents the active pill glow from getting clipped */
+  padding:8px 12px;
 }
 nav.nav::-webkit-scrollbar{display:none}
 
@@ -108,43 +111,13 @@ nav.nav::-webkit-scrollbar{display:none}
   border-color:rgba(212,175,55,.60);
   box-shadow:0 0 0 1px rgba(212,175,55,.20) inset, 0 10px 25px rgba(0,0,0,.35);
 }
-
 .nav a:hover{
   background:rgba(212,175,55,.12);
   border-color:rgba(212,175,55,.35);
   text-decoration:none;
 }
 
-/* Hamburger button (mobile only) */
-.navToggle{
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(212,175,55,.45);
-  background:rgba(18,18,18,.60);
-  color:var(--ink);
-  cursor:pointer;
-}
-.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
-.navToggle .bars{
-  width:18px;
-  height:12px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.navToggle .bars span{
-  height:2px;
-  background:rgba(255,242,183,.92);
-  border-radius:2px;
-  box-shadow:0 0 10px rgba(212,175,55,.35);
-}
-
 main{padding:22px 0 50px}
-
-/* ---------- Cards + Sections ---------- */
 
 .hero{
   border:1px solid var(--line);
@@ -157,9 +130,7 @@ main{padding:22px 0 50px}
 .hero .sub{color:#d9d9d9; margin:0}
 
 .divider{
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex; align-items:center; justify-content:center;
   gap:12px;
   margin:26px 0 14px;
 }
@@ -175,8 +146,6 @@ main{padding:22px 0 50px}
   text-transform:uppercase;
   font-size:11px;
 }
-/* For Resources/NYSUT page: align the divider to the left so it matches the table */
-.divider.dividerLeft{justify-content:flex-start}
 
 .pill{
   display:inline-flex;
@@ -193,13 +162,16 @@ main{padding:22px 0 50px}
   color:#fecdd3;
 }
 
-/* Staff cards */
+/* Grid */
 .staff-grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
   gap:14px;
   margin-top:14px;
 }
+.span6{ grid-column:span 6; }
+.span12{ grid-column:span 12; }
+
 .person{
   grid-column:span 4;
   border:1px solid var(--line);
@@ -211,9 +183,7 @@ main{padding:22px 0 50px}
 .person .ph{
   height:170px;
   background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex; align-items:center; justify-content:center;
   border-bottom:1px solid var(--line);
 }
 .person .ph img{
@@ -230,9 +200,7 @@ main{padding:22px 0 50px}
 
 /* Buttons */
 .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
+  display:inline-flex; align-items:center; gap:10px;
   background:linear-gradient(180deg, var(--brand2), var(--brand));
   border:1px solid rgba(255,215,0,.70);
   color:#111;
@@ -248,8 +216,6 @@ main{padding:22px 0 50px}
   filter:brightness(1.05);
   text-decoration:none;
 }
-
-/* Instagram icon + extra glow only when .ig */
 .btn.ig::before{
   content:"";
   width:18px; height:18px; display:inline-block;
@@ -259,14 +225,6 @@ main{padding:22px 0 50px}
 }
 .btn.ig:hover{
   box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
-}
-
-/* Reserved Instagram preview placeholder */
-.igReserve{
-  border:1px dashed rgba(255,215,0,.35);
-  border-radius:14px;
-  padding:12px;
-  background:rgba(0,0,0,.20);
 }
 
 /* Calendar */
@@ -298,7 +256,10 @@ main{padding:22px 0 50px}
 }
 
 /* Tables */
-.tableWrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.tableWrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
 .table{
   width:100%;
   min-width:680px;
@@ -321,7 +282,7 @@ main{padding:22px 0 50px}
   font-weight:900;
   font-size:12px;
   letter-spacing:.06em;
-  text-transform:uppercase;
+  text-transform:uppercase
 }
 .table tr:last-child td{border-bottom:none}
 
@@ -372,32 +333,20 @@ footer{
   text-align:center;
 }
 
+/* Instagram preview placeholder */
+.igReserve{
+  border:1px dashed rgba(255,215,0,.35);
+  border-radius:14px;
+  padding:12px;
+  background:rgba(0,0,0,.20);
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 900px){
   .person{grid-column:span 6}
-
-  .top{ flex-wrap:wrap; align-items:flex-start; }
-  .brand{ flex:1 1 260px; }
+  nav.nav{justify-content:flex-start}
   .wrap{ padding:14px; }
-
-  /* Mobile menu becomes available, but desktop nav still works until 768px */
-}
-
-@media (max-width: 768px){
-  .navToggle{ display:inline-flex; }
-
-  nav.nav{
-    display:none;
-    width:100%;
-    margin-top:10px;
-    padding:10px;
-    border:1px solid var(--line);
-    border-radius:14px;
-    background:rgba(10,10,10,.92);
-  }
-  nav.nav.open{ display:flex; flex-direction:column; }
-  .nav a{ width:100%; justify-content:flex-start; }
 }
 
 @media (max-width: 700px){
@@ -410,4 +359,77 @@ footer{
   .input, select{min-width:100%}
   .hero{ padding:18px; }
   .table{ min-width:560px; }
+}
+
+/* Hamburger button (mobile only) */
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.60);
+  color:var(--ink);
+  cursor:pointer;
+}
+.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
+.navToggle .bars{
+  width:18px;
+  height:14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.navToggle .bars span{
+  display:block;
+  height:2px;
+  background:rgba(255,242,183,.92);
+  border-radius:2px;
+  box-shadow:0 0 10px rgba(212,175,55,.35);
+}
+
+/* Mobile nav collapses under 768px */
+@media (max-width: 768px){
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  .navToggle{ display:inline-flex; }
+
+  /* STACK the Connect section so calendar isn't squeezed */
+  .staff-grid{
+    grid-template-columns:1fr;
+  }
+  .span6, .span12, .person{
+    grid-column:span 12 !important;
+  }
+
+  /* Collapse nav */
+  nav.nav{
+    display:block;           /* keep in DOM for animation */
+    width:100%;
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(-6px);
+    transition: max-height .24s ease, opacity .18s ease, transform .18s ease;
+    margin-top:10px;
+    padding:0 10px;
+    border:1px solid transparent;
+    border-radius:14px;
+    background:rgba(10,10,10,.92);
+  }
+  nav.nav.open{
+    max-height:420px;
+    opacity:1;
+    transform:translateY(0);
+    padding:10px;
+    border-color:var(--line);
+  }
+  .nav a{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  /* Calendar: a little taller on mobile */
+  .calFrame{ height:900px; }
 }
