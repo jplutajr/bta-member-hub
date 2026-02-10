@@ -35,15 +35,14 @@ a{color:var(--brand); text-decoration:none}
 a:hover{text-decoration:underline}
 
 header{
-  overflow:visible;
   position:sticky;
   top:0;
   z-index:50;
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
-  padding-top:4px;
-  padding-bottom:4px;
+  padding:6px 0; /* prevents top-clipping on active tab */
+  overflow:visible;
 }
 
 .wrap{max-width:var(--max); margin:0 auto; padding:18px}
@@ -82,21 +81,18 @@ header{
 
 /* Desktop nav: one row, horizontal scroll if needed.
    IMPORTANT: padding-block prevents pill/glow from being clipped by the scroll container. */
+
 nav{
   display:flex;
   gap:8px;
-  flex-wrap:nowrap;
+  flex-wrap:nowrap;           /* keep NYSUT on the same row */
   justify-content:flex-end;
-  align-items:center;
-
-  /* Keep everything on one row. If the window is too narrow, scroll horizontally. */
-  overflow-x:auto;
-  overflow-y:visible;              /* ✅ prevents vertical clipping of active pill */
+  overflow-x:auto;            /* if it ever gets tight, scroll instead of wrapping */
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-
-  padding:10px 2px;                /* ✅ more headroom so “Home” never clips */
+  padding:2px 0;              /* prevents top clipping */
 }
+nav::-webkit-scrollbar{display:none}
 nav::-webkit-scrollbar{display:none}
 
 .nav a{
@@ -109,7 +105,11 @@ nav::-webkit-scrollbar{display:none}
   border:1px solid transparent;
   white-space:nowrap;
   line-height:1.2;
+
+  flex:0 0 auto;
+  line-height:1.15;
 }
+
 
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
@@ -372,4 +372,73 @@ footer{
   .input, select{min-width:100%}
   .hero{ padding:18px; }
   .table{ min-width:560px; }
+}
+
+
+/* ---------- Mobile nav (hamburger under 768px) ---------- */
+.navToggle{
+  display:none; /* shown via media query */
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.55);
+  color:var(--ink);
+  cursor:pointer;
+  user-select:none;
+}
+.navToggle:hover{ box-shadow:0 0 16px rgba(212,175,55,.35); }
+.navToggle:active{ transform:translateY(1px); }
+
+.navToggleIcon{
+  width:18px; height:12px; position:relative; display:inline-block;
+}
+.navToggleIcon::before,
+.navToggleIcon::after,
+.navToggleIcon span{
+  content:"";
+  position:absolute; left:0; right:0;
+  height:2px; border-radius:2px;
+  background:rgba(255,242,183,.92);
+  box-shadow:0 0 10px rgba(212,175,55,.25);
+}
+.navToggleIcon::before{ top:0; }
+.navToggleIcon span{ top:5px; }
+.navToggleIcon::after{ bottom:0; }
+
+@media (max-width: 768px){
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  .navToggle{ display:inline-flex; }
+
+  /* turn nav into animated dropdown panel */
+  nav.nav{
+    width:100%;
+    order:3;
+    justify-content:flex-start;
+    overflow:visible;
+    max-height:0;
+    opacity:0;
+    transform:translateY(-6px);
+    pointer-events:none;
+    transition: max-height .22s ease, opacity .18s ease, transform .18s ease;
+    padding:0;
+    margin-top:10px;
+  }
+  nav.nav.open{
+    max-height:520px;
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(10,10,10,.92);
+  }
+  nav.nav.open a{
+    width:100%;
+    justify-content:flex-start;
+  }
 }
