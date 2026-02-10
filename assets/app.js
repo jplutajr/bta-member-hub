@@ -192,7 +192,7 @@
               <button class="btn" id="calAgendaBtn" type="button">Agenda</button>
               <a class="btn" href="#events" style="margin-left:auto;">Events tab</a>
             </div>
-            <iframe class="calFrame" id="calFrame" src="${calMonth}" style="border:0" width="800" height="750" frameborder="0" scrolling="no"></iframe>
+           <iframe class="calFrame" id="calFrame" src="${calMonth}" style="border:0" frameborder="0" scrolling="no"></iframe>
           </div>
         </div>
       </div>
