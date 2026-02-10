@@ -91,7 +91,9 @@ nav{
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 
-  padding:6px 2px;                 /* ✅ FIX: prevents top clipping */
+  padding:6px 12px;                /* ✅ FIX: prevents edge clipping (Home pill) */
+  scroll-padding-left:12px;
+  scroll-padding-right:12px;
 }
 nav::-webkit-scrollbar{display:none}
 
