@@ -1,16 +1,13 @@
 :root{
   --bg:#0b0b0b;
   --panel:#121212;
-  --panel2:#181818;
   --ink:#f5f5f5;
   --muted:#c9b458;
   --line:rgba(255,215,0,.15);
   --brand:#d4af37;
   --brand2:#f5e08a;
-  --danger:#fb7185;
   --shadow:0 10px 30px rgba(0,0,0,.55);
   --radius:18px;
-  --radius2:12px;
   --max:1100px;
 }
 
@@ -31,7 +28,7 @@ body{
 a{color:var(--brand); text-decoration:none}
 a:hover{text-decoration:underline}
 
-/* ================= HEADER ================= */
+/* ---------- HEADER ---------- */
 
 header{
   position:sticky;
@@ -52,6 +49,7 @@ header{
   display:flex;
   align-items:center;
   gap:18px;
+  min-height:64px; /* prevents clipping */
 }
 
 /* Brand */
@@ -61,19 +59,11 @@ header{
   gap:12px;
   flex-shrink:0;
 }
-.brand h1{
-  font-size:16px;
-  margin:0;
-}
-.brand p{
-  margin:0;
-  font-size:12px;
-  color:#aaa;
-}
+.brand h1{font-size:16px;margin:0}
+.brand p{font-size:12px;margin:0;color:#aaa}
 
-/* ================= NAV ================= */
+/* ---------- NAV ---------- */
 
-/* Desktop nav */
 nav.nav{
   display:flex;
   align-items:center;
@@ -81,10 +71,8 @@ nav.nav{
   margin-left:auto;
   flex-wrap:nowrap;
   white-space:nowrap;
-
-  /* Critical fixes */
-  padding:6px 4px;              /* prevents pill clipping */
-  overflow-x:auto;              /* prevents NYSUT drop */
+  padding:6px 4px; /* fixes Home clipping */
+  overflow-x:auto;
   scrollbar-width:none;
 }
 nav.nav::-webkit-scrollbar{display:none}
@@ -102,7 +90,6 @@ nav.nav::-webkit-scrollbar{display:none}
 .nav a.active{
   background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
   border-color:rgba(212,175,55,.6);
-  box-shadow:0 0 0 1px rgba(212,175,55,.2) inset;
 }
 
 .nav a:hover{
@@ -111,7 +98,7 @@ nav.nav::-webkit-scrollbar{display:none}
   text-decoration:none;
 }
 
-/* ================= MOBILE NAV ================= */
+/* ---------- HAMBURGER ---------- */
 
 .navToggle{
   display:none;
@@ -138,7 +125,7 @@ nav.nav::-webkit-scrollbar{display:none}
   border-radius:2px;
 }
 
-/* ================= CONTENT ================= */
+/* ---------- CONTENT ---------- */
 
 main{padding:22px 0 50px}
 
@@ -150,19 +137,68 @@ main{padding:22px 0 50px}
   padding:22px;
 }
 
-.divider{
+.staff-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:14px;
+  margin-top:14px;
+}
+
+.person{
+  grid-column:span 6;
+  border:1px solid var(--line);
+  background:rgba(18,18,18,.85);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+.person .ph{
+  height:180px;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:12px;
-  margin:26px 0 14px;
-}
-.divider .dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--brand);
+  background:linear-gradient(135deg, rgba(212,175,55,.18), rgba(0,0,0,.55));
 }
 
-/* ================= FOOTER ================= */
+.person .info{padding:14px}
+
+/* ---------- BUTTONS ---------- */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:linear-gradient(180deg, var(--brand2), var(--brand));
+  border:1px solid rgba(255,215,0,.7);
+  color:#111;
+  padding:10px 16px;
+  border-radius:14px;
+  font-weight:800;
+}
+
+.btn.ig::before{
+  content:"";
+  width:18px;height:18px;
+  border-radius:5px;
+  background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5);
+}
+
+/* ---------- CALENDAR ---------- */
+
+.calWrap{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.calFrame{
+  width:100%;
+  height:820px; /* BIGGER */
+  border:0;
+}
+
+/* ---------- FOOTER ---------- */
 
 footer{
   border-top:1px solid var(--line);
@@ -172,10 +208,10 @@ footer{
   text-align:center;
 }
 
-/* ================= RESPONSIVE ================= */
+/* ---------- MOBILE ---------- */
 
-@media (max-width: 768px){
-  .navToggle{ display:inline-flex }
+@media (max-width:768px){
+  .navToggle{display:inline-flex}
   nav.nav{
     display:none;
     width:100%;
@@ -185,12 +221,7 @@ footer{
     border-radius:14px;
     background:rgba(10,10,10,.95);
   }
-  nav.nav.open{ display:flex }
-  .nav a{ width:100% }
-  .top{ flex-wrap:wrap }
-}
-
-@media (max-width: 520px){
-  .wrap{ padding:14px }
-  .hero{ padding:18px }
+  nav.nav.open{display:flex}
+  .nav a{width:100%}
+  .top{flex-wrap:wrap}
 }
