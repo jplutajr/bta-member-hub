@@ -22,12 +22,42 @@
     resources: () => renderResources("NYSUT & Links", "data/resources.json"),
   };
 
+
+  function initNavToggle() {
+    const btn = $("#navToggle");
+    const navEl = $("#nav");
+    if (!btn || !navEl) return;
+
+    const close = () => {
+      navEl.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+    };
+
+    const toggle = () => {
+      const open = navEl.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    btn.addEventListener("click", toggle);
+
+    // Close menu after clicking a link (mobile)
+    navEl.addEventListener("click", (e) => {
+      const a = e.target && e.target.closest ? e.target.closest("a") : null;
+      if (a) close();
+    });
+
+    // If resized up to desktop, ensure nav is not stuck "open"
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768) close();
+    });
+  }
+
   function setActiveNav() {
     const cur = (location.hash || "#home").replace("#", "");
     const navEl = $("#nav");
-    navEl.innerHTML = `<div class="navInner">${nav
+    navEl.innerHTML = nav
       .map((n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`)
-      .join("")}</div>`;
+      .join("");
 
     // Mobile nav toggle (only shows on small screens)
     const t = document.getElementById("navToggle");
@@ -41,7 +71,7 @@
     if (t) {
       navEl.querySelectorAll("a").forEach((a) => {
         a.addEventListener("click", () => {
-          if (window.innerWidth <= 768) {
+          if (window.innerWidth <= 900) {
             navEl.classList.remove("open");
             t.setAttribute("aria-expanded", "false");
           }
@@ -512,6 +542,7 @@
     (routes[id] || routes.home)();
   }
 
+  initNavToggle();
   window.addEventListener("hashchange", route);
   route();
 })();
