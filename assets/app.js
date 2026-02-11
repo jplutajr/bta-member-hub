@@ -1,12 +1,16 @@
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
 
+  // Google Form embed (Update Contact Info)
+  const FORM_EMBED_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfXsuucGYGRnUdDwCy19LoHy6DIQdOlsTKDILaBGo09HlsJIg/viewform?embedded=true";
+
   // ---------- Nav / routing ----------
   const nav = [
     { id: "home", label: "Home" },
     { id: "documents", label: "Documents" },
     { id: "officers", label: "Union Officers" },
     { id: "directory", label: "Staff Directory" },
+    { id: "contact", label: "Update Contact Info" },
     { id: "resources", label: "NYSUT & Links" },
   ];
 
@@ -17,6 +21,7 @@
     documents: renderDocuments,
     officers: renderOfficers,
     directory: renderDirectory,
+    contact: renderContact,
     resources: () => renderResources("NYSUT & Links", "data/resources.json"),
   };
 
@@ -94,13 +99,14 @@
     `;
   }
 
-  // ---------- Calendar scaler (keeps month-grid on mobile portrait) ----------
-  function bindCalendarScaler(baseW, baseH) {
-    const viewport = document.getElementById("calViewport");
-    const iframe = document.getElementById("calFrame");
+
+  // ---------- Responsive iframe scaler (keeps embeds readable on mobile portrait) ----------
+  function bindScaler(viewportId, frameId, baseW, baseH) {
+    const viewport = document.getElementById(viewportId);
+    const iframe = document.getElementById(frameId);
     if (!viewport || !iframe) return () => {};
 
-    // Force iframe to render "desktop" size, then scale down to viewport width.
+    // Force iframe to render at a "desktop" size, then scale down to viewport width.
     iframe.style.width = `${baseW}px`;
     iframe.style.height = `${baseH}px`;
     iframe.style.transformOrigin = "0 0";
@@ -115,17 +121,21 @@
       viewport.style.height = `${Math.round(baseH * scale)}px`;
     };
 
-    // Apply now + on resize/orientation changes.
     apply();
     window.addEventListener("resize", apply, { passive: true });
     window.addEventListener("orientationchange", apply, { passive: true });
 
-    // Return cleanup function (not strictly needed, but good hygiene).
     return () => {
       window.removeEventListener("resize", apply);
       window.removeEventListener("orientationchange", apply);
     };
   }
+
+  // Back-compat: existing calendar code calls this.
+  function bindCalendarScaler(baseW, baseH) {
+    return bindScaler("calViewport", "calFrame", baseW, baseH);
+  }
+
 
   // ---------- Pages ----------
   async function renderHome() {
@@ -336,7 +346,7 @@
           </div>
 
           <div style="margin-top:12px;">
-            <a class="btn" href="PASTE_GOOGLE_FORM_LINK_HERE" target="_blank" rel="noopener">
+            <a class="btn" href="#contact" target="_blank" rel="noopener">
               Request member access
             </a>
           </div>
@@ -373,6 +383,82 @@
         </div>
       </div>
     `;
+  }
+
+
+  async function renderContact() {
+    const app = $("#app");
+
+    // Base render size from your Google Forms embed code.
+    const BASE_W = 640;
+    const BASE_H = 1257;
+
+    app.innerHTML = `
+      ${hero({
+        pill: "New member / access",
+        title: "Update your contact info",
+        subHtml:
+          "We use <b>Gmail</b> for BTA Google Drive access and Google Meet links. Please submit your personal email and the <b>Gmail</b> you will use for union business.",
+      })}
+
+      ${divider("Step 1: Use a Gmail for union business", "left")}
+
+      <div class="person" style="margin-bottom:14px;">
+        <div class="info">
+          <div class="name">Why Gmail?</div>
+          <div class="small" style="margin-top:6px;">
+            BTA member documents live in Google Drive and meeting links are run through Google Meet.
+            If you try to open a restricted document and see “Request access,” it usually means we don’t have your Gmail added yet.
+            <br><br>
+            <b>If you already have a Gmail:</b> great — use that in the form below.
+            <br>
+            <b>If you don’t have one:</b> make a free Gmail just for BTA (takes ~2 minutes).
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn" href="https://accounts.google.com/signup" target="_blank" rel="noopener">
+              Create a Gmail account
+            </a>
+            <a class="btn" href="#documents">
+              Go to Documents
+            </a>
+          </div>
+        </div>
+      </div>
+
+      ${divider("Step 2: Submit the form", "left")}
+
+      <div class="person" style="padding:0;">
+        <div class="info">
+          <div class="small" style="margin:12px 12px 0;">
+            This form writes directly to a Google Sheet so the union can update Drive permissions and contact lists.
+          </div>
+
+          <div class="calWrap" style="margin:12px;">
+            <div class="calViewport" id="formViewport">
+              <iframe
+                class="calFrame"
+                id="formFrame"
+                src="${escapeHtml(FORM_EMBED_URL)}"
+                style="border:0"
+                frameborder="0"
+                marginheight="0"
+                marginwidth="0"
+                scrolling="no"
+                title="BTA Contact Info Form"
+              ></iframe>
+            </div>
+          </div>
+
+          <div class="small" style="margin:12px;">
+            If the form does not load, <a href="${escapeHtml(FORM_EMBED_URL)}" target="_blank" rel="noopener">open it in a new tab</a>.
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Scale the form for phones so there is no horizontal scroll.
+    bindScaler("formViewport", "formFrame", BASE_W, BASE_H);
   }
 
   async function renderResources(title, path) {
