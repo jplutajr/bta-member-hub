@@ -101,6 +101,12 @@
     const title = String(cell(0) || "").trim();
     if (!title) return null;
 
+    // Skip header row if the sheet includes column headings as the first row
+    const tLower = title.toLowerCase();
+    const c1 = String(cell(1) || "").toLowerCase();
+    const c2 = String(cell(2) || "").toLowerCase();
+    if (tLower === "title" && (c1.includes("date") || c2.includes("display"))) return null;
+
     const dateV = cell(1);
     const dateF = cellF(1);
     const sortDate = parseGvizDate(dateV, dateF);
