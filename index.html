@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BTA Member Hub</title>
   <meta name="description" content="Bridgehampton Teachers Association — member news, events, documents, and resources." />
-  <link rel="stylesheet" href="assets/styles.css?v=FINAL9" />
+
+  <!-- Cache bust -->
+  <link rel="stylesheet" href="assets/styles.css?v=FINAL11" />
 </head>
 <body>
   <header>
@@ -18,13 +20,13 @@
         </div>
       </div>
 
-      <button class="navToggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="nav">
-        <span class="bars" aria-hidden="true">
+      <button class="navToggle" id="navToggle" aria-label="Menu">
+        <span class="bars">
           <span></span><span></span><span></span>
         </span>
       </button>
 
-      <nav class="nav" id="nav" aria-label="Primary"></nav>
+      <nav class="nav" id="nav"></nav>
     </div>
   </header>
 
@@ -41,6 +43,6 @@
     if (!location.hash) location.hash = "#home";
   </script>
 
-  <script src="assets/app.js?v=FINAL9"></script>
+  <script src="assets/app.js?v=FINAL11"></script>
 </body>
 </html>
