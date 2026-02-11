@@ -55,6 +55,21 @@
         });
       });
     }
+
+    // If the nav fits within the available width, force scroll position back to 0.
+    // Some browsers preserve a tiny scrollLeft value on overflow-x:auto containers,
+    // which makes the last tab look clipped even when everything fits.
+    requestAnimationFrame(() => {
+      ensureNavScrollReset(navEl);
+    });
+  }
+
+  function ensureNavScrollReset(navEl) {
+    if (!navEl) return;
+    // Only do this when the nav does NOT need scrolling.
+    if (navEl.scrollWidth <= navEl.clientWidth + 2) {
+      navEl.scrollLeft = 0;
+    }
   }
 
   // ---------- Data helpers ----------
@@ -779,5 +794,9 @@
   }
 
   window.addEventListener("hashchange", route);
+  window.addEventListener("resize", () => {
+    const navEl = $("#nav");
+    ensureNavScrollReset(navEl);
+  });
   route();
 })();
