@@ -498,7 +498,7 @@
     const officers = {
       "Executive Board": [
         { title: "Secondary President", name: "Joe Pluta" },
-        { title: "Elementary President", name: "Caite Hansen" },
+        { title: "Elementary President", name: "Caitlin Hansen" },
         { title: "Secretary", name: "Allie Federico" },
         { title: "Treasurer", name: "Pat Aiello" },
       ],
