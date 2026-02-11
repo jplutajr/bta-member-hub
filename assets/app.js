@@ -3,9 +3,166 @@
 
   // Google Form embed (Update Contact Info)
   const FORM_EMBED_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfXsuucGYGRnUdDwCy19LoHy6DIQdOlsTKDILaBGo09HlsJIg/viewform?embedded=true";
-    // Google Calendar embeds
-    const calMonth = `${CAL_BASE}`;
-    const calAgenda = `${CAL_BASE}&mode=AGENDA&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0`;
+
+  // ---------- Nav / routing ----------
+  const nav = [
+    { id: "home", label: "Home" },
+    { id: "documents", label: "Documents" },
+    { id: "officers", label: "Union Officers" },
+    { id: "directory", label: "Staff Directory" },
+    { id: "contact", label: "Update Contact Info" },
+    { id: "resources", label: "NYSUT & Links" },
+  ];
+
+  const routes = {
+    home: renderHome,
+    news: () => renderListPage("News", "data/news.json"),
+    events: () => renderListPage("Events", "data/events.json"),
+    documents: renderDocuments,
+    officers: renderOfficers,
+    directory: renderDirectory,
+    contact: renderContact,
+    resources: () => renderResources("NYSUT & Links", "data/resources.json"),
+  };
+
+  function setActiveNav() {
+    const cur = (location.hash || "#home").replace("#", "");
+    const navEl = $("#nav");
+    navEl.innerHTML = nav
+      .map((n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`)
+      .join("");
+
+    // Mobile nav toggle (only shows on small screens)
+    const t = document.getElementById("navToggle");
+    if (t && !t.__bound) {
+      t.__bound = true;
+      t.addEventListener("click", () => {
+        navEl.classList.toggle("open");
+        t.setAttribute("aria-expanded", navEl.classList.contains("open") ? "true" : "false");
+      });
+    }
+    if (t) {
+      navEl.querySelectorAll("a").forEach((a) => {
+        a.addEventListener("click", () => {
+          if (window.innerWidth <= 900) {
+            navEl.classList.remove("open");
+            t.setAttribute("aria-expanded", "false");
+          }
+        });
+      });
+    }
+  }
+
+  // ---------- Data helpers ----------
+  async function fetchJSON(path) {
+    const res = await fetch(path, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to load ${path}`);
+    return await res.json();
+  }
+
+  async function safeLoad(path, fallback) {
+    try {
+      return await fetchJSON(path);
+    } catch {
+      return fallback;
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // ---------- UI helpers ----------
+  function divider(label, align = "center") {
+    const cls = align === "left" ? "divider dividerLeft" : "divider";
+    return `
+      <div class="${cls}" role="separator" aria-label="${escapeHtml(label)}">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="label">${escapeHtml(label)}</span>
+        <span class="dot" aria-hidden="true"></span>
+      </div>
+    `;
+  }
+
+  function hero({ pill, title, subHtml }) {
+    return `
+      <section class="hero">
+        ${pill ? `<div style="margin-bottom:10px;"><span class="pill">${escapeHtml(pill)}</span></div>` : ""}
+        <h2>${escapeHtml(title)}</h2>
+        ${subHtml ? `<p class="sub">${subHtml}</p>` : ""}
+      </section>
+    `;
+  }
+
+
+  // ---------- Responsive iframe scaler (keeps embeds readable on mobile portrait) ----------
+  function bindScaler(viewportId, frameId, baseW, baseH) {
+    const viewport = document.getElementById(viewportId);
+    const iframe = document.getElementById(frameId);
+    if (!viewport || !iframe) return () => {};
+
+    // Force iframe to render at a "desktop" size, then scale down to viewport width.
+    iframe.style.width = `${baseW}px`;
+    iframe.style.height = `${baseH}px`;
+    iframe.style.transformOrigin = "0 0";
+
+    const apply = () => {
+      const w = viewport.clientWidth || baseW;
+
+      // Never upscale above 1 (desktop stays crisp and unchanged).
+      const scale = Math.min(1, w / baseW);
+
+      iframe.style.transform = `scale(${scale})`;
+      viewport.style.height = `${Math.round(baseH * scale)}px`;
+    };
+
+    apply();
+    window.addEventListener("resize", apply, { passive: true });
+    window.addEventListener("orientationchange", apply, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", apply);
+      window.removeEventListener("orientationchange", apply);
+    };
+  }
+
+  // Back-compat: existing calendar code calls this.
+  function bindCalendarScaler(baseW, baseH) {
+    return bindScaler("calViewport", "calFrame", baseW, baseH);
+  }
+
+
+  // ---------- Pages ----------
+  async function renderHome() {
+    const app = $("#app");
+    const [news, events] = await Promise.all([
+      safeLoad("data/news.json", []),
+      safeLoad("data/events.json", []),
+    ]);
+
+    const latestNews = (news || []).slice(0, 3);
+    const upcoming = (events || []).slice(0, 3);
+
+    const missionHtml = `
+      <b>Mission:</b>  The BTA  is a union of professionals that champions fairness; democracy; economic opportunity; and high-quality public education, healthcare and public services for our students, their families and our communities. *
+      <br><br>
+      <em>*We share the same mission as the United Federation of Teachers.</em>
+    `;
+
+    // Instagram
+    const igHandle = "bhsteachersassociation";
+    const igUrl = `https://www.instagram.com/${igHandle}/`;
+
+    // Google Calendar embed (your exact embed base, America/New_York)
+    const calBase =
+      "https://calendar.google.com/calendar/embed?src=7e799d3cb530dec90c54e3e39f608d213d756dda4b474b3bbeb84f08e01278bf%40group.calendar.google.com&ctz=America%2FNew_York";
+    const calMonth = `${calBase}`; // month grid default
+    const calAgenda = `${calBase}&mode=AGENDA`;
 
     app.innerHTML = `
       ${hero({
@@ -21,14 +178,18 @@
           <div class="info">
             <div class="name">Upcoming events</div>
             <ul>
-              
-              <li style="list-style:none;margin-left:0;">
-                <div class="small" style="margin-bottom:10px;">Pulled live from the BTA Google Calendar.</div>
-                <div class="embedWrap" style="border-top:none;background:transparent;">
-                  <iframe class="embedFrame" src="${calAgenda}" style="height:360px;" frameborder="0" scrolling="no"></iframe>
-                </div>
-              </li>
-
+              ${
+                upcoming.length
+                  ? upcoming
+                      .map(
+                        (e) =>
+                          `<li><b>${escapeHtml(e.title || "")}</b> — ${escapeHtml(e.date || "")}${
+                            e.time ? ` (${escapeHtml(e.time)})` : ""
+                          }${e.location ? ` · ${escapeHtml(e.location)}` : ""}</li>`
+                      )
+                      .join("")
+                  : "<li>No events posted yet.</li>"
+              }
             </ul>
             <div class="small"><a href="#events">View all events →</a></div>
           </div>
@@ -130,62 +291,7 @@
     }
   }
 
-  
-  async function renderEventsPage() {
-    const app = $("#app");
-
-    const calMonth = `${CAL_BASE}`;
-    const calAgenda = `${CAL_BASE}&mode=AGENDA&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0`;
-
-    app.innerHTML = `
-      ${hero({
-        pill: "Events",
-        title: "Events",
-        subHtml: "All events are managed in the BTA Google Calendar. This page always stays current.",
-      })}
-
-      ${divider("BTA Calendar")}
-
-      <div class="calWrap">
-        <div class="calTabs">
-          <button class="btn activeBtn" id="evMonthBtn" type="button">Month</button>
-          <button class="btn" id="evAgendaBtn" type="button">Agenda</button>
-        </div>
-
-        <div class="calViewport" id="evViewport">
-          <iframe class="calFrame" id="evFrame" src="${calMonth}" style="border:0" frameborder="0" scrolling="no"></iframe>
-        </div>
-      </div>
-    `;
-
-    const evFrame = $("#evFrame");
-    const mBtn = $("#evMonthBtn");
-    const aBtn = $("#evAgendaBtn");
-
-    const BASE_W = 1100;
-    const BASE_H = 780;
-
-    // Scale this iframe on mobile the same way the home calendar scales
-    bindScaler("evViewport", "evFrame", BASE_W, BASE_H);
-
-    if (evFrame && mBtn && aBtn) {
-      mBtn.addEventListener("click", () => {
-        mBtn.classList.add("activeBtn");
-        aBtn.classList.remove("activeBtn");
-        evFrame.src = calMonth;
-        setTimeout(() => bindScaler("evViewport", "evFrame", BASE_W, BASE_H), 50);
-      });
-
-      aBtn.addEventListener("click", () => {
-        aBtn.classList.add("activeBtn");
-        mBtn.classList.remove("activeBtn");
-        evFrame.src = calAgenda;
-        setTimeout(() => bindScaler("evViewport", "evFrame", BASE_W, BASE_H), 50);
-      });
-    }
-  }
-
-async function renderListPage(title, path) {
+  async function renderListPage(title, path) {
     const app = $("#app");
     const items = await safeLoad(path, []);
     app.innerHTML = `
