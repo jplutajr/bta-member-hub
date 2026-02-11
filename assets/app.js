@@ -4,6 +4,10 @@
   // Google Form embed (Update Contact Info)
   const FORM_EMBED_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfXsuucGYGRnUdDwCy19LoHy6DIQdOlsTKDILaBGo09HlsJIg/viewform?embedded=true";
 
+  // Upcoming events Google Sheet (public)
+  const EVENTS_SHEET_ID = "19gTGcoFG9UnlW8m1ZEuGxuFZ_5cG5Tmem2Md5ROotp8";
+  const EVENTS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${EVENTS_SHEET_ID}/gviz/tq?tqx=out:json`;
+
   // ---------- Nav / routing ----------
   const nav = [
     { id: "home", label: "Home" },
@@ -11,13 +15,13 @@
     { id: "officers", label: "Union Officers" },
     { id: "directory", label: "Staff Directory" },
     { id: "contact", label: "Update Contact Info" },
-    { id: "resources", label: "NYSUT & Links" },
+    { id: "resources", label: "NYSUT" },
   ];
 
   const routes = {
     home: renderHome,
     news: () => renderListPage("News", "data/news.json"),
-    events: () => renderListPage("Events", "data/events.json"),
+    events: renderEventsPage,
     documents: renderDocuments,
     officers: renderOfficers,
     directory: renderDirectory,
@@ -66,6 +70,76 @@
     } catch {
       return fallback;
     }
+  }
+
+  // ---------- Google Sheet -> events helpers ----------
+  const parseGvizJson = (text) => {
+    // Response format: google.visualization.Query.setResponse(<json>);
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1) throw new Error("Unexpected gviz response");
+    return JSON.parse(text.slice(start, end + 1));
+  };
+
+  const parseGvizDate = (v, f) => {
+    // v can be "Date(2026,5,1)" or a string; f may be formatted date
+    const s = typeof v === "string" ? v : (v && v.toString ? v.toString() : "");
+    if (s.startsWith("Date(")) {
+      const nums = s.slice(5, -1).split(",").map((n) => parseInt(n.trim(), 10));
+      const [y, m, d] = nums;
+      if (!Number.isNaN(y) && !Number.isNaN(m) && !Number.isNaN(d)) return new Date(y, m, d);
+    }
+    const cand = f || v;
+    const t = Date.parse(cand);
+    return Number.isNaN(t) ? null : new Date(t);
+  };
+
+  const sheetRowToEvent = (row) => {
+    const c = (row && row.c) || [];
+    const cell = (i) => (c[i] ? (c[i].v ?? "") : "");
+    const cellF = (i) => (c[i] ? (c[i].f ?? "") : "");
+    const title = String(cell(0) || "").trim();
+    if (!title) return null;
+
+    const dateV = cell(1);
+    const dateF = cellF(1);
+    const sortDate = parseGvizDate(dateV, dateF);
+
+    const displayDate = String(cell(2) || "").trim() || (dateF ? String(dateF) : String(dateV || "").trim());
+    const time = String(cell(3) || "").trim();
+    const location = String(cell(4) || "").trim();
+    const notes = String(cell(5) || "").trim();
+
+    return {
+      title,
+      date: displayDate,
+      time: time && time.toUpperCase() !== "TBD" ? time : (time || "TBD"),
+      location,
+      details: notes,
+      _sort: sortDate ? sortDate.getTime() : Number.POSITIVE_INFINITY,
+    };
+  };
+
+  async function loadEventsFromSheet() {
+    const res = await fetch(EVENTS_SHEET_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
+    const text = await res.text();
+    const data = parseGvizJson(text);
+    const rows = (data && data.table && data.table.rows) || [];
+    const items = rows.map(sheetRowToEvent).filter(Boolean);
+    // sort by date if possible
+    items.sort((a, b) => (a._sort || 0) - (b._sort || 0));
+    return items.map(({ _sort, ...rest }) => rest);
+  }
+
+  async function loadUpcomingEventsAll() {
+    try {
+      const items = await loadEventsFromSheet();
+      if (items && items.length) return items;
+    } catch (e) {
+      console.warn("Upcoming events sheet unavailable, falling back to events.json", e);
+    }
+    return await safeLoad("data/events.json", []);
   }
 
   function escapeHtml(s) {
@@ -142,7 +216,7 @@
     const app = $("#app");
     const [news, events] = await Promise.all([
       safeLoad("data/news.json", []),
-      safeLoad("data/events.json", []),
+      loadUpcomingEventsAll(),
     ]);
 
     const latestNews = (news || []).slice(0, 3);
@@ -309,6 +383,35 @@
                   <td>${escapeHtml(i.date || "")}</td>
                   <td><b>${escapeHtml(i.title || "")}</b></td>
                   <td>${escapeHtml(i.details || i.location || "")}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function renderEventsPage() {
+    const app = $("#app");
+    const items = await loadUpcomingEventsAll();
+    app.innerHTML = `
+      ${hero({ pill: "Events", title: "Events", subHtml: "" })}
+      ${divider("Events")}
+      <div class="person" style="padding:0;">
+        <div class="info">
+          <div class="tableWrap"><table class="table">
+            <thead><tr><th>Date</th><th>Title</th><th>Details</th></tr></thead>
+            <tbody>
+              ${(items || [])
+                .map(
+                  (i) => `
+                <tr>
+                  <td>${escapeHtml(i.date || "")}${i.time ? ` · ${escapeHtml(i.time)}` : ""}</td>
+                  <td><b>${escapeHtml(i.title || "")}</b></td>
+                  <td>${escapeHtml(i.location || i.details || "")}</td>
                 </tr>
               `
                 )
