@@ -29,6 +29,19 @@
       .map((n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`)
       .join("");
 
+    // Keep the active tab fully visible (prevents the first tab from looking cut off
+    // if the nav container was previously scrolled).
+    const ensureActiveVisible = () => {
+      const active = navEl.querySelector("a.active");
+      if (!active) return;
+      // Scroll just enough to reveal, without centering (which can clip edges).
+      active.scrollIntoView({ block: "nearest", inline: "nearest" });
+      // If "Home" is active, always snap to the far left.
+      if (active === navEl.firstElementChild) navEl.scrollLeft = 0;
+    };
+    // Run after paint so measurements are correct.
+    requestAnimationFrame(ensureActiveVisible);
+
     // Mobile nav toggle (only shows on small screens)
     const t = document.getElementById("navToggle");
     if (t && !t.__bound) {
