@@ -110,6 +110,16 @@ nav.nav{
 }
 nav.nav::-webkit-scrollbar{display:none}
 
+/* ✅ DESKTOP FIX (NO MOBILE IMPACT):
+   If nothing is actually overflowing on desktop, the scroll container itself
+   is what clips the last pill (NYSUT). Remove scroll-container behavior on
+   wide screens only. */
+@media (min-width: 901px){
+  nav.nav{
+    overflow-x: visible;
+  }
+}
+
 .nav a{
   display:inline-flex;
   align-items:center;
