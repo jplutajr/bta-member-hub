@@ -5,7 +5,6 @@
   const nav = [
     { id: "home", label: "Home" },
     { id: "documents", label: "Documents" },
-    { id: "contact", label: "Update Contact Info" },
     { id: "officers", label: "Union Officers" },
     { id: "directory", label: "Staff Directory" },
     { id: "resources", label: "NYSUT & Links" },
@@ -16,7 +15,6 @@
     news: () => renderListPage("News", "data/news.json"),
     events: () => renderListPage("Events", "data/events.json"),
     documents: renderDocuments,
-    contact: renderContactUpdate,
     officers: renderOfficers,
     directory: renderDirectory,
     resources: () => renderResources("NYSUT & Links", "data/resources.json"),
@@ -28,19 +26,6 @@
     navEl.innerHTML = nav
       .map((n) => `<a href="#${n.id}" class="${n.id === cur ? "active" : ""}">${n.label}</a>`)
       .join("");
-
-    // Keep the active tab fully visible (prevents the first tab from looking cut off
-    // if the nav container was previously scrolled).
-    const ensureActiveVisible = () => {
-      const active = navEl.querySelector("a.active");
-      if (!active) return;
-      // Scroll just enough to reveal, without centering (which can clip edges).
-      active.scrollIntoView({ block: "nearest", inline: "nearest" });
-      // If "Home" is active, always snap to the far left.
-      if (active === navEl.firstElementChild) navEl.scrollLeft = 0;
-    };
-    // Run after paint so measurements are correct.
-    requestAnimationFrame(ensureActiveVisible);
 
     // Mobile nav toggle (only shows on small screens)
     const t = document.getElementById("navToggle");
@@ -350,10 +335,9 @@
             <b>BTA members:</b> request access using the form below. Once approved, you will be able to open all member-only documents.
           </div>
 
-          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-            <a class="btn" href="#contact">Update contact info / request access</a>
-            <a class="btn" href="#contact" style="background:rgba(18,18,18,.65); color:var(--ink); border-color:rgba(212,175,55,.35);">
-              New member? Start here
+          <div style="margin-top:12px;">
+            <a class="btn" href="PASTE_GOOGLE_FORM_LINK_HERE" target="_blank" rel="noopener">
+              Request member access
             </a>
           </div>
         </div>
@@ -385,88 +369,6 @@
           </table></div>
           <div class="small" style="margin-top:10px;">
             🔒 Member documents are stored in Google Drive with restricted access. If you get a “Request access” screen, you’re not added yet.
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // New member / email collection (static-site friendly)
-  function renderContactUpdate() {
-    const app = $("#app");
-
-    // Paste the Google Form embed URL (the iframe src), not the edit URL.
-    // Example looks like: https://docs.google.com/forms/d/e/<FORM_ID>/viewform?embedded=true
-    const FORM_EMBED_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfXsuucGYGRnUdDwCy19LoHy6DIQdOlsTKDILaBGo09HlsJIg/viewform?embedded=true";
-
-    const gmailSignup = "https://accounts.google.com/signup";
-
-    app.innerHTML = `
-      ${hero({
-        pill: "Members",
-        title: "Update your contact info",
-        subHtml:
-          "We need every member to have a <b>Gmail address</b> for access to BTA Google Drive files and Google Meet meetings.<br><br><b>Fill out the form below</b> so the union can add your Gmail to the BTA Drive and keep the directory accurate.",
-      })}
-
-      ${divider("Step 1 — Submit your email")}
-
-      <div class="person" style="padding:0;">
-        <div class="info">
-          <div class="name">Contact info form</div>
-          <div class="small" style="margin-top:6px;">
-            If the form does not load (district device restrictions), open it in a new tab.
-          </div>
-
-          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-            <a class="btn" href="${escapeHtml(
-              FORM_EMBED_URL && FORM_EMBED_URL !== "PASTE_GOOGLE_FORM_EMBED_URL_HERE"
-                ? FORM_EMBED_URL.replace("?embedded=true", "")
-                : "#"
-            )}" target="_blank" rel="noopener">
-              Open form in new tab
-            </a>
-          </div>
-        </div>
-
-        <div class="embedWrap">
-          <iframe
-            class="embedFrame"
-            title="BTA contact info form"
-            src="${escapeHtml(FORM_EMBED_URL)}"
-            frameborder="0"
-            marginheight="0"
-            marginwidth="0"
-          >Loading…</iframe>
-        </div>
-      </div>
-
-      ${divider("Step 2 — If you don’t have Gmail")}
-
-      <div class="person">
-        <div class="info">
-          <div class="name">Make a Gmail for union business</div>
-          <div class="small" style="margin-top:6px;">
-            Keep it simple and professional (example: <b>firstname.lastname.bta@gmail.com</b>). Use it only for union work.
-          </div>
-          <ol class="small" style="margin-top:10px; padding-left:18px;">
-            <li>Go to <a href="${gmailSignup}" target="_blank" rel="noopener">Google Account sign-up</a>.</li>
-            <li>Choose <b>“Create a Gmail address”</b> (not “Use my current email”).</li>
-            <li>Pick a username you will keep long-term.</li>
-            <li>Add a recovery email/phone so you don’t get locked out.</li>
-            <li>After it’s created, submit your new Gmail in the form above.</li>
-          </ol>
-        </div>
-      </div>
-
-      ${divider("Why we require Gmail")}
-
-      <div class="person">
-        <div class="info">
-          <div class="name">Drive + Meet access is permission-based</div>
-          <div class="small" style="margin-top:6px;">
-            Member-only documents live in Google Drive and are shared to specific email addresses.
-            If you’re not signed in with the Gmail address the BTA added, you’ll see “Request access.”
           </div>
         </div>
       </div>
