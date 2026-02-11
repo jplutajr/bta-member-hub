@@ -1,12 +1,3 @@
-/* =========================================================
-   BTA Member Hub — styles.css (FULL FILE)
-   - Keeps desktop layout unchanged
-   - Mobile fixes:
-     1) Docs/Links tables show the “Open” links without sideways scrolling
-     2) Calendar scales in portrait so it looks like the “horizontal” month view
-   ========================================================= */
-
-/* ---------- Theme ---------- */
 :root{
   --bg:#0b0b0b;
   --panel:#121212;
@@ -43,10 +34,6 @@ body{
 a{color:var(--brand); text-decoration:none}
 a:hover{text-decoration:underline}
 
-/* ---------- Layout ---------- */
-.wrap{max-width:var(--max); margin:0 auto; padding:18px}
-main{padding:22px 0 50px}
-
 header{
   position:sticky;
   top:0;
@@ -54,8 +41,11 @@ header{
   background:rgba(10,10,10,.92);
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
-  padding:10px 0; /* gives the nav pills vertical breathing room */
+  padding-top:4px;
+  padding-bottom:4px;
 }
+
+.wrap{max-width:var(--max); margin:0 auto; padding:18px}
 
 .top{
   display:flex;
@@ -89,39 +79,34 @@ header{
 .brand h1{font-size:16px; margin:0}
 .brand p{margin:0; color:#aaa; font-size:12px}
 
-/* ---------- Navigation (desktop: single row, never wraps; scrolls if needed) ---------- */
-nav.nav{
+/* Desktop nav: one row, horizontal scroll if needed.
+   IMPORTANT: padding-block prevents pill/glow from being clipped by the scroll container. */
+nav{
   display:flex;
-  align-items:center;
   gap:8px;
-  margin-left:auto;
-
   flex-wrap:nowrap;
-  white-space:nowrap;
+  justify-content:flex-end;
 
-  overflow-x:auto;                 /* keep NYSUT on the same row */
+  overflow-x:auto;                 /* keep single row */
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 
-  /* IMPORTANT: padding keeps the Home pill glow from being clipped */
-  padding:8px 12px;
+  padding:6px 12px;                /* prevents edge clipping (Home pill) */
   scroll-padding-left:12px;
   scroll-padding-right:12px;
 }
-nav.nav::-webkit-scrollbar{display:none}
+nav::-webkit-scrollbar{display:none}
 
 .nav a{
   display:inline-flex;
   align-items:center;
   gap:8px;
-
-  padding:10px 14px;
+  padding:8px 12px;
   border-radius:12px;
   color:var(--ink);
   border:1px solid transparent;
-
   white-space:nowrap;
-  line-height:1.1;
+  line-height:1.2;
 }
 
 .nav a.active{
@@ -138,36 +123,8 @@ nav.nav::-webkit-scrollbar{display:none}
   text-decoration:none;
 }
 
-/* Hamburger button (mobile only) */
-.navToggle{
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(212,175,55,.45);
-  background:rgba(18,18,18,.60);
-  color:var(--ink);
-  cursor:pointer;
-}
-.navToggle:hover{
-  box-shadow:0 0 16px rgba(212,175,55,.35);
-}
-.navToggle .bars{
-  width:18px;
-  height:12px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.navToggle .bars span{
-  height:2px;
-  background:rgba(255,242,183,.92);
-  border-radius:2px;
-  box-shadow:0 0 10px rgba(212,175,55,.35);
-}
+main{padding:22px 0 50px}
 
-/* ---------- Hero / separators ---------- */
 .hero{
   border:1px solid var(--line);
   background:linear-gradient(180deg, rgba(18,18,18,.95), rgba(10,10,10,.95));
@@ -198,9 +155,6 @@ nav.nav::-webkit-scrollbar{display:none}
   font-size:11px;
 }
 
-/* optional left-aligned divider (used on resources) */
-.divider.dividerLeft{justify-content:flex-start}
-
 .pill{
   display:inline-flex;
   padding:4px 10px;
@@ -216,7 +170,6 @@ nav.nav::-webkit-scrollbar{display:none}
   color:#fecdd3;
 }
 
-/* ---------- Cards / grids ---------- */
 .staff-grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
@@ -241,7 +194,7 @@ nav.nav::-webkit-scrollbar{display:none}
   border-bottom:1px solid var(--line);
 }
 
-/* image zoom fix */
+/* image zoom fix stays */
 .person .ph img{
   width:100%;
   height:100%;
@@ -255,7 +208,7 @@ nav.nav::-webkit-scrollbar{display:none}
 .person .name{font-weight:800}
 .person .small{color:#cfcfcf; font-size:12px; margin-top:4px}
 
-/* ---------- Buttons ---------- */
+/* Buttons */
 .btn{
   display:inline-flex;
   align-items:center;
@@ -276,6 +229,7 @@ nav.nav::-webkit-scrollbar{display:none}
   text-decoration:none;
 }
 
+/* Instagram icon + extra glow only when .ig */
 .btn.ig::before{
   content:"";
   width:18px; height:18px; display:inline-block;
@@ -287,15 +241,7 @@ nav.nav::-webkit-scrollbar{display:none}
   box-shadow:0 0 22px rgba(212,175,55,.95), 0 12px 25px rgba(0,0,0,.45);
 }
 
-/* Instagram preview placeholder */
-.igReserve{
-  border:1px dashed rgba(255,215,0,.35);
-  border-radius:14px;
-  padding:12px;
-  background:rgba(0,0,0,.20);
-}
-
-/* ---------- Calendar ---------- */
+/* Calendar */
 .calWrap{
   border:1px solid var(--line);
   background:rgba(18,18,18,.78);
@@ -315,20 +261,41 @@ nav.nav::-webkit-scrollbar{display:none}
   box-shadow:0 0 16px rgba(212,175,55,.65), 0 12px 25px rgba(0,0,0,.35);
   filter:brightness(1.02);
 }
-.calFrame{
+
+/* IMPORTANT: this wrapper is what lets the iframe stay "month grid" on mobile portrait */
+.calViewport{
   width:100%;
-  height:780px;
+  overflow:hidden;     /* hides anything outside the scaled iframe */
+  background:transparent;
+}
+
+/* The iframe is scaled by JS */
+.calFrame{
   border:0;
   display:block;
   background:transparent;
 }
 
-/* ---------- Tables ---------- */
+/* Generic embedded content (Google Forms, etc.) */
+.embedWrap{
+  width:100%;
+  border-top:1px solid var(--line);
+  background:rgba(0,0,0,.25);
+  overflow:hidden;
+}
+
+.embedFrame{
+  width:100%;
+  height:980px;
+  border:0;
+  display:block;
+}
+
+/* Tables */
 .tableWrap{
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
 }
-
 .table{
   width:100%;
   min-width:680px;
@@ -355,7 +322,6 @@ nav.nav::-webkit-scrollbar{display:none}
 }
 .table tr:last-child td{border-bottom:none}
 
-/* Inputs */
 .input, select{
   background:rgba(10,10,10,.85);
   border:1px solid var(--line);
@@ -403,46 +369,27 @@ footer{
   text-align:center;
 }
 
-/* =========================================================
-   Responsive
-   ========================================================= */
+/* Reserved Instagram preview placeholder */
+.igReserve{
+  border:1px dashed rgba(255,215,0,.35);
+  border-radius:14px;
+  padding:12px;
+  background:rgba(0,0,0,.20);
+}
+
+/* ---------- Responsive ---------- */
 
 @media (max-width: 900px){
   .person{grid-column:span 6}
+
   .top{ flex-wrap:wrap; align-items:flex-start; }
   .brand{ flex:1 1 260px; }
-  nav.nav{ justify-content:flex-start; }
+  nav{ justify-content:flex-start; }
+
   .wrap{ padding:14px; }
 }
 
-@media (max-width: 768px){
-  /* Mobile nav becomes a dropdown under the header */
-  .navToggle{ display:inline-flex; }
-
-  nav.nav{
-    display:none;            /* hidden until open */
-    width:100%;
-    margin-top:10px;
-    padding:10px;
-    border:1px solid var(--line);
-    border-radius:14px;
-    background:rgba(10,10,10,.92);
-
-    overflow:visible;        /* dropdown shouldn't scroll like desktop row */
-  }
-  nav.nav.open{
-    display:flex;
-    flex-direction:column;
-  }
-  .nav a{
-    width:100%;
-    justify-content:flex-start;
-  }
-}
-
-/* Slightly taller calendar on smaller screens */
 @media (max-width: 700px){
-  .calFrame{ height:860px; }
   .table{ min-width:600px; }
 }
 
@@ -453,101 +400,82 @@ footer{
   .table{ min-width:560px; }
 }
 
-/* =========================================================
-   MOBILE FIX #1: Tables — show "Open" link on-screen (no side scroll)
-   Applies ONLY on mobile widths
-   - Converts .table into stacked “rows as cards”
-   - Works for:
-     Docs table (4 cols: Access, Category, Document, Link)
-     Resources table (3 cols: Title, Description, Link)
-     News/Events table (3 cols: Date, Title, Details)
-   ========================================================= */
-@media (max-width: 600px){
-  .tableWrap{ overflow-x:visible; }
-
-  .table{
-    min-width:0;
-    width:100%;
-    border-radius:var(--radius);
-  }
-
-  .table thead{
-    display:none; /* hide header row */
-  }
-
-  .table, .table tbody, .table tr, .table td{
-    display:block;
-    width:100%;
-  }
-
-  .table tr{
-    border-bottom:1px solid var(--line);
-    padding:10px 12px;
-  }
-  .table tr:last-child{
-    border-bottom:none;
-  }
-
-  .table td{
-    border-bottom:none;
-    padding:8px 0;
-    display:flex;
-    gap:10px;
-    justify-content:space-between;
-    align-items:flex-start;
-  }
-
-  /* labels (default) */
-  .table td::before{
-    font-weight:900;
-    color:#e9d787;
-    text-transform:uppercase;
-    letter-spacing:.06em;
-    font-size:11px;
-    flex:0 0 auto;
-    padding-right:10px;
-    opacity:.95;
-  }
-
-  /* 3-column tables: (News/Events OR Resources) */
-  .table td:nth-child(1)::before{ content:"Item"; }
-  .table td:nth-child(2)::before{ content:"Details"; }
-  .table td:nth-child(3)::before{ content:"Link"; }
-
-  /* Docs table override (4 columns) */
-  .table td:nth-child(4)::before{ content:"Link"; }
-  .table td:nth-child(1)::before{ content:"Access"; }
-  .table td:nth-child(2)::before{ content:"Category"; }
-  .table td:nth-child(3)::before{ content:"Document"; }
-
-  /* Make the last column (Open) visually obvious */
-  .table td:last-child a{
-    font-weight:900;
-    text-decoration:underline;
-  }
-
-  /* Keep lock pill from shrinking weirdly */
-  .lockTag{ white-space:nowrap; }
+/* Header/Nav polish (prevents top clipping + keeps NYSUT on same row) */
+header{
+  padding:10px 0;
 }
 
-/* =========================================================
-   MOBILE FIX #2: Calendar — portrait looks like the landscape month view
-   Google Calendar embed has a hard minimum width; in portrait it crops.
-   Fix: scale the iframe DOWN in portrait only, while keeping container width.
-   (Desktop unchanged.)
-   ========================================================= */
-@media (max-width: 430px){
-  /* Scale factor: tweak if you want slightly bigger/smaller */
-  :root{ --calScale: .82; }
+.top{ align-items:center; }
 
-  .calWrap{ overflow:hidden; }
+nav.nav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+  flex-wrap:nowrap;
+  white-space:nowrap;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding:8px 6px;
+}
+nav.nav::-webkit-scrollbar{ display:none; }
 
-  .calFrame{
-    transform: scale(var(--calScale));
-    transform-origin: 0 0;
+.nav a{
+  padding:10px 14px;
+  line-height:1.1;
+}
 
-    /* counter-scale the box so it still fills the card */
-    width: calc(100% / var(--calScale));
-    height: calc(860px / var(--calScale));
+/* Hamburger button (mobile only) */
+.navToggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(212,175,55,.45);
+  background:rgba(18,18,18,.60);
+  color:var(--ink);
+  cursor:pointer;
+}
+.navToggle:hover{
+  box-shadow:0 0 16px rgba(212,175,55,.35);
+}
+.navToggle .bars{
+  width:18px;
+  height:12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.navToggle .bars span{
+  height:2px;
+  background:rgba(255,242,183,.92);
+  border-radius:2px;
+  box-shadow:0 0 10px rgba(212,175,55,.35);
+}
+
+/* Mobile nav collapses under 768px */
+@media (max-width: 768px){
+  .top{ flex-wrap:wrap; align-items:flex-start; }
+  .brand{ flex:1 1 260px; }
+  .navToggle{ display:inline-flex; }
+
+  nav.nav{
+    display:none;
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(10,10,10,.92);
+  }
+  nav.nav.open{
+    display:flex;
+    flex-direction:column;
+  }
+  .nav a{
+    width:100%;
+    justify-content:flex-start;
   }
 }

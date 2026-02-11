@@ -1,10 +1,14 @@
 [
   {
+    "date": "2026-02-11",
+    "title": "BTA Meeting — Virtual",
+    "body": "Tonight at 8:00 PM. Check your email for the Google Meet link.",
+    "tags": ["meeting"]
+  },
+  {
     "date": "2026-02-06",
     "title": "Payroll delay update",
     "body": "Add the latest info here. Keep posts short and factual.",
-    "tags": [
-      "operations"
-    ]
+    "tags": ["operations"]
   }
 ]
