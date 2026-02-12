@@ -2,11 +2,116 @@
   const $ = (sel, root = document) => root.querySelector(sel);
 
   // Google Form embed (Update Contact Info)
-  const FORM_EMBED_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfXsuucGYGRnUdDwCy19LoHy6DIQdOlsTKDILaBGo09HlsJIg/viewform?embedded=true";
+  const FORM_EMBED_URL =
+    "https://docs.google.com/forms/d/e/1FAIpQLSfXsuucGYGRnUdDwCy19LoHy6DIQdOlsTKDILaBGo09HlsJIg/viewform?embedded=true";
 
   // Upcoming events Google Sheet (public)
   const EVENTS_SHEET_ID = "19gTGcoFG9UnlW8m1ZEuGxuFZ_5cG5Tmem2Md5ROotp8";
   const EVENTS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${EVENTS_SHEET_ID}/gviz/tq?tqx=out:json`;
+
+  // ---------- Instagram (free, automatic best-effort) ----------
+  // Uses RSSHub (Picuki) feed + CORS-friendly proxy.
+  // If it fails, we show a clean fallback.
+  async function fetchLatestInstagramViaRSSHub(username) {
+    // Public RSS via Picuki route (RSSHub docs recommend Picuki/Picnob routes)
+    const feedUrl = `https://rsshub.app/picuki/profile/${encodeURIComponent(username)}`;
+
+    // CORS proxy approach: try Jina Reader first, then a backup.
+    const candidates = [
+      `https://r.jina.ai/${feedUrl}`,
+      `https://r.jina.ai/http://r.jina.ai/${feedUrl}`, // extra fallback some networks like
+    ];
+
+    let xmlText = "";
+    let lastErr = null;
+
+    for (const u of candidates) {
+      try {
+        const res = await fetch(u, { cache: "no-store" });
+        if (!res.ok) throw new Error(`Feed fetch failed: ${res.status}`);
+        xmlText = await res.text();
+        if (xmlText) break;
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+
+    if (!xmlText) throw lastErr || new Error("Feed unavailable");
+
+    const doc = new DOMParser().parseFromString(xmlText, "text/xml");
+    const item = doc.querySelector("item");
+    if (!item) throw new Error("No items found in feed");
+
+    const title =
+      item.querySelector("title")?.textContent?.trim() || "Latest Instagram post";
+    const link =
+      item.querySelector("link")?.textContent?.trim() ||
+      `https://instagram.com/${username}`;
+
+    // Try to find an image URL (formats vary)
+    let img =
+      item.querySelector("media\\:content")?.getAttribute("url") ||
+      item.querySelector("enclosure")?.getAttribute("url") ||
+      "";
+
+    // Fallback: find first <img src="..."> in encoded content/description
+    if (!img) {
+      const html =
+        item.querySelector("content\\:encoded")?.textContent ||
+        item.querySelector("description")?.textContent ||
+        "";
+      const m = html.match(/<img[^>]+src="([^"]+)"/i);
+      if (m && m[1]) img = m[1];
+    }
+
+    return { title, link, img };
+  }
+
+  async function renderInstagramPreview(igHandle, containerEl) {
+    if (!containerEl) return;
+
+    // Lightweight loading state (keeps your layout intact)
+    containerEl.innerHTML = `
+      <div class="small" style="opacity:.9;">Loading latest Instagram post…</div>
+    `;
+
+    const profileUrl = `https://www.instagram.com/${igHandle}/`;
+
+    try {
+      const { title, link, img } = await fetchLatestInstagramViaRSSHub(igHandle);
+
+      containerEl.innerHTML = `
+        ${img
+          ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" style="display:block;">
+              <img
+                src="${escapeHtml(img)}"
+                alt="${escapeHtml(title)}"
+                loading="lazy"
+                style="width:100%; height:auto; display:block; border-radius:14px; border:1px solid rgba(255,215,0,.15);"
+              />
+            </a>`
+          : `<div class="small" style="opacity:.9;">Latest post found, but no preview image available.</div>`}
+
+        <div class="small" style="margin-top:10px; line-height:1.35;">
+          <b>${escapeHtml(title)}</b>
+        </div>
+
+        <div style="margin-top:12px;">
+          <a class="btn ig" href="${escapeHtml(link)}" target="_blank" rel="noopener">Open latest post</a>
+        </div>
+      `;
+    } catch (e) {
+      console.warn("Instagram preview unavailable:", e);
+      containerEl.innerHTML = `
+        <div class="small" style="opacity:.9;">
+          Instagram preview isn’t available right now (free feed limitations).
+        </div>
+        <div style="margin-top:12px;">
+          <a class="btn ig" href="${escapeHtml(profileUrl)}" target="_blank" rel="noopener">View Instagram</a>
+        </div>
+      `;
+    }
+  }
 
   // ---------- Nav / routing ----------
   const nav = [
@@ -126,7 +231,8 @@
     const dateF = cellF(1);
     const sortDate = parseGvizDate(dateV, dateF);
 
-    const displayDate = String(cell(2) || "").trim() || (dateF ? String(dateF) : String(dateV || "").trim());
+    const displayDate =
+      String(cell(2) || "").trim() || (dateF ? String(dateF) : String(dateV || "").trim());
     const time = String(cell(3) || "").trim();
     const location = String(cell(4) || "").trim();
     const notes = String(cell(5) || "").trim();
@@ -194,7 +300,6 @@
     `;
   }
 
-
   // ---------- Responsive iframe scaler (keeps embeds readable on mobile portrait) ----------
   function bindScaler(viewportId, frameId, baseW, baseH) {
     const viewport = document.getElementById(viewportId);
@@ -208,10 +313,8 @@
 
     const apply = () => {
       const w = viewport.clientWidth || baseW;
-
       // Never upscale above 1 (desktop stays crisp and unchanged).
       const scale = Math.min(1, w / baseW);
-
       iframe.style.transform = `scale(${scale})`;
       viewport.style.height = `${Math.round(baseH * scale)}px`;
     };
@@ -230,7 +333,6 @@
   function bindCalendarScaler(baseW, baseH) {
     return bindScaler("calViewport", "calFrame", baseW, baseH);
   }
-
 
   // ---------- Pages ----------
   async function renderHome() {
@@ -326,7 +428,7 @@
 
               <div class="igReserve" style="margin-top:14px;">
                 <div class="small" style="opacity:.9;">
-                  Instagram preview will appear here once we connect the account.
+                  Loading latest Instagram post…
                 </div>
               </div>
             </div>
@@ -361,7 +463,6 @@
     const aBtn = $("#calAgendaBtn");
 
     // Keep the embed "desktop-shaped" so portrait doesn't flip into the ugly mobile agenda layout.
-    // These are the base render dimensions the iframe will use (scaled down on phones).
     const BASE_W = 1100;
     const BASE_H = 780;
 
@@ -373,7 +474,6 @@
         mBtn.classList.add("activeBtn");
         aBtn.classList.remove("activeBtn");
         calFrame.src = calMonth;
-        // give the iframe a tick to load, then re-apply scale
         setTimeout(() => bindCalendarScaler(BASE_W, BASE_H), 50);
       });
 
@@ -384,6 +484,10 @@
         setTimeout(() => bindCalendarScaler(BASE_W, BASE_H), 50);
       });
     }
+
+    // Instagram preview (auto-load into existing placeholder; no layout changes)
+    const igBox = $(".igReserve");
+    renderInstagramPreview(igHandle, igBox);
   }
 
   async function renderListPage(title, path) {
@@ -508,7 +612,6 @@
       </div>
     `;
   }
-
 
   async function renderContact() {
     const app = $("#app");
