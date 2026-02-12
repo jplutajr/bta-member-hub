@@ -1,23 +1,27 @@
 /**
- * Update data/social.json with the latest Instagram post URL.
- * Source: RSSHub Picuki route (no credentials) -> RSS XML.
+ * Update data/instagram.json with the latest Instagram post info.
  *
- * NOTE:
- * - This is "best free" and can occasionally break if the upstream changes.
- * - If it fails, the workflow will not commit.
+ * Goal: FREE + reasonably stable for a static GitHub Pages site.
+ *
+ * Approach:
+ * - Run server-side in GitHub Actions (avoids browser CORS + adblock issues)
+ * - Fetch public profile HTML via r.jina.ai (simple text proxy)
+ * - Extract the newest post shortcode
+ * - Fetch the post page (also via r.jina.ai) and extract OpenGraph metadata
+ * - Write a tiny JSON file that the site can load safely
+ *
+ * Notes:
+ * - Instagram can change markup at any time. This is still best-effort.
+ * - If fetch/parsing fails, we keep the existing JSON and exit 0 (no broken deploy).
  */
 
 import fs from "node:fs";
 import path from "node:path";
 
-const INSTAGRAM_HANDLE = process.env.IG_HANDLE || "bhsteachersassociation";
-const SOCIAL_PATH = process.env.SOCIAL_PATH || "data/social.json";
+const IG_HANDLE = process.env.IG_HANDLE || "bhsteachersassociation";
+const OUT_PATH = process.env.IG_OUT_PATH || "data/instagram.json";
 
-// RSSHub docs recommend Picuki/Picnob when Instagram private API needs credentials.
-// We'll use Picuki route.
-const FEED_URL =
-  process.env.FEED_URL ||
-  `https://rsshub.app/picuki/profile/${encodeURIComponent(INSTAGRAM_HANDLE)}`;
+const JINA = (url) => `https://r.jina.ai/${url.replace(/^https?:\/\//, "https://")}`;
 
 function readJsonSafe(p, fallback) {
   try {
@@ -32,70 +36,95 @@ function writeJsonPretty(p, obj) {
   fs.writeFileSync(p, JSON.stringify(obj, null, 2) + "\n", "utf8");
 }
 
-function extractFirstItemLinkFromRss(xml) {
-  // Find first <item> ... <link>URL</link>
-  // RSSHub generally sorts newest first.
-  const itemMatch = xml.match(/<item\b[\s\S]*?<\/item>/i);
-  if (!itemMatch) return "";
+async function fetchText(url) {
+  const res = await fetch(url, {
+    headers: {
+      "user-agent": "bta-member-hub-bot/1.0 (GitHub Actions)",
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    },
+  });
+  if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText} :: ${url}`);
+  return await res.text();
+}
 
-  const item = itemMatch[0];
-  const linkMatch = item.match(/<link>(.*?)<\/link>/i);
-  if (!linkMatch) return "";
+function firstMatch(re, text) {
+  const m = text.match(re);
+  return m ? m[1] : "";
+}
 
-  // Decode common entities
-  return linkMatch[1]
-    .trim()
+function decodeHtml(s) {
+  return String(s || "")
     .replaceAll("&amp;", "&")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#039;", "'");
+    .trim();
+}
+
+function extractLatestShortcode(profileHtml) {
+  // Instagram embeds JSON blobs containing "shortcode":"...".
+  // We'll take the first occurrence.
+  const code = firstMatch(/"shortcode"\s*:\s*"([A-Za-z0-9_-]+)"/, profileHtml);
+  return code;
+}
+
+function extractOg(postHtml) {
+  // OpenGraph tags are stable-ish and good enough for a preview.
+  const ogImage = decodeHtml(
+    firstMatch(/property="og:image"\s+content="([^"]+)"/i, postHtml) ||
+      firstMatch(/name="og:image"\s+content="([^"]+)"/i, postHtml)
+  );
+  const ogDesc = decodeHtml(
+    firstMatch(/property="og:description"\s+content="([^"]+)"/i, postHtml) ||
+      firstMatch(/name="og:description"\s+content="([^"]+)"/i, postHtml)
+  );
+  const ogTitle = decodeHtml(
+    firstMatch(/property="og:title"\s+content="([^"]+)"/i, postHtml) ||
+      firstMatch(/name="og:title"\s+content="([^"]+)"/i, postHtml)
+  );
+  return { ogImage, ogDesc, ogTitle };
 }
 
 async function main() {
-  console.log(`Handle: ${INSTAGRAM_HANDLE}`);
-  console.log(`Feed: ${FEED_URL}`);
-  console.log(`Social path: ${SOCIAL_PATH}`);
+  const outAbs = path.resolve(OUT_PATH);
+  console.log(`IG_HANDLE: ${IG_HANDLE}`);
+  console.log(`OUT_PATH: ${OUT_PATH}`);
 
-  const res = await fetch(FEED_URL, {
-    headers: {
-      "user-agent": "bta-member-hub-bot/1.0 (GitHub Actions)"
+  const current = readJsonSafe(outAbs, {});
+
+  try {
+    const profileUrl = `https://www.instagram.com/${encodeURIComponent(IG_HANDLE)}/`;
+    const profileHtml = await fetchText(JINA(profileUrl));
+
+    const shortcode = extractLatestShortcode(profileHtml);
+    if (!shortcode) throw new Error("Could not find a shortcode on profile page");
+
+    const postUrl = `https://www.instagram.com/p/${shortcode}/`;
+    const postHtml = await fetchText(JINA(postUrl));
+    const { ogImage, ogDesc, ogTitle } = extractOg(postHtml);
+
+    const next = {
+      instagramHandle: IG_HANDLE,
+      postUrl,
+      imageUrl: ogImage || "",
+      title: ogTitle || "",
+      description: ogDesc || "",
+      lastAutoUpdated: new Date().toISOString(),
+    };
+
+    if ((current.postUrl || "") === postUrl && (current.imageUrl || "") === (next.imageUrl || "")) {
+      console.log("No change detected. Exiting cleanly.");
+      return;
     }
-  });
 
-  if (!res.ok) {
-    throw new Error(`Feed fetch failed: ${res.status} ${res.statusText}`);
+    writeJsonPretty(outAbs, next);
+    console.log(`Updated latest Instagram post -> ${postUrl}`);
+  } catch (err) {
+    // Don't break the site/deploy if Instagram blocks us today.
+    console.warn("Instagram update failed. Keeping existing data.");
+    console.warn(String(err?.stack || err));
   }
-
-  const xml = await res.text();
-  const latestLink = extractFirstItemLinkFromRss(xml);
-
-  if (!latestLink || !latestLink.includes("instagram.com")) {
-    throw new Error(
-      `Could not extract a valid Instagram link from feed. Got: ${latestLink || "(empty)"}`
-    );
-  }
-
-  const current = readJsonSafe(SOCIAL_PATH, {});
-  const next = {
-    ...current,
-    instagramHandle: current.instagramHandle || INSTAGRAM_HANDLE,
-    instagramPostUrl: latestLink,
-    lastAutoUpdated: new Date().toISOString()
-  };
-
-  // Only write if changed (keeps commits clean)
-  const changed = (current.instagramPostUrl || "") !== latestLink;
-  if (!changed) {
-    console.log("No change: latest post URL is the same. Exiting cleanly.");
-    return;
-  }
-
-  writeJsonPretty(SOCIAL_PATH, next);
-  console.log(`Updated instagramPostUrl -> ${latestLink}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+await main();
