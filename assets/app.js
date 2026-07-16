@@ -12,9 +12,10 @@
   const nav = [
     { id: "home", label: "Home" },
     { id: "documents", label: "Documents" },
-    { id: "officers", label: "Union Officers" },
-    { id: "directory", label: "Staff Directory" },
-    { id: "contact", label: "Update Contact Info" },
+    { id: "salary", label: "Salary" },
+    { id: "officers", label: "Officers" },
+    { id: "directory", label: "Directory" },
+    { id: "contact", label: "Contact" },
     { id: "resources", label: "NYSUT" },
   ];
 
@@ -23,6 +24,7 @@
     news: () => renderListPage("News", "data/news.json"),
     events: renderEventsPage,
     documents: renderDocuments,
+    salary: renderSalaryLookup,
     officers: renderOfficers,
     directory: renderDirectory,
     contact: renderContact,
@@ -532,6 +534,380 @@
     `;
   }
 
+
+
+  async function renderSalaryLookup() {
+    const app = $("#app");
+    const data = await safeLoad("data/salary-schedules.json", null);
+
+    if (!data || !Array.isArray(data.schedules) || !data.schedules.length) {
+      app.innerHTML = `
+        ${hero({
+          pill: "Salary schedules",
+          title: "Salary lookup",
+          subHtml: "The salary schedule data could not be loaded.",
+        })}
+        ${divider("Unavailable", "left")}
+        <div class="person"><div class="info">
+          <div class="name">Salary lookup is temporarily unavailable.</div>
+          <div class="small" style="margin-top:6px;">Please try again later or contact a BTA officer.</div>
+        </div></div>
+      `;
+      return;
+    }
+
+    const schedules = data.schedules;
+    const columns = Array.isArray(data.columns) ? data.columns : [];
+    const teacherColumns = columns.filter((column) => column !== "TA");
+    const today = new Date();
+    const currentSchedule =
+      schedules.find((schedule) => {
+        const start = new Date(`${schedule.effectiveStart}T00:00:00`);
+        const end = new Date(`${schedule.effectiveEnd}T23:59:59`);
+        return today >= start && today <= end;
+      }) || schedules[schedules.length - 1];
+
+    const yearOptions = schedules
+      .map(
+        (schedule) =>
+          `<option value="${escapeHtml(schedule.id)}" ${
+            schedule.id === currentSchedule.id ? "selected" : ""
+          }>School year ${escapeHtml(schedule.id)}${
+            schedule.id === currentSchedule.id ? " (current)" : ""
+          }</option>`
+      )
+      .join("");
+
+    const stepOptions = Array.from({ length: 23 }, (_, index) => index + 1)
+      .map((step) => `<option value="${step}">Step ${step}</option>`)
+      .join("");
+
+    const columnOptions = columns
+      .map(
+        (column) =>
+          `<option value="${escapeHtml(column)}">${
+            column === "TA" ? "TA" : escapeHtml(column)
+          }</option>`
+      )
+      .join("");
+
+    app.innerHTML = `
+      ${hero({
+        pill: "Finalized schedules",
+        title: "Salary lookup",
+        subHtml:
+          "Search the finalized BTA salary schedules by <b>step and column</b> or by <b>annual base salary</b>.",
+      })}
+
+      ${divider("Choose a school year", "left")}
+
+      <section class="salaryShell">
+        <div class="salaryToolbar">
+          <label class="salaryField salaryYearField" for="salaryYear">
+            <span class="salaryLabel">Salary schedule year</span>
+            <select id="salaryYear">${yearOptions}</select>
+          </label>
+          <div class="salaryYearDetails" id="salaryYearDetails"></div>
+        </div>
+
+        <div class="salaryModeSwitch" role="tablist" aria-label="Salary lookup method">
+          <button class="salaryModeBtn active" type="button" data-mode="placement" role="tab" aria-selected="true">
+            Step &amp; column → salary
+          </button>
+          <button class="salaryModeBtn" type="button" data-mode="amount" role="tab" aria-selected="false">
+            Salary → step &amp; column
+          </button>
+          <button class="salaryModeBtn" type="button" data-mode="schedule" role="tab" aria-selected="false">
+            Full schedule
+          </button>
+        </div>
+
+        <section class="salaryPanel" id="salaryPlacementPanel" data-panel="placement" role="tabpanel">
+          <div class="salaryFormGrid">
+            <label class="salaryField" for="salaryColumn">
+              <span class="salaryLabel">Column</span>
+              <select id="salaryColumn">${columnOptions}</select>
+            </label>
+            <label class="salaryField" for="salaryStep">
+              <span class="salaryLabel">Step</span>
+              <select id="salaryStep">${stepOptions}</select>
+              <span class="salaryHelp" id="salaryStepHelp"></span>
+            </label>
+          </div>
+          <div class="salaryResult" id="salaryPlacementResult" aria-live="polite"></div>
+        </section>
+
+        <section class="salaryPanel" id="salaryAmountPanel" data-panel="amount" role="tabpanel" hidden>
+          <div class="salaryAmountSearch">
+            <label class="salaryField" for="salaryAmount">
+              <span class="salaryLabel">Annual contractual base salary</span>
+              <input
+                class="input salaryAmountInput"
+                id="salaryAmount"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Example: $105,414"
+              />
+              <span class="salaryHelp">Enter the annual amount, not a paycheck amount.</span>
+            </label>
+            <button class="btn" type="button" id="salarySearchBtn">Find matches</button>
+          </div>
+          <div class="salarySearchResults" id="salarySearchResults" aria-live="polite"></div>
+        </section>
+
+        <section class="salaryPanel" id="salarySchedulePanel" data-panel="schedule" role="tabpanel" hidden>
+          <div class="salaryScheduleTopline">
+            <div>
+              <div class="name">Full salary schedule</div>
+              <div class="small">Scroll horizontally to view every column.</div>
+            </div>
+            <a class="btn salaryPdfLink" id="salaryPdfLink" target="_blank" rel="noopener">Open official PDF</a>
+          </div>
+          <div class="salaryTableWrap" id="salaryTableWrap"></div>
+        </section>
+      </section>
+
+      <div class="salaryNotice">
+        <b>Base salary only.</b> These schedules do not include stipends, extra classes, coaching,
+        summer work, health-insurance buyback, retroactive pay, or other individual compensation.
+        Use the official PDF or contact BTA leadership when placement is unclear.
+      </div>
+    `;
+
+    const yearSelect = $("#salaryYear");
+    const yearDetails = $("#salaryYearDetails");
+    const columnSelect = $("#salaryColumn");
+    const stepSelect = $("#salaryStep");
+    const stepHelp = $("#salaryStepHelp");
+    const placementResult = $("#salaryPlacementResult");
+    const amountInput = $("#salaryAmount");
+    const searchButton = $("#salarySearchBtn");
+    const searchResults = $("#salarySearchResults");
+    const pdfLink = $("#salaryPdfLink");
+    const tableWrap = $("#salaryTableWrap");
+    const modeButtons = Array.from(document.querySelectorAll(".salaryModeBtn"));
+    const panels = Array.from(document.querySelectorAll(".salaryPanel"));
+
+    const currency = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: data.currency || "USD",
+      maximumFractionDigits: 0,
+    });
+
+    const getSchedule = () =>
+      schedules.find((schedule) => schedule.id === yearSelect.value) || schedules[0];
+
+    const formatDate = (iso) => {
+      if (!iso) return "";
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(`${iso}T12:00:00`));
+    };
+
+    const parseSalary = (value) => {
+      const cleaned = String(value || "")
+        .replace(/[$,\s]/g, "")
+        .trim();
+      if (!cleaned || !/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+      const amount = Number(cleaned);
+      return Number.isFinite(amount) && amount > 0 ? amount : null;
+    };
+
+    const flattenSchedule = (schedule) => {
+      const entries = [];
+      (schedule.rows || []).forEach((row) => {
+        columns.forEach((column) => {
+          if (typeof row[column] === "number") {
+            entries.push({ step: row.step, column, salary: row[column] });
+          }
+        });
+      });
+      return entries;
+    };
+
+    function renderYearDetails() {
+      const schedule = getSchedule();
+      yearDetails.innerHTML = `
+        <div class="salaryYearName">${escapeHtml(schedule.id)}</div>
+        <div class="small">Effective ${escapeHtml(formatDate(schedule.effectiveStart))} - ${escapeHtml(
+          formatDate(schedule.effectiveEnd)
+        )}</div>
+      `;
+    }
+
+    function renderPlacement() {
+      const schedule = getSchedule();
+      const column = columnSelect.value;
+      if (column === "TA") {
+        stepSelect.value = "1";
+        stepSelect.disabled = true;
+        stepHelp.textContent = "The finalized schedule lists one TA salary under Step 1.";
+      } else {
+        stepSelect.disabled = false;
+        stepHelp.textContent = "";
+      }
+
+      const step = Number(stepSelect.value);
+      const row = (schedule.rows || []).find((item) => Number(item.step) === step);
+      const salary = row && row[column];
+
+      if (typeof salary !== "number") {
+        placementResult.innerHTML = `
+          <div class="salaryResultLabel">No listed salary</div>
+          <div class="small">This step and column combination is blank on the official schedule.</div>
+        `;
+        return;
+      }
+
+      placementResult.innerHTML = `
+        <div class="salaryResultLabel">Annual contractual base salary</div>
+        <div class="salaryBigAmount">${escapeHtml(currency.format(salary))}</div>
+        <div class="salaryResultMeta">
+          School year ${escapeHtml(schedule.id)} · ${escapeHtml(column)} · Step ${escapeHtml(step)}
+        </div>
+      `;
+    }
+
+    function renderSalarySearch() {
+      const schedule = getSchedule();
+      const amount = parseSalary(amountInput.value);
+
+      if (amount === null) {
+        searchResults.innerHTML = `
+          <div class="salaryInlineMessage">Enter a valid annual salary amount.</div>
+        `;
+        return;
+      }
+
+      const entries = flattenSchedule(schedule);
+      const exactMatches = entries.filter((entry) => Math.abs(entry.salary - amount) < 0.005);
+
+      if (exactMatches.length) {
+        searchResults.innerHTML = `
+          <div class="salarySearchHeading">
+            ${exactMatches.length} exact ${exactMatches.length === 1 ? "match" : "matches"} in ${escapeHtml(
+              schedule.id
+            )}
+          </div>
+          <div class="salaryMatchGrid">
+            ${exactMatches
+              .map(
+                (entry) => `
+                  <div class="salaryMatchCard exact">
+                    <div class="salaryMatchAmount">${escapeHtml(currency.format(entry.salary))}</div>
+                    <div><b>${escapeHtml(entry.column)}</b> · Step ${escapeHtml(entry.step)}</div>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        `;
+        return;
+      }
+
+      const closest = entries
+        .map((entry) => ({ ...entry, difference: Math.abs(entry.salary - amount) }))
+        .sort((a, b) => a.difference - b.difference || a.salary - b.salary)
+        .slice(0, 6);
+
+      searchResults.innerHTML = `
+        <div class="salarySearchHeading">No exact match in ${escapeHtml(schedule.id)}</div>
+        <div class="salaryInlineMessage warning">
+          The entries below are only the closest schedule amounts. They do not confirm a member's placement.
+        </div>
+        <div class="salaryMatchGrid">
+          ${closest
+            .map(
+              (entry) => `
+                <div class="salaryMatchCard">
+                  <div class="salaryMatchAmount">${escapeHtml(currency.format(entry.salary))}</div>
+                  <div><b>${escapeHtml(entry.column)}</b> · Step ${escapeHtml(entry.step)}</div>
+                  <div class="small">${escapeHtml(currency.format(entry.difference))} away</div>
+                </div>
+              `
+            )
+            .join("")}
+        </div>
+      `;
+    }
+
+    function renderFullSchedule() {
+      const schedule = getSchedule();
+      pdfLink.href = schedule.sourcePdf || "#";
+      pdfLink.hidden = !schedule.sourcePdf;
+
+      tableWrap.innerHTML = `
+        <table class="salaryTable">
+          <thead>
+            <tr>
+              <th scope="col">Step</th>
+              ${columns.map((column) => `<th scope="col">${escapeHtml(column)}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${(schedule.rows || [])
+              .map(
+                (row) => `
+                  <tr>
+                    <th scope="row">${escapeHtml(row.step)}</th>
+                    ${columns
+                      .map(
+                        (column) =>
+                          `<td>${typeof row[column] === "number" ? escapeHtml(currency.format(row[column])) : "—"}</td>`
+                      )
+                      .join("")}
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function setMode(mode) {
+      modeButtons.forEach((button) => {
+        const active = button.dataset.mode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== mode;
+      });
+      if (mode === "schedule") renderFullSchedule();
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    yearSelect.addEventListener("change", () => {
+      renderYearDetails();
+      renderPlacement();
+      renderFullSchedule();
+      if (amountInput.value.trim()) renderSalarySearch();
+    });
+    columnSelect.addEventListener("change", renderPlacement);
+    stepSelect.addEventListener("change", renderPlacement);
+    searchButton.addEventListener("click", renderSalarySearch);
+    amountInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") renderSalarySearch();
+    });
+    amountInput.addEventListener("blur", () => {
+      const amount = parseSalary(amountInput.value);
+      if (amount !== null) amountInput.value = currency.format(amount);
+    });
+
+    // Teacher columns are listed in the same order as the official schedules.
+    if (teacherColumns.length && columns[0] === "TA") {
+      columnSelect.value = teacherColumns[0];
+    }
+    renderYearDetails();
+    renderPlacement();
+    renderFullSchedule();
+  }
 
   async function renderContact() {
     const app = $("#app");

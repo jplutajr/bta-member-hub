@@ -413,11 +413,222 @@ footer{
   text-align:center;
 }
 
+
+/* ---------- Salary lookup ---------- */
+.salaryShell{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(18,18,18,.94), rgba(9,9,9,.94));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.salaryToolbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px;
+  border-bottom:1px solid var(--line);
+  background:rgba(212,175,55,.06);
+}
+.salaryField{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-width:0;
+}
+.salaryLabel{
+  color:#f4e5a5;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+.salaryHelp{
+  color:#aaa;
+  font-size:12px;
+  min-height:17px;
+}
+.salaryYearField select{min-width:270px}
+.salaryYearDetails{text-align:right}
+.salaryYearName{font-weight:900; color:var(--brand2)}
+.salaryModeSwitch{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:8px;
+  padding:12px 18px;
+  border-bottom:1px solid var(--line);
+}
+.salaryModeBtn{
+  border:1px solid rgba(212,175,55,.25);
+  border-radius:12px;
+  background:rgba(10,10,10,.72);
+  color:#ddd;
+  padding:11px 12px;
+  font:inherit;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+}
+.salaryModeBtn:hover{
+  border-color:rgba(212,175,55,.55);
+  background:rgba(212,175,55,.09);
+}
+.salaryModeBtn.active{
+  border-color:rgba(212,175,55,.72);
+  color:#fff4c2;
+  background:linear-gradient(180deg, rgba(212,175,55,.26), rgba(212,175,55,.10));
+  box-shadow:0 0 16px rgba(212,175,55,.18);
+}
+.salaryPanel{padding:20px}
+.salaryFormGrid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:16px;
+}
+.salaryFormGrid select{width:100%; min-width:0}
+.salaryResult{
+  margin-top:18px;
+  padding:22px;
+  border:1px solid rgba(212,175,55,.38);
+  border-radius:16px;
+  background:
+    radial-gradient(480px 180px at 0% 0%, rgba(212,175,55,.15), transparent 70%),
+    rgba(8,8,8,.70);
+}
+.salaryResultLabel{
+  color:#d5c984;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.salaryBigAmount{
+  margin-top:4px;
+  font-size:clamp(32px, 6vw, 52px);
+  line-height:1.05;
+  font-weight:950;
+  letter-spacing:-.035em;
+  color:#fff3b5;
+}
+.salaryResultMeta{margin-top:9px; color:#ddd; font-weight:700}
+.salaryAmountSearch{
+  display:flex;
+  align-items:flex-end;
+  gap:12px;
+}
+.salaryAmountSearch .salaryField{flex:1}
+.salaryAmountInput{width:100%; min-width:0; font-size:17px}
+.salarySearchResults{margin-top:18px}
+.salarySearchHeading{
+  margin-bottom:10px;
+  color:#f1e29b;
+  font-weight:900;
+  font-size:16px;
+}
+.salaryInlineMessage{
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.035);
+  color:#ddd;
+}
+.salaryInlineMessage.warning{
+  border-color:rgba(251,191,36,.28);
+  background:rgba(251,191,36,.07);
+  color:#f4e7b2;
+}
+.salaryMatchGrid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.salaryMatchCard{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(15,15,15,.78);
+}
+.salaryMatchCard.exact{
+  border-color:rgba(212,175,55,.48);
+  background:rgba(212,175,55,.08);
+}
+.salaryMatchAmount{font-size:20px; font-weight:950; color:#fff0a8}
+.salaryScheduleTopline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+.salaryPdfLink{white-space:nowrap}
+.salaryTableWrap{
+  overflow:auto;
+  max-height:68vh;
+  border:1px solid var(--line);
+  border-radius:14px;
+  -webkit-overflow-scrolling:touch;
+}
+.salaryTable{
+  width:max-content;
+  min-width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:#111;
+  font-variant-numeric:tabular-nums;
+}
+.salaryTable th,
+.salaryTable td{
+  padding:10px 12px;
+  border-right:1px solid rgba(255,215,0,.10);
+  border-bottom:1px solid rgba(255,215,0,.10);
+  text-align:right;
+  white-space:nowrap;
+}
+.salaryTable thead th{
+  position:sticky;
+  top:0;
+  z-index:3;
+  background:#1b180d;
+  color:#f0df8d;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.04em;
+}
+.salaryTable th:first-child,
+.salaryTable td:first-child{
+  position:sticky;
+  left:0;
+  z-index:2;
+  text-align:center;
+  background:#171717;
+  font-weight:900;
+}
+.salaryTable thead th:first-child{z-index:4; background:#211d0e}
+.salaryTable tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.salaryTable tbody tr:nth-child(even) th{background:#1b1b1b}
+.salaryNotice{
+  margin-top:14px;
+  padding:14px 16px;
+  border:1px solid rgba(212,175,55,.23);
+  border-radius:14px;
+  background:rgba(212,175,55,.055);
+  color:#d8d8d8;
+  font-size:13px;
+}
+
 /* =========================================================
    Responsive
    ========================================================= */
 
+@media (max-width: 1050px) and (min-width: 769px){
+  .top{flex-wrap:wrap}
+  nav.nav{width:100%; margin-left:0; justify-content:center}
+}
+
 @media (max-width: 900px){
+  .salaryMatchGrid{grid-template-columns:repeat(2, minmax(0,1fr))}
   .person{grid-column:span 6}
   .top{ flex-wrap:wrap; align-items:flex-start; }
   .brand{ flex:1 1 260px; }
@@ -457,6 +668,17 @@ footer{
 }
 
 @media (max-width: 520px){
+  .salaryToolbar{align-items:stretch; flex-direction:column}
+  .salaryYearDetails{text-align:left}
+  .salaryYearField select{min-width:0; width:100%}
+  .salaryModeSwitch{grid-template-columns:1fr; padding:10px 14px}
+  .salaryPanel{padding:15px}
+  .salaryFormGrid{grid-template-columns:1fr}
+  .salaryAmountSearch{align-items:stretch; flex-direction:column}
+  .salaryAmountSearch .btn{justify-content:center}
+  .salaryMatchGrid{grid-template-columns:1fr}
+  .salaryScheduleTopline{align-items:flex-start; flex-direction:column}
+  .salaryPdfLink{width:100%; justify-content:center}
   .person{grid-column:span 12}
   .input, select{min-width:100%}
   .hero{ padding:18px; }
