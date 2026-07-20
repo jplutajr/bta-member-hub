@@ -188,6 +188,50 @@ nav.nav::-webkit-scrollbar{display:none}
 .hero h2{margin:0 0 8px; font-size:22px}
 .hero .sub{color:#d9d9d9; margin:0}
 
+.welcomeBanner{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-top:16px;
+  padding:16px 18px;
+  border:1px solid rgba(212,175,55,.45);
+  border-radius:var(--radius);
+  background:
+    linear-gradient(105deg, rgba(212,175,55,.22), rgba(212,175,55,.07)),
+    rgba(18,18,18,.96);
+  box-shadow:0 10px 28px rgba(0,0,0,.34);
+}
+.welcomeBannerIcon{
+  display:grid;
+  place-items:center;
+  flex:0 0 52px;
+  width:52px;
+  height:52px;
+  border:1px solid rgba(255,215,0,.34);
+  border-radius:16px;
+  background:rgba(0,0,0,.28);
+  font-size:28px;
+}
+.welcomeBannerCopy{min-width:0}
+.welcomeBannerEyebrow{
+  color:var(--brand2);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.welcomeBannerTitle{
+  margin-top:2px;
+  color:#fff;
+  font-size:19px;
+  font-weight:950;
+}
+.welcomeBannerText{
+  margin-top:2px;
+  color:#dedede;
+  font-size:14px;
+}
+
 .divider{
   display:flex;
   align-items:center;
@@ -668,6 +712,9 @@ footer{
 }
 
 @media (max-width: 520px){
+  .welcomeBanner{align-items:flex-start; gap:12px; padding:14px}
+  .welcomeBannerIcon{flex-basis:44px; width:44px; height:44px; border-radius:13px; font-size:23px}
+  .welcomeBannerTitle{font-size:17px}
   .salaryToolbar{align-items:stretch; flex-direction:column}
   .salaryYearDetails{text-align:left}
   .salaryYearField select{min-width:0; width:100%}

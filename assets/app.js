@@ -272,6 +272,15 @@
         subHtml: missionHtml,
       })}
 
+      <aside class="welcomeBanner" aria-label="Welcome our new French teacher">
+        <div class="welcomeBannerIcon" aria-hidden="true">🐝</div>
+        <div class="welcomeBannerCopy">
+          <div class="welcomeBannerEyebrow">Bienvenue to the Hive</div>
+          <div class="welcomeBannerTitle">Welcome, Inna Kucheryavenko!</div>
+          <div class="welcomeBannerText">Please join us in welcoming Bridgehampton’s new French teacher.</div>
+        </div>
+      </aside>
+
       ${divider("Latest")}
 
       <div class="staff-grid">
