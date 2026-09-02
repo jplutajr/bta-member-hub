@@ -46,7 +46,7 @@
   {"name":"Jeff Neubauer","building":"Secondary","role":"Secondary Special Education","email":"","photo":""},
   {"name":"Brianna Rodrigues","building":"Secondary","role":"Secondary 12:1:1","email":"","photo":"assets/staff/BriannaRodrigues.jpg"},
   {"name":"Ninfa Boyd","building":"Secondary","role":"Secondary Foreign Language: Spanish/ENL · Elementary ENL/TESOL","email":"","photo":"assets/staff/NinfaBoyd.jpg"},
-  {"name":"Ryan Barker","building":"Secondary","role":"","email":"","photo":""},
-  {"name":"Danielle Doscher","building":"Secondary","role":"","email":"","photo":"assets/staff/DanielleDoscherASC.jpg"},
-  {"name":"Ralph Naglieri","building":"Secondary","role":"","email":"","photo":""}
+  {"name":"Ryan Barker","building":"Secondary","role":"Elementary Guidance Counselor","email":"","photo":""},
+  {"name":"Danielle Doscher","building":"Secondary","role":"Secondary Guidance Counselor · Director of Guidance","email":"","photo":"assets/staff/DanielleDoscherASC.jpg"},
+  {"name":"Ralph Naglieri","building":"Secondary","role":"School Psychologist","email":"","photo":""}
 ]
