@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="assets/logo.png" />
 
   <!-- Cache bust -->
-  <link rel="stylesheet" href="assets/styles.css?v=FINAL14" />
+  <link rel="stylesheet" href="assets/styles.css?v=FINAL15" />
 </head>
 <body>
   <header>
@@ -44,6 +44,35 @@
     if (!location.hash) location.hash = "#home";
   </script>
 
-  <script src="assets/app.js?v=FINAL14"></script>
+  <script src="assets/app.js?v=FINAL15"></script>
+  <script>
+    // Keep the two Home cards visually blank when there is nothing posted.
+    // As soon as an event/update exists, app.js renders it normally.
+    (() => {
+      const cleanEmptyHomeCards = () => {
+        if ((location.hash || "#home") !== "#home") return;
+        document.querySelectorAll("#app .person").forEach((card) => {
+          const heading = card.querySelector(".name");
+          if (!heading) return;
+          const title = heading.textContent.trim();
+          if (title !== "Upcoming events" && title !== "Latest updates") return;
+
+          const li = card.querySelector("ul li");
+          const emptyText = title === "Upcoming events" ? "No events posted yet." : "No updates posted yet.";
+          if (li && li.textContent.trim() === emptyText) {
+            const ul = card.querySelector("ul");
+            const linkRow = card.querySelector(".small");
+            if (ul) ul.innerHTML = "";
+            if (linkRow) linkRow.innerHTML = "";
+          }
+        });
+      };
+
+      const observer = new MutationObserver(cleanEmptyHomeCards);
+      observer.observe(document.getElementById("app"), { childList: true, subtree: true });
+      window.addEventListener("hashchange", cleanEmptyHomeCards);
+      cleanEmptyHomeCards();
+    })();
+  </script>
 </body>
 </html>
