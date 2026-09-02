@@ -1,7 +1,7 @@
 {
   "title": "2025-2030 BTA Agreement",
   "pdfPath": "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf",
-  "assistantEndpoint": "",
+  "assistantEndpoint": "https://script.google.com/macros/s/AKfycbzZjWyAcKprPqCXEROZZhcDZnMzv7iEBh6Rz5I0WO92iMvWojXxclj6a5T7kBxNRgpL/exec",
   "contractStart": "2025-07-01",
   "contractEnd": "2030-06-30",
   "versionLabel": "Official clean copy"
