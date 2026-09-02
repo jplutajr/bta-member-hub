@@ -2,77 +2,91 @@
   {
     "name": "Rebecca Kave",
     "building": "Elementary",
-    "role": "",
+    "role": "Pre-Kindergarten Class",
     "email": "",
     "photo": "assets/staff/RebeccaKave.jpg"
   },
   {
+    "name": "Carl Johnson",
+    "building": "Elementary",
+    "role": "Pre-Kindergarten Class",
+    "email": "",
+    "photo": ""
+  },
+  {
+    "name": "Fulbia Garcia",
+    "building": "Elementary",
+    "role": "Pre-Kindergarten Class",
+    "email": "",
+    "photo": ""
+  },
+  {
     "name": "Elizabeth Kirwan",
     "building": "Elementary",
-    "role": "",
+    "role": "ENL/TESOL",
     "email": "",
     "photo": "assets/staff/ElizabethKirwan.jpg"
   },
   {
     "name": "Danielle Corbett",
     "building": "Elementary",
-    "role": "",
+    "role": "Kindergarten Class",
     "email": "",
     "photo": "assets/staff/DanielleCorbett.jpg"
   },
   {
     "name": "Nina Merkert",
     "building": "Elementary",
-    "role": "",
+    "role": "First Grade Class",
     "email": "",
     "photo": "assets/staff/NinaMerkert.jpg"
   },
   {
     "name": "Caitlin Hansen",
     "building": "Elementary",
-    "role": "",
+    "role": "Third Grade Class",
     "email": "",
     "photo": "assets/staff/CaitlinHansenASC.jpg"
   },
   {
     "name": "Amanda Candelaria",
     "building": "Elementary",
-    "role": "",
+    "role": "Second Grade Class",
     "email": "",
     "photo": "assets/staff/AmandaCandelaria.jpg"
   },
   {
     "name": "Angela Selvaggio",
     "building": "Elementary",
-    "role": "",
+    "role": "Fourth Grade Class",
     "email": "",
     "photo": "assets/staff/AngelaSelvaggio.jpg"
   },
   {
     "name": "Jeff Hand",
     "building": "Elementary",
-    "role": "",
+    "role": "K-5 AIS Math",
     "email": "",
     "photo": "assets/staff/JeffHand.jpg"
   },
   {
     "name": "Meredith McArdle",
     "building": "Elementary",
-    "role": "",
+    "role": "Fifth Grade Class",
     "email": "",
     "photo": ""
   },
   {
     "name": "Allie Federico",
     "building": "Elementary",
-    "role": "",
+    "role": "Fourth Grade Class",
     "email": "",
     "photo": "assets/staff/AllisonFedericoASC.jpg"
   },
   {
     "name": "Mallory Dougherty",
     "building": "Elementary",
-    "role": "",
+    "role": "Fifth Grade Class",
     "email": "",
     "photo": "assets/staff/MalloryDougherty.jpg"
   },
@@ -84,32 +98,32 @@
     "photo": "assets/staff/LouLiberatore.jpg"
   },
   {
-    "name": "Kristina Minichiello",
-    "building": "Elementary",
-    "role": "",
-    "email": "",
-    "photo": "assets/staff/KristinaMinichiello.jpg"
-  },
-  {
     "name": "Corinne Neubauer",
     "building": "Elementary",
-    "role": "",
+    "role": "Private School Special Education · ENL/TESOL",
     "email": "",
     "photo": ""
   },
   {
     "name": "Rosanna Maione",
     "building": "Elementary",
-    "role": "",
+    "role": "ENL/TESOL",
     "email": "",
     "photo": ""
   },
   {
     "name": "Hamra Ozsu",
     "building": "Elementary",
-    "role": "",
+    "role": "ENL/TESOL · K-5 AIS Literacy/ENL",
     "email": "",
     "photo": "assets/staff/HamraOzsu.jpg"
+  },
+  {
+    "name": "Lindsay Kestler",
+    "building": "Elementary",
+    "role": "Speech Pathologist",
+    "email": "",
+    "photo": "assets/staff/LindsayKestler.jpg"
   },
   {
     "name": "Alexandra DeSouza",
@@ -121,84 +135,84 @@
   {
     "name": "Tom House",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary English · Secondary ENL/TESOL",
     "email": "",
     "photo": ""
   },
   {
     "name": "Hailee Carman",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary English · Secondary ENL/TESOL · Elementary ENL/TESOL",
     "email": "",
     "photo": "assets/staff/HaileeCarman.jpg"
   },
   {
     "name": "Kam Kaiser",
     "building": "Secondary",
-    "role": "",
+    "role": "6th Grade Class · Secondary ENL/TESOL",
     "email": "",
     "photo": "assets/staff/KamKaiser.jpg"
   },
   {
     "name": "John Reilly",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Social Studies",
     "email": "",
     "photo": "assets/staff/JohnReilly.jpg"
   },
   {
     "name": "Henry Meyer",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Social Studies",
     "email": "",
     "photo": "assets/staff/HenryMeyer105.jpg"
   },
   {
     "name": "Michael Sherman",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Science",
     "email": "",
     "photo": "assets/staff/MichaelSherman.jpg"
   },
   {
     "name": "Natalia Nichols",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Science",
     "email": "",
     "photo": "assets/staff/NataliaNichols.jpg"
   },
   {
     "name": "Arthur Erb",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Science",
     "email": "",
     "photo": "assets/staff/ArthurErb.jpg"
   },
   {
     "name": "Kelly Sharp",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Math · Secondary ENL/TESOL",
     "email": "",
     "photo": "assets/staff/KellySharp.jpg"
   },
   {
     "name": "Andrea Sullivan",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Math",
     "email": "",
     "photo": ""
   },
   {
     "name": "Justin O'Connor",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Math",
     "email": "",
     "photo": "assets/staff/JustinOConnor.jpg"
   },
   {
     "name": "Inna Kucheryavenko",
     "building": "Secondary",
-    "role": "French Teacher",
+    "role": "Secondary Foreign Language: French",
     "email": "",
     "photo": ""
   },
@@ -261,79 +275,79 @@
   {
     "name": "Marie Reilly",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary ENL/TESOL",
     "email": "",
     "photo": "assets/staff/MarieReilly.jpg"
   },
   {
     "name": "Julianna Martins",
     "building": "Secondary",
-    "role": "",
+    "role": "6th Grade Class",
     "email": "",
     "photo": "assets/staff/JuliannaMartins.jpg"
   },
   {
     "name": "Ken Giosi",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Special Education",
     "email": "",
     "photo": ""
   },
   {
     "name": "Karen Knight",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Special Education",
     "email": "",
     "photo": "assets/staff/KarenKnight.jpg"
   },
   {
     "name": "Susan Conklin",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary English",
     "email": "",
     "photo": "assets/staff/SusanConklin.jpg"
   },
   {
     "name": "Joe Pluta",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Special Education",
     "email": "",
     "photo": "assets/staff/JoePluta.jpg"
   },
   {
     "name": "Pat Aiello",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Special Education",
     "email": "",
     "photo": "assets/staff/PatAiello.jpg"
   },
   {
     "name": "Jeff Neubauer",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Special Education",
     "email": "",
     "photo": ""
   },
   {
     "name": "Brianna Rodrigues",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary 12:1:1",
     "email": "",
     "photo": "assets/staff/BriannaRodrigues.jpg"
   },
   {
-    "name": "Ninfa Boyd",
+    "name": "Janet Mancino-Conde",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary 12:1:1",
     "email": "",
-    "photo": "assets/staff/NinfaBoyd.jpg"
+    "photo": ""
   },
   {
-    "name": "Lindsay Kestler",
+    "name": "Ninfa Boyd",
     "building": "Secondary",
-    "role": "",
+    "role": "Secondary Foreign Language: Spanish/ENL · Elementary ENL/TESOL",
     "email": "",
-    "photo": "assets/staff/LindsayKestler.jpg"
+    "photo": "assets/staff/NinfaBoyd.jpg"
   },
   {
     "name": "Ryan Barker",
