@@ -13,6 +13,7 @@
     { id: "home", label: "Home" },
     { id: "documents", label: "Documents" },
     { id: "salary", label: "Salary" },
+    { id: "contract", label: "Contract" },
     { id: "officers", label: "Officers" },
     { id: "directory", label: "Directory" },
     { id: "contact", label: "Contact" },
@@ -25,6 +26,7 @@
     events: renderEventsPage,
     documents: renderDocuments,
     salary: renderSalaryLookup,
+    contract: renderContract,
     officers: renderOfficers,
     directory: renderDirectory,
     contact: renderContact,
@@ -916,6 +918,330 @@
     renderYearDetails();
     renderPlacement();
     renderFullSchedule();
+  }
+
+  async function renderContract() {
+    const app = $("#app");
+    const config = await safeLoad("data/contract-assistant.json", {
+      title: "2025-2030 BTA Agreement",
+      pdfPath: "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf",
+      assistantEndpoint: "",
+      versionLabel: "Official clean copy",
+    });
+
+    const pdfPath = config.pdfPath || "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf";
+    const endpoint = String(config.assistantEndpoint || "").trim();
+    const assistantReady = /^https?:\/\//i.test(endpoint);
+    const suggestions = [
+      "How many personal days do I get?",
+      "What are the grievance deadlines?",
+      "How much is a full-year extra class?",
+      "What is the health insurance contribution for 2027-28?",
+      "When do I qualify for longevity?",
+      "What does the contract say about prep periods?",
+    ];
+
+    app.innerHTML = `
+      ${hero({
+        pill: "2025-2030 agreement",
+        title: "Contract center",
+        subHtml:
+          "Read the official agreement or ask the BTA Contract Assistant a question and jump directly to the supporting contract language.",
+      })}
+
+      <div class="contractNotice">
+        <b>The agreement controls.</b> The AI assistant is a faster way to locate and understand provisions; it does not replace the actual contract or BTA guidance on an individual situation.
+      </div>
+
+      <section class="contractShell">
+        <div class="contractModeSwitch" role="tablist" aria-label="Contract tools">
+          <button class="contractModeBtn active" type="button" data-contract-mode="read" role="tab" aria-selected="true">
+            Read the contract
+          </button>
+          <button class="contractModeBtn" type="button" data-contract-mode="ask" role="tab" aria-selected="false">
+            Ask the contract
+          </button>
+        </div>
+
+        <section class="contractPanel" data-contract-panel="read" role="tabpanel">
+          <div class="contractReaderTopline">
+            <div>
+              <div class="name">${escapeHtml(config.title || "2025-2030 BTA Agreement")}</div>
+              <div class="small">${escapeHtml(config.versionLabel || "Official contract copy")} · July 1, 2025 - June 30, 2030</div>
+            </div>
+            <div class="contractReaderActions">
+              <a class="btn" href="${escapeHtml(pdfPath)}" target="_blank" rel="noopener">Open full screen</a>
+              <a class="btn secondaryBtn" href="${escapeHtml(pdfPath)}" download>Download PDF</a>
+            </div>
+          </div>
+
+          <div class="contractPdfWrap">
+            <iframe
+              class="contractPdfFrame"
+              src="${escapeHtml(pdfPath)}#view=FitH"
+              title="Bridgehampton BTA Agreement 2025-2030"
+            ></iframe>
+          </div>
+          <div class="small contractPdfFallback">
+            If your browser does not display PDFs inside the page, use <a href="${escapeHtml(pdfPath)}" target="_blank" rel="noopener">Open full screen</a>.
+          </div>
+        </section>
+
+        <section class="contractPanel" data-contract-panel="ask" role="tabpanel" hidden>
+          <div class="contractAssistantHeader">
+            <div>
+              <div class="name">Ask the BTA Contract Assistant</div>
+              <div class="small">Grounded only in the 2025-2030 agreement and verified contract tables.</div>
+            </div>
+            <button class="btn secondaryBtn" type="button" id="contractClearBtn">Clear conversation</button>
+          </div>
+
+          <div class="contractSuggestionWrap" aria-label="Example contract questions">
+            ${suggestions
+              .map((question) => `<button type="button" class="contractSuggestion" data-question="${escapeHtml(question)}">${escapeHtml(question)}</button>`)
+              .join("")}
+          </div>
+
+          <div class="contractChat" id="contractChat" aria-live="polite">
+            <div class="contractMessage assistant">
+              <div class="contractMessageRole">BTA Contract Assistant</div>
+              <div class="contractMessageText">Ask me about working conditions, leave, benefits, salary provisions, stipends, grievance timelines, extra classes, or another provision in the 2025-2030 agreement. I will cite the section and PDF page I used.</div>
+            </div>
+          </div>
+
+          ${
+            assistantReady
+              ? ""
+              : `<div class="contractSetupMessage" id="contractSetupMessage"><b>AI connection pending.</b> The contract reader is ready, but the secure assistant endpoint still needs to be connected before questions can be submitted.</div>`
+          }
+
+          <form class="contractAskForm" id="contractAskForm">
+            <label class="salaryField" for="contractQuestion">
+              <span class="salaryLabel">Your contract question</span>
+              <textarea
+                class="contractQuestion"
+                id="contractQuestion"
+                rows="3"
+                maxlength="1600"
+                placeholder="Example: Can I be required to give up my preparation period for a meeting?"
+                ${assistantReady ? "" : "disabled"}
+              ></textarea>
+            </label>
+            <div class="contractAskActions">
+              <div class="small">Do not enter sensitive student information or other confidential personal information.</div>
+              <button class="btn" id="contractAskBtn" type="submit" ${assistantReady ? "" : "disabled"}>Ask the contract</button>
+            </div>
+          </form>
+
+          <div class="contractAiDisclaimer">
+            AI can make mistakes. Verify important answers using the cited contract page. If the agreement is silent or ambiguous, contact a BTA officer rather than relying on the assistant alone.
+          </div>
+        </section>
+      </section>
+    `;
+
+    const modeButtons = Array.from(document.querySelectorAll(".contractModeBtn"));
+    const panels = Array.from(document.querySelectorAll(".contractPanel"));
+    const chat = $("#contractChat");
+    const form = $("#contractAskForm");
+    const textarea = $("#contractQuestion");
+    const askButton = $("#contractAskBtn");
+    const clearButton = $("#contractClearBtn");
+    let history = [];
+
+    function callContractAssistant(question, priorHistory) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `__btaContractCb_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const context = (priorHistory || [])
+          .slice(-4)
+          .map((item) => `${item.role === "assistant" ? "Assistant" : "Member"}: ${String(item.text || "").slice(0, 550)}`)
+          .join("\n")
+          .slice(0, 2200);
+
+        const params = new URLSearchParams({
+          q: question,
+          callback: callbackName,
+        });
+        if (context) params.set("context", context);
+
+        const script = document.createElement("script");
+        const separator = endpoint.includes("?") ? "&" : "?";
+        script.src = `${endpoint}${separator}${params.toString()}`;
+        script.async = true;
+
+        let finished = false;
+        const cleanup = () => {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch { window[callbackName] = undefined; }
+        };
+
+        const timer = window.setTimeout(() => {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          reject(new Error("The Contract Assistant took too long to respond. Please try again."));
+        }, 45000);
+
+        window[callbackName] = (result) => {
+          if (finished) return;
+          finished = true;
+          window.clearTimeout(timer);
+          cleanup();
+          if (result && result.error) {
+            reject(new Error(result.error));
+            return;
+          }
+          resolve(result || {});
+        };
+
+        script.onerror = () => {
+          if (finished) return;
+          finished = true;
+          window.clearTimeout(timer);
+          cleanup();
+          reject(new Error("The Contract Assistant could not connect. Please try again."));
+        };
+
+        document.head.appendChild(script);
+      });
+    }
+
+    function setContractMode(mode) {
+      modeButtons.forEach((button) => {
+        const active = button.dataset.contractMode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.contractPanel !== mode;
+      });
+      if (mode === "ask" && assistantReady) setTimeout(() => textarea && textarea.focus(), 0);
+    }
+
+    function textHtml(text) {
+      return escapeHtml(text || "").replaceAll("\n", "<br>");
+    }
+
+    function addUserMessage(text) {
+      const div = document.createElement("div");
+      div.className = "contractMessage user";
+      div.innerHTML = `
+        <div class="contractMessageRole">You</div>
+        <div class="contractMessageText">${textHtml(text)}</div>
+      `;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function sourceHtml(source) {
+      const parts = [];
+      if (source.article) parts.push(source.article);
+      if (source.section) parts.push(source.section);
+      if (source.label && !parts.includes(source.label)) parts.push(source.label);
+      const label = parts.filter(Boolean).join(" · ") || "Contract source";
+      const page = Number(source.pdf_page);
+      if (Number.isInteger(page) && page >= 1 && page <= 46) {
+        return `<a class="contractSource" href="${escapeHtml(pdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+      }
+      return `<span class="contractSource"><span>${escapeHtml(label)}</span></span>`;
+    }
+
+    function addAssistantMessage(result) {
+      const div = document.createElement("div");
+      div.className = `contractMessage assistant ${result.found_in_contract === false ? "notFound" : ""}`;
+      const sources = Array.isArray(result.sources) ? result.sources : [];
+      div.innerHTML = `
+        <div class="contractMessageRole">BTA Contract Assistant</div>
+        <div class="contractMessageText">${textHtml(result.answer || "I could not produce an answer.")}</div>
+        ${sources.length ? `<div class="contractSources"><div class="contractSourcesLabel">Sources</div>${sources.map(sourceHtml).join("")}</div>` : ""}
+        ${result.caveat ? `<div class="contractCaveat">${textHtml(result.caveat)}</div>` : ""}
+        ${result.needs_bta_followup ? `<div class="contractFollowup">This question may need BTA review because the language is silent, ambiguous, deadline-sensitive, or fact-dependent.</div>` : ""}
+      `;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addErrorMessage(message) {
+      const div = document.createElement("div");
+      div.className = "contractMessage assistant error";
+      div.innerHTML = `
+        <div class="contractMessageRole">BTA Contract Assistant</div>
+        <div class="contractMessageText">${textHtml(message)}</div>
+      `;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => setContractMode(button.dataset.contractMode));
+    });
+
+    document.querySelectorAll(".contractSuggestion").forEach((button) => {
+      button.addEventListener("click", () => {
+        setContractMode("ask");
+        if (!assistantReady || !textarea) return;
+        textarea.value = button.dataset.question || button.textContent || "";
+        textarea.focus();
+      });
+    });
+
+    if (clearButton) {
+      clearButton.addEventListener("click", () => {
+        history = [];
+        chat.innerHTML = `
+          <div class="contractMessage assistant">
+            <div class="contractMessageRole">BTA Contract Assistant</div>
+            <div class="contractMessageText">Conversation cleared. Ask another question about the 2025-2030 agreement.</div>
+          </div>
+        `;
+        if (textarea && assistantReady) textarea.focus();
+      });
+    }
+
+    if (form && assistantReady) {
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const question = String(textarea.value || "").trim();
+        if (!question) {
+          textarea.focus();
+          return;
+        }
+
+        const priorHistory = history.slice(-8);
+        addUserMessage(question);
+        textarea.value = "";
+        textarea.disabled = true;
+        askButton.disabled = true;
+        askButton.textContent = "Checking contract…";
+
+        const thinking = document.createElement("div");
+        thinking.className = "contractMessage assistant thinking";
+        thinking.innerHTML = `
+          <div class="contractMessageRole">BTA Contract Assistant</div>
+          <div class="contractMessageText">Reviewing the agreement and contract tables…</div>
+        `;
+        chat.appendChild(thinking);
+        chat.scrollTop = chat.scrollHeight;
+
+        try {
+          const result = await callContractAssistant(question, priorHistory);
+          thinking.remove();
+
+          addAssistantMessage(result);
+          history.push({ role: "user", text: question });
+          history.push({ role: "assistant", text: result.answer || "" });
+          history = history.slice(-8);
+        } catch (error) {
+          thinking.remove();
+          addErrorMessage(error && error.message ? error.message : "The contract assistant is unavailable right now.");
+        } finally {
+          textarea.disabled = false;
+          askButton.disabled = false;
+          askButton.textContent = "Ask the contract";
+          textarea.focus();
+        }
+      });
+    }
   }
 
   async function renderContact() {

@@ -44,3 +44,18 @@ When a future contract adds new schedules:
 4. Do not include stipends, extra classes, buyback, summer work, or employee names in this data.
 
 The finalized 2025-26 through 2029-30 schedules are already loaded.
+
+## Update the 2025-2030 Contract Center
+The Contract page uses:
+
+- `assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf` - the official PDF members read and the AI uses as its controlling source.
+- `data/contract-assistant.json` - contract title, PDF path, and the deployed AI endpoint.
+- `data/contract-numeric-reference.json` - verified numeric tables used to reduce AI errors on stipends, coaching, insurance percentages, and other number-heavy provisions.
+- `data/salary-schedules.json` - exact salary-table data already used by the Salary page and also supplied to the contract assistant.
+- `backend/google-apps-script/Code.gs` - Google Apps Script backend. The Gemini API key belongs in Apps Script Script Properties as `GEMINI_API_KEY`, never in GitHub.
+
+If a signed/executed PDF replaces the clean copy, keep the same filename and replace the file. If the language or page count changes, re-check the numeric reference and source-page mapping before publishing.
+
+If an MOA later changes the contract, do not simply tell the AI about it in prose. Add the executed MOA as an approved source and update the grounding rules/data so the assistant can identify which language controls.
+
+See `CONTRACT_ASSISTANT_SETUP.md` for the one-time deployment steps.

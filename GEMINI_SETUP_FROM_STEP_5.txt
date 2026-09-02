@@ -1,0 +1,141 @@
+BTA CONTRACT ASSISTANT — EXACT SETUP FROM WHERE YOU ARE NOW
+==============================================================
+
+You already completed this:
+- Created a Gemini API key in Google AI Studio.
+- Created a Google Apps Script project.
+- Saved the key in Script Properties as GEMINI_API_KEY.
+
+DO NOT put your API key in GitHub or in any file from this ZIP.
+
+STEP 6 — PUT THE NEW WEBSITE FILES ON GITHUB
+--------------------------------------------
+1. Download and extract BTA-member-hub-gemini-contract-assistant.zip.
+2. Open the extracted folder named bta-member-hub-main.
+3. You should see index.html, assets, data, backend, and other files.
+4. Open your GitHub repository: jplutajr/bta-member-hub.
+5. Click Add file → Upload files.
+6. Drag the CONTENTS of bta-member-hub-main into the upload box.
+   Do NOT drag the outer bta-member-hub-main folder itself.
+7. Commit the upload to main (or use a branch if you prefer).
+8. Wait for GitHub Pages to redeploy.
+9. Open the live BTA site and click Contract.
+10. Confirm the PDF reader works. The AI box will correctly say that the AI connection is pending.
+
+WHY THIS MUST HAPPEN FIRST:
+The Google Apps Script backend reads the contract text and verified tables from your public GitHub repository. Those new files must exist before testing the backend.
+
+STEP 7 — COPY THE GOOGLE APPS SCRIPT CODE
+-----------------------------------------
+1. In the extracted ZIP, open:
+   backend/google-apps-script/Code.gs
+2. Select all of the text in that file and copy it.
+3. Go back to your Google Apps Script project.
+4. Click Code.gs on the left.
+5. Delete everything currently inside Code.gs.
+6. Paste the code from the file.
+7. Click Save (disk icon), or press Ctrl+S.
+
+DO NOT paste your API key into Code.gs. The code reads GEMINI_API_KEY from the Script Property you already created.
+
+STEP 8 — TEST THE BACKEND BEFORE DEPLOYING IT
+---------------------------------------------
+1. At the top of Apps Script, find the function dropdown. It may currently say myFunction.
+2. Choose testContractAssistant.
+3. Click Run.
+4. The first time, Google will ask you to authorize the script.
+5. Click Review permissions.
+6. Choose the same Google account that owns the Apps Script project.
+7. If Google shows an "unverified" warning for your own script, click Advanced, then continue to the BTA Contract Assistant project.
+8. Click Allow.
+9. Wait for the run to finish.
+10. At the bottom, open the Execution log.
+
+A successful test should show a line beginning with:
+   testCallback({
+
+and the JSON inside should answer the built-in test question:
+   How many personal days do I get?
+
+If the test says the source file could not load, make sure Step 6 finished and GitHub Pages/repository contains data/contract-text.txt.
+
+STEP 9 — DEPLOY APPS SCRIPT AS A WEB APP
+-----------------------------------------
+1. In Apps Script, click Deploy in the upper-right.
+2. Choose New deployment.
+3. Next to Select type, click the gear icon.
+4. Choose Web app.
+5. Description: BTA Contract Assistant
+6. Execute as: Me
+7. Who has access: Anyone
+8. Click Deploy.
+9. Approve permissions if asked.
+10. Google will show a Web app URL ending in /exec.
+11. COPY THAT /exec URL.
+
+It will look similar to:
+https://script.google.com/macros/s/XXXXXXXXXXXXXXXXXXXXXXXX/exec
+
+This URL is NOT your Gemini API key. It is okay for the public website to contain this URL.
+
+STEP 10 — CONNECT THE WEBSITE TO THE WEB APP
+---------------------------------------------
+The easiest method is to edit one small file directly on GitHub.
+
+1. Open your GitHub repository: jplutajr/bta-member-hub.
+2. Open the data folder.
+3. Click contract-assistant.json.
+4. Click the pencil icon (Edit this file).
+5. Find this line:
+
+   "assistantEndpoint": "",
+
+6. Paste your Apps Script /exec URL between the quotation marks, for example:
+
+   "assistantEndpoint": "https://script.google.com/macros/s/XXXXXXXXXXXXXXXX/exec",
+
+7. Do not change anything else.
+8. Click Commit changes.
+9. Wait for GitHub Pages to redeploy.
+
+STEP 11 — TEST THE LIVE WEBSITE
+-------------------------------
+1. Open the live BTA website.
+2. Hard refresh: Ctrl+F5 on Windows.
+3. Click Contract.
+4. Click Ask the contract.
+5. The text box should now be enabled.
+6. Ask: How many personal days do I get?
+7. Confirm the answer cites Article VIII / Personal Leave and links to the correct PDF page.
+8. Ask several more questions from the testing list below.
+
+TESTING LIST
+------------
+- How many personal days do I get?
+- What are the Level One grievance deadlines?
+- How much is a full-year A and B day extra class?
+- What is the health insurance contribution for teachers in 2028-29?
+- How many sick days can be used for immediate family illness?
+- What is the tuition reimbursement percentage starting July 1, 2026?
+- How much does the Senior Class Advisor receive in 2029-30?
+- When is the retirement incentive letter due for 2026-27?
+- Can an elementary teacher be assigned a duty during the professional period?
+- What does the contract say about snow-day parking?  (This should say the agreement does not specify it.)
+
+IMPORTANT PRIVACY RULE
+----------------------
+The free Gemini tier may use submitted content to improve Google's products. The website therefore warns members not to enter student names, medical details, disciplinary details, or confidential grievance facts. The bot is for understanding the public contract, not for sending confidential case files to AI.
+
+FREE-COST RULE
+--------------
+Do not enable billing in Google AI Studio / Google Cloud. This build uses gemini-2.5-flash, which Google currently lists with free-tier text input/output. If a free quota is reached, the assistant may temporarily stop responding; it should not create a charge if billing was never enabled.
+
+WHEN YOU CHANGE THE APPS SCRIPT CODE LATER
+------------------------------------------
+Editing Code.gs does NOT automatically update an existing deployment.
+After a future code change:
+1. Deploy → Manage deployments.
+2. Click the pencil/edit icon for the current web app.
+3. Under Version, choose New version.
+4. Click Deploy.
+The /exec URL normally stays the same.

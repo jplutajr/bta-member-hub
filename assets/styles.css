@@ -188,6 +188,7 @@ nav.nav::-webkit-scrollbar{display:none}
 .hero h2{margin:0 0 8px; font-size:22px}
 .hero .sub{color:#d9d9d9; margin:0}
 
+
 .welcomeBanner{
   display:flex;
   align-items:center;
@@ -662,6 +663,233 @@ footer{
   font-size:13px;
 }
 
+
+
+/* =========================================================
+   Contract center / grounded AI assistant
+   ========================================================= */
+.secondaryBtn{
+  background:rgba(18,18,18,.78);
+  border-color:rgba(212,175,55,.42);
+  color:#f5e7a7;
+}
+.secondaryBtn:hover{filter:none}
+.btn:disabled{
+  cursor:not-allowed;
+  opacity:.5;
+  transform:none;
+  box-shadow:none;
+  filter:none;
+}
+.contractNotice{
+  margin:14px 0;
+  padding:13px 15px;
+  border:1px solid rgba(212,175,55,.22);
+  border-radius:14px;
+  background:rgba(212,175,55,.055);
+  color:#dedede;
+  font-size:13px;
+}
+.contractShell{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:rgba(16,16,16,.88);
+  box-shadow:var(--shadow);
+}
+.contractModeSwitch{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  padding:14px;
+  border-bottom:1px solid var(--line);
+  background:rgba(0,0,0,.18);
+}
+.contractModeBtn{
+  min-height:46px;
+  border:1px solid rgba(212,175,55,.22);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  color:#ddd;
+  font:inherit;
+  font-weight:850;
+  cursor:pointer;
+}
+.contractModeBtn:hover{border-color:rgba(212,175,55,.48); background:rgba(212,175,55,.07)}
+.contractModeBtn.active{
+  color:#171308;
+  border-color:rgba(255,215,0,.72);
+  background:linear-gradient(180deg,var(--brand2),var(--brand));
+}
+.contractPanel{padding:18px}
+.contractReaderTopline,
+.contractAssistantHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+.contractReaderActions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.contractPdfWrap{
+  overflow:hidden;
+  border:1px solid rgba(212,175,55,.24);
+  border-radius:14px;
+  background:#222;
+}
+.contractPdfFrame{
+  display:block;
+  width:100%;
+  height:760px;
+  border:0;
+  background:#fff;
+}
+.contractPdfFallback{margin-top:10px}
+.contractSuggestionWrap{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.contractSuggestion{
+  border:1px solid rgba(212,175,55,.28);
+  border-radius:999px;
+  background:rgba(212,175,55,.055);
+  color:#eee4b4;
+  padding:8px 11px;
+  font:inherit;
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.contractSuggestion:hover{background:rgba(212,175,55,.13); border-color:rgba(212,175,55,.55)}
+.contractChat{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-height:230px;
+  max-height:540px;
+  overflow-y:auto;
+  padding:14px;
+  border:1px solid rgba(212,175,55,.16);
+  border-radius:14px;
+  background:#0d0d0d;
+  scroll-behavior:smooth;
+}
+.contractMessage{
+  max-width:86%;
+  padding:12px 14px;
+  border-radius:15px;
+  line-height:1.55;
+}
+.contractMessage.assistant{
+  align-self:flex-start;
+  border:1px solid rgba(212,175,55,.20);
+  background:rgba(255,255,255,.045);
+}
+.contractMessage.user{
+  align-self:flex-end;
+  border:1px solid rgba(212,175,55,.52);
+  background:rgba(212,175,55,.14);
+}
+.contractMessage.assistant.notFound{border-color:rgba(242,196,89,.38)}
+.contractMessage.assistant.error{border-color:rgba(226,112,112,.38); background:rgba(140,30,30,.13)}
+.contractMessage.thinking{opacity:.72}
+.contractMessageRole{
+  margin-bottom:5px;
+  color:#e7d77f;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.065em;
+  text-transform:uppercase;
+}
+.contractMessage.user .contractMessageRole{color:#fff0ad}
+.contractMessageText{color:#f1f1f1; font-size:14px}
+.contractSources{
+  display:grid;
+  gap:7px;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid rgba(212,175,55,.14);
+}
+.contractSourcesLabel{
+  color:#bcbcbc;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.contractSource{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 10px;
+  border:1px solid rgba(212,175,55,.16);
+  border-radius:10px;
+  background:rgba(0,0,0,.22);
+  color:#ddd;
+  font-size:12px;
+  text-decoration:none;
+}
+a.contractSource:hover{border-color:rgba(212,175,55,.45); text-decoration:none}
+.contractSource b{white-space:nowrap; color:#efdf8c}
+.contractCaveat,
+.contractFollowup{
+  margin-top:10px;
+  padding:9px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+.contractCaveat{background:rgba(255,255,255,.045); color:#d8d8d8}
+.contractFollowup{border:1px solid rgba(212,175,55,.26); background:rgba(212,175,55,.07); color:#f0e4ae}
+.contractSetupMessage{
+  margin-top:14px;
+  padding:12px 14px;
+  border:1px solid rgba(212,175,55,.30);
+  border-radius:12px;
+  background:rgba(212,175,55,.07);
+  color:#eee1a8;
+  font-size:13px;
+}
+.contractAskForm{margin-top:14px}
+.contractQuestion{
+  width:100%;
+  min-height:88px;
+  resize:vertical;
+  border:1px solid rgba(212,175,55,.32);
+  border-radius:12px;
+  background:#101010;
+  color:#fff;
+  padding:12px 13px;
+  font:inherit;
+  font-size:16px;
+  line-height:1.45;
+  outline:none;
+}
+.contractQuestion:focus{border-color:rgba(255,215,0,.76); box-shadow:0 0 0 3px rgba(212,175,55,.10)}
+.contractQuestion:disabled{opacity:.52; cursor:not-allowed}
+.contractAskActions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:10px;
+}
+.contractAiDisclaimer{
+  margin-top:14px;
+  color:#aaa;
+  font-size:11px;
+  line-height:1.5;
+}
+
+
 /* =========================================================
    Responsive
    ========================================================= */
@@ -712,6 +940,18 @@ footer{
 }
 
 @media (max-width: 520px){
+  .contractModeSwitch{grid-template-columns:1fr; padding:10px}
+  .contractPanel{padding:13px}
+  .contractReaderTopline,.contractAssistantHeader{align-items:flex-start; flex-direction:column}
+  .contractReaderActions{width:100%; justify-content:stretch}
+  .contractReaderActions .btn{flex:1; justify-content:center}
+  .contractPdfFrame{height:560px}
+  .contractAssistantHeader .btn{width:100%; justify-content:center}
+  .contractMessage{max-width:96%}
+  .contractChat{padding:10px; min-height:210px; max-height:500px}
+  .contractSource{align-items:flex-start; flex-direction:column; gap:4px}
+  .contractAskActions{align-items:stretch; flex-direction:column}
+  .contractAskActions .btn{width:100%; justify-content:center}
   .welcomeBanner{align-items:flex-start; gap:12px; padding:14px}
   .welcomeBannerIcon{flex-basis:44px; width:44px; height:44px; border-radius:13px; font-size:23px}
   .welcomeBannerTitle{font-size:17px}
