@@ -1,0 +1,71 @@
+/* BTA header cleanup and persistent mobile Home button */
+.mobileHomeBtn{
+  display:none;
+}
+
+@media (max-width: 768px){
+  .top{
+    align-items:center;
+    gap:8px;
+  }
+
+  .brand{
+    flex:1 1 150px;
+    min-width:0;
+    gap:9px;
+  }
+
+  .brand img{
+    flex:0 0 auto;
+    height:36px !important;
+  }
+
+  .brand h1{
+    font-size:14px;
+    line-height:1.15;
+  }
+
+  .mobileHomeBtn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    min-height:40px;
+    padding:9px 12px;
+    border:1px solid rgba(212,175,55,.65);
+    border-radius:12px;
+    background:linear-gradient(180deg, rgba(212,175,55,.28), rgba(212,175,55,.10));
+    color:#fff2b7;
+    font-size:13px;
+    font-weight:900;
+    line-height:1;
+    text-decoration:none;
+    box-shadow:0 6px 18px rgba(0,0,0,.28);
+  }
+
+  .mobileHomeBtn:hover,
+  .mobileHomeBtn:focus-visible{
+    background:rgba(212,175,55,.22);
+    border-color:rgba(255,215,0,.85);
+    text-decoration:none;
+  }
+
+  .navToggle{
+    flex:0 0 auto;
+    min-height:40px;
+  }
+
+  nav.nav{
+    flex:1 0 100%;
+  }
+}
+
+@media (max-width: 390px){
+  .brand h1{
+    font-size:12.5px;
+  }
+
+  .mobileHomeBtn{
+    padding:9px 10px;
+  }
+}
