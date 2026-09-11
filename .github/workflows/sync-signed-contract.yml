@@ -16,17 +16,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Google Drive downloader
+        run: python -m pip install --quiet gdown
+
       - name: Download official signed agreement from Google Drive
         run: |
           mkdir -p assets/contracts
-          curl -L --fail --retry 3 --retry-delay 2 \
-            "https://drive.usercontent.google.com/download?id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-&export=download&confirm=t" \
-            -o assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf
+          gdown --id "1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-" \
+            -O assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf
 
       - name: Validate PDF
         run: |
-          test "$(head -c 5 assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf)" = "%PDF-"
-          test "$(stat -c%s assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf)" -gt 100000
+          file assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf')
+          data = p.read_bytes()
+          assert data.startswith(b'%PDF-'), 'Downloaded file is not a PDF.'
+          assert len(data) > 100000, 'Downloaded PDF is unexpectedly small.'
+          print(f'Validated signed PDF: {len(data):,} bytes')
+          PY
 
       - name: Commit signed agreement if changed
         run: |
