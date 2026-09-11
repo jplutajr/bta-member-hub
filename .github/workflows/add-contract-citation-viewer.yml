@@ -1,0 +1,148 @@
+name: Add Contract Citation Page Viewer
+
+on:
+  push:
+    paths:
+      - ".github/workflows/add-contract-citation-viewer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch source links and add cited-page viewer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          app = Path('assets/app.js')
+          text = app.read_text(encoding='utf-8')
+          old = '''      if (Number.isInteger(page) && page >= 1 && page <= 44) {
+                return `<a class="contractSource" href="${escapeHtml(citationPdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+              }'''
+          if old not in text:
+              # current file uses normal indentation in the checked-in source
+              old = '''      if (Number.isInteger(page) && page >= 1 && page <= 44) {
+        return `<a class="contractSource" href="${escapeHtml(citationPdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+      }'''
+          new = '''      if (Number.isInteger(page) && page >= 1 && page <= 44) {
+        const citationUrl = `contract-citation.html?page=${page}&label=${encodeURIComponent(label)}`;
+        return `<a class="contractSource" href="${escapeHtml(citationUrl)}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+      }'''
+          if old not in text:
+              raise SystemExit('Could not find current source-link block')
+          text = text.replace(old, new, 1)
+          app.write_text(text, encoding='utf-8')
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          html = re.sub(r'assets/app\.js\?v=[A-Za-z0-9_-]+', 'assets/app.js?v=FINAL20', html, count=1)
+          index.write_text(html, encoding='utf-8')
+          PY
+
+          cat > contract-citation.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>BTA Contract Citation</title>
+            <style>
+              :root{--bg:#090909;--panel:#151515;--gold:#f2c230;--text:#f5f5f5;--muted:#bdbdbd;--paper:#fff;--ink:#111}
+              *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+              .wrap{max-width:980px;margin:0 auto;padding:22px 18px 48px}.top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+              h1{font-size:clamp(22px,4vw,32px);margin:0}.eyebrow{color:var(--gold);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.08em}.sub{color:var(--muted);margin-top:5px}
+              .actions{display:flex;gap:8px;flex-wrap:wrap}.btn{display:inline-block;background:var(--gold);color:#111;font-weight:800;text-decoration:none;border-radius:8px;padding:10px 14px;border:0}.btn.secondary{background:#2a2a2a;color:#fff;border:1px solid #555}
+              .notice{background:#181818;border:1px solid #333;border-left:4px solid var(--gold);padding:12px 14px;border-radius:8px;margin-bottom:18px;color:#ddd}
+              .paper{background:var(--paper);color:var(--ink);border-radius:8px;padding:clamp(22px,5vw,54px);box-shadow:0 12px 36px rgba(0,0,0,.35);min-height:70vh}
+              .pageTitle{font-size:13px;font-weight:800;color:#555;border-bottom:1px solid #ccc;padding-bottom:10px;margin-bottom:20px;text-transform:uppercase;letter-spacing:.05em}
+              pre{font-family:"Times New Roman",Times,serif;font-size:16px;white-space:pre-wrap;word-break:normal;margin:0;line-height:1.48}.error{color:#8a1f11;font-weight:700}
+              .foot{color:var(--muted);font-size:12px;margin-top:16px}
+              @media print{body{background:#fff}.wrap{max-width:none;padding:0}.top,.notice,.foot{display:none}.paper{box-shadow:none;border-radius:0;padding:.45in}.pageTitle{color:#333}}
+            </style>
+          </head>
+          <body>
+            <main class="wrap">
+              <div class="top">
+                <div>
+                  <div class="eyebrow">Bridgehampton Teachers Association</div>
+                  <h1 id="heading">Contract citation</h1>
+                  <div class="sub" id="sourceLabel">2025-2030 Official Signed Agreement</div>
+                </div>
+                <div class="actions">
+                  <a class="btn secondary" href="./#contract">Back to Contract Center</a>
+                  <a class="btn" id="fullPdf" href="https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview" target="_blank" rel="noopener">Open full signed agreement</a>
+                </div>
+              </div>
+
+              <div class="notice">
+                This page shows the text extracted from the cited page of the <b>official signed 44-page agreement</b>. It is provided so a citation opens directly to the correct page content without Google Drive forcing a download.
+              </div>
+
+              <article class="paper">
+                <div class="pageTitle" id="pageTitle">Loading cited page...</div>
+                <pre id="pageText">Loading...</pre>
+              </article>
+              <div class="foot">The executed PDF remains the controlling document. Use “Open full signed agreement” when you need to inspect the original page visually.</div>
+            </main>
+
+            <script>
+              (async () => {
+                const params = new URLSearchParams(location.search);
+                const page = Number(params.get('page'));
+                const label = String(params.get('label') || '').trim();
+                const heading = document.getElementById('heading');
+                const pageTitle = document.getElementById('pageTitle');
+                const pageText = document.getElementById('pageText');
+                const sourceLabel = document.getElementById('sourceLabel');
+
+                if (!Number.isInteger(page) || page < 1 || page > 44) {
+                  heading.textContent = 'Invalid contract citation';
+                  pageTitle.textContent = 'Citation error';
+                  pageText.textContent = 'The requested PDF page number is invalid.';
+                  pageText.className = 'error';
+                  return;
+                }
+
+                heading.textContent = `Signed Agreement — PDF Page ${page}`;
+                document.title = `BTA Contract — PDF Page ${page}`;
+                if (label) sourceLabel.textContent = label;
+                pageTitle.textContent = `Official signed agreement · PDF page ${page} of 44`;
+
+                try {
+                  const res = await fetch('data/contract-text.txt', { cache: 'no-store' });
+                  if (!res.ok) throw new Error('Could not load the contract text source.');
+                  const all = await res.text();
+                  const marker = `=== PDF PAGE ${page} ===`;
+                  const start = all.indexOf(marker);
+                  if (start < 0) throw new Error(`Page ${page} was not found in the signed contract source.`);
+                  const bodyStart = start + marker.length;
+                  const next = all.indexOf('\n=== PDF PAGE ', bodyStart);
+                  const text = all.slice(bodyStart, next >= 0 ? next : all.length).trim();
+                  pageText.textContent = text || '[This signed PDF page contains no extractable text. Open the full signed agreement to view the page.]';
+                } catch (err) {
+                  pageText.textContent = err && err.message ? err.message : 'The cited page could not be loaded.';
+                  pageText.className = 'error';
+                }
+              })();
+            </script>
+          </body>
+          </html>
+          HTML
+
+      - name: Remove failed one-time workflow and commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/store-signed-contract.yml || true
+          git rm -f .github/workflows/add-contract-citation-viewer.yml
+          git add assets/app.js index.html contract-citation.html
+          git commit -m "Open Contract Assistant citations at exact signed pages"
+          git push
