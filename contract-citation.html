@@ -3,99 +3,100 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
   <title>BTA Contract Citation</title>
   <style>
     :root{--bg:#090909;--gold:#f2c230;--text:#f5f5f5;--muted:#bdbdbd}
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 42px}
-    .top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
-    h1{font-size:clamp(22px,4vw,32px);margin:0}
-    .eyebrow{color:var(--gold);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.08em}
-    .sub{color:var(--muted);margin-top:5px}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .btn{display:inline-block;background:var(--gold);color:#111;font-weight:800;text-decoration:none;border-radius:8px;padding:10px 14px;border:0}
-    .btn.secondary{background:#2a2a2a;color:#fff;border:1px solid #555}
-    .notice{background:#181818;border:1px solid #333;border-left:4px solid var(--gold);padding:11px 14px;border-radius:8px;margin-bottom:16px;color:#ddd}
-    .viewerShell{background:#111;border:1px solid #333;border-radius:10px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.35)}
-    .viewerTop{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 14px;background:#171717;border-bottom:1px solid #333;font-size:13px;font-weight:700}
-    .viewerTop span:last-child{color:var(--gold)}
-    iframe{display:block;width:100%;height:min(82vh,1050px);min-height:650px;border:0;background:#fff}
-    .foot{color:var(--muted);font-size:12px;margin-top:14px}
-    @media(max-width:700px){.wrap{padding:14px 10px 30px}.actions{width:100%}.btn{flex:1;text-align:center}.viewerTop{align-items:flex-start;flex-direction:column}iframe{height:78vh;min-height:520px}}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+    .wrap{max-width:760px;margin:0 auto;padding:44px 18px;text-align:center}h1{font-size:clamp(22px,4vw,32px);margin:8px 0}
+    .eyebrow{color:var(--gold);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.08em}.sub{color:var(--muted);margin:8px 0 22px}
+    .btn{display:inline-block;background:var(--gold);color:#111;font-weight:800;text-decoration:none;border-radius:8px;padding:10px 14px;margin:4px}
+    .btn.secondary{background:#2a2a2a;color:#fff;border:1px solid #555}.error{background:#181818;border:1px solid #444;border-left:4px solid var(--gold);padding:16px;border-radius:8px;text-align:left}
   </style>
 </head>
 <body>
   <main class="wrap">
-    <div class="top">
-      <div>
-        <div class="eyebrow">Bridgehampton Teachers Association</div>
-        <h1 id="heading">Contract citation</h1>
-        <div class="sub" id="sourceLabel">2025-2030 Official Signed Agreement</div>
-      </div>
-      <div class="actions">
-        <a class="btn secondary" href="./#contract">Back to Contract Center</a>
-        <a class="btn" href="https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview" target="_blank" rel="noopener">Open full signed agreement</a>
-      </div>
+    <div class="eyebrow">Bridgehampton Teachers Association</div>
+    <h1 id="heading">Opening original contract page...</h1>
+    <div class="sub" id="status">Loading the cited page from the official signed 2025-2030 agreement.</div>
+    <div id="fallback" hidden>
+      <a class="btn" id="openPage" href="#" target="_self">Open cited contract page</a>
+      <a class="btn secondary" href="./#contract">Back to Contract Center</a>
     </div>
-
-    <div class="notice">
-      This citation displays the <b>original signed PDF page</b>, preserving the contract's actual layout and formatting. The executed 44-page agreement remains the controlling document.
-    </div>
-
-    <section class="viewerShell">
-      <div class="viewerTop">
-        <span id="viewerLabel">Official signed agreement</span>
-        <span id="pageLabel">Loading page…</span>
-      </div>
-      <iframe id="pdfViewer" title="Original signed BTA agreement citation page" allowfullscreen></iframe>
-    </section>
-
-    <div class="foot">If the embedded Google viewer does not load on your device, use “Open full signed agreement” above. The cited PDF page number remains shown at the top.</div>
   </main>
-
   <script>
     (() => {
+      const pageFiles = {
+      1: "1ghe1OCL_CqTdMr2fF1P4y_IDGar7WW0H",
+      2: "1mB6dc-0nMoKTd3zITanIU9kaJwOrjhtV",
+      3: "1pg7O0GstzPulBHE4Jx6dl9WY0KRjHVnM",
+      4: "1TvoGalVfbPAMGY_I-pK43uzci27NC5Rr",
+      5: "11TqrvBddzyrNf-V4slwT-UlIsrAvq5e3",
+      6: "13wQQ9zouXJiem0kGObs2iAkswrH3u3wc",
+      7: "1lsMX3iFGJwRXk7F0TVsK-6F1P9-tsFnz",
+      8: "1pesWb0g-l94ldF1H53LCX6BG9exxp3hr",
+      9: "1rKQQaE5rPikvrbby2h8GYFeJ7KJR92et",
+      10: "1HRZqYcFUArT1hfsXTDfd6YbpsUJIUvbQ",
+      11: "1oTsHXns2aSEdjDGvpGystIi61kXAn3rQ",
+      12: "1cwznNh6vA7F6EYVmKEQp02StM2Z5lGPm",
+      13: "1BF4DK_hX1pGaeFBNIpc-2v-mOLyv3d3a",
+      14: "1Jg8AybzxSQl23ZxCEcJC8gkCU0bP9rMP",
+      15: "1IoG20fH_bJhZewOmtaIXb7n7HUTuIWvP",
+      16: "1RVzvlq5JwMDRBi7TyBNYwEtIr9cjqiFf",
+      17: "11Qbp3EJ3rAiXt2P9pQvWmb3nHoCBpq8b",
+      18: "1zUkX8KRQB_tmkrHNxqujHXl7UyU7NM05",
+      19: "1naSrcC9G1oVMTjMG-Uji6L9ZMRROtlJf",
+      20: "1pJWAAb1l3ktUED2jmOVv8cIpTRN-Nkhh",
+      21: "1DsOigZoNMi01t-alsCQeq_qQRuYMjrf8",
+      22: "1XvhARmfUT5JL-3V2XB-WIzZ3lhkWqKPM",
+      23: "1vl0wMUiOFe2DxjRNSlLmeveF6MGH5xMd",
+      24: "1QvEZl0VC42xs4u0mFm_kL50fDLgUk532",
+      25: "1EFXWNff06EQW0wmNMI0g29vNgEBhyerO",
+      26: "1KnTW0-NaVcfiTLVAfJfiUtFicArAViSP",
+      27: "1jPutbh6o-wWLsJOG3HB6XJHxaXGTlRlH",
+      28: "1O-Wc7JI6HonlYmv9ymJhKGvZ8bbbb1DM",
+      29: "1ZC-Cr5BrLfPogGG2bLrhrCMD79VoVk3w",
+      30: "1Koz4n1h4ZezMoyJevHxt0EKCjnoNk9W8",
+      31: "1SZqamB-a7N2LrR8fZBcmMa3eh9IVXCif",
+      32: "1Q1m9Z79lzjsSQCTzK1Jug9vMI-zczYTV",
+      33: "1q5uEsk8AwQQvgzy_5Etysc_a57tMg84L",
+      34: "1kA5i-utk3rN9iZwMpiCRTyIcQPSvAPJp",
+      35: "1rWY3qXvBQEFboNgGNLEvan_BR0Ipu5NJ",
+      36: "1UC4oHjpVwpU3ESzPoKFtw8WJWerLWW-t",
+      37: "1zA_MA0UHLQkwumH-0XJsWZjO7gG1kmF4",
+      38: "15xQJE7X2zq3LGdIUYneA-uFuvyaHvIZZ",
+      39: "1O473wbkfGf8_3SLJK9f2UeG_nlnZXKWK",
+      40: "13cjkjLIgeycqaUxrX93NbTjUxcHk1yoh",
+      41: "1xYysiIm04JVb_j4mlal5UarrWyi_HDFw",
+      42: "1X9oM_lteZR6R8CJz-71znIO_-p0Y6EeN",
+      43: "1_YgwKpYOGYtCuihvCMHOhJeeyHGhSQLG",
+      44: "1vHJFKDJWjhrnCDHIiQQuz4s20xfAzQyU"
+      };
       const params = new URLSearchParams(location.search);
       const page = Number(params.get('page'));
-      const label = String(params.get('label') || '').trim();
+      const fileId = pageFiles[page];
       const heading = document.getElementById('heading');
-      const sourceLabel = document.getElementById('sourceLabel');
-      const pageLabel = document.getElementById('pageLabel');
-      const viewerLabel = document.getElementById('viewerLabel');
-      const iframe = document.getElementById('pdfViewer');
+      const status = document.getElementById('status');
+      const fallback = document.getElementById('fallback');
+      const openPage = document.getElementById('openPage');
 
-      if (!Number.isInteger(page) || page < 1 || page > 44) {
+      if (!Number.isInteger(page) || !fileId) {
         heading.textContent = 'Invalid contract citation';
-        pageLabel.textContent = 'Invalid page';
-        iframe.remove();
+        status.innerHTML = '<div class="error">The requested signed-contract page could not be identified.</div>';
+        fallback.hidden = false;
+        openPage.hidden = true;
         return;
       }
 
-      heading.textContent = `Signed Agreement — PDF Page ${page}`;
-      document.title = `BTA Contract — PDF Page ${page}`;
-      pageLabel.textContent = `PDF page ${page} of 44`;
-      if (label) {
-        sourceLabel.textContent = label;
-        viewerLabel.textContent = label;
-      }
+      document.title = `BTA Contract - PDF Page ${page}`;
+      heading.textContent = `Opening original PDF page ${page}`;
+      status.textContent = 'This is the original page extracted directly from the signed 44-page agreement; no text or formatting has been recreated.';
+      const target = `https://drive.google.com/file/d/${fileId}/preview`;
+      openPage.href = target;
+      fallback.hidden = false;
 
-      const pdfUrl = 'https://drive.google.com/uc?export=download&id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-';
-      const viewerBase = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
-      const targetHash = `#:0.page.${page - 1}`;
-
-      // Load the actual signed PDF through Google's document viewer and target the cited page.
-      // Re-applying the page hash once after load improves page targeting in browsers that
-      // initially render the viewer before its internal page anchors are ready.
-      let reapplied = false;
-      iframe.src = viewerBase + targetHash;
-      iframe.addEventListener('load', () => {
-        if (reapplied) return;
-        reapplied = true;
-        window.setTimeout(() => {
-          iframe.src = viewerBase + targetHash;
-        }, 650);
-      });
+      // Each citation PDF contains exactly one original page, so Drive page 1 is the cited page.
+      window.setTimeout(() => location.replace(target), 120);
     })();
   </script>
 </body>
