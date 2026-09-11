@@ -5,16 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BTA Contract Citation</title>
   <style>
-    :root{--bg:#090909;--gold:#f2c230;--text:#f5f5f5;--muted:#bdbdbd;--paper:#fff;--ink:#111}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
-    .wrap{max-width:980px;margin:0 auto;padding:22px 18px 48px}.top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
-    h1{font-size:clamp(22px,4vw,32px);margin:0}.eyebrow{color:var(--gold);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.08em}.sub{color:var(--muted);margin-top:5px}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}.btn{display:inline-block;background:var(--gold);color:#111;font-weight:800;text-decoration:none;border-radius:8px;padding:10px 14px}.btn.secondary{background:#2a2a2a;color:#fff;border:1px solid #555}
-    .notice{background:#181818;border:1px solid #333;border-left:4px solid var(--gold);padding:12px 14px;border-radius:8px;margin-bottom:18px;color:#ddd}
-    .paper{background:var(--paper);color:var(--ink);border-radius:8px;padding:clamp(22px,5vw,54px);box-shadow:0 12px 36px rgba(0,0,0,.35);min-height:70vh}
-    .pageTitle{font-size:13px;font-weight:800;color:#555;border-bottom:1px solid #ccc;padding-bottom:10px;margin-bottom:20px;text-transform:uppercase;letter-spacing:.05em}
-    pre{font-family:"Times New Roman",Times,serif;font-size:16px;white-space:pre-wrap;word-break:normal;margin:0;line-height:1.48}.error{color:#8a1f11;font-weight:700}.foot{color:var(--muted);font-size:12px;margin-top:16px}
-    @media print{body{background:#fff}.wrap{max-width:none;padding:0}.top,.notice,.foot{display:none}.paper{box-shadow:none;border-radius:0;padding:.45in}.pageTitle{color:#333}}
+    :root{--bg:#090909;--gold:#f2c230;--text:#f5f5f5;--muted:#bdbdbd}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+    .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 42px}
+    .top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+    h1{font-size:clamp(22px,4vw,32px);margin:0}
+    .eyebrow{color:var(--gold);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.08em}
+    .sub{color:var(--muted);margin-top:5px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{display:inline-block;background:var(--gold);color:#111;font-weight:800;text-decoration:none;border-radius:8px;padding:10px 14px;border:0}
+    .btn.secondary{background:#2a2a2a;color:#fff;border:1px solid #555}
+    .notice{background:#181818;border:1px solid #333;border-left:4px solid var(--gold);padding:11px 14px;border-radius:8px;margin-bottom:16px;color:#ddd}
+    .viewerShell{background:#111;border:1px solid #333;border-radius:10px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.35)}
+    .viewerTop{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 14px;background:#171717;border-bottom:1px solid #333;font-size:13px;font-weight:700}
+    .viewerTop span:last-child{color:var(--gold)}
+    iframe{display:block;width:100%;height:min(82vh,1050px);min-height:650px;border:0;background:#fff}
+    .foot{color:var(--muted);font-size:12px;margin-top:14px}
+    @media(max-width:700px){.wrap{padding:14px 10px 30px}.actions{width:100%}.btn{flex:1;text-align:center}.viewerTop{align-items:flex-start;flex-direction:column}iframe{height:78vh;min-height:520px}}
   </style>
 </head>
 <body>
@@ -31,53 +39,63 @@
       </div>
     </div>
 
-    <div class="notice">This page shows the text extracted from the cited page of the <b>official signed 44-page agreement</b>. It opens directly to the cited page content without Google Drive forcing a download.</div>
+    <div class="notice">
+      This citation displays the <b>original signed PDF page</b>, preserving the contract's actual layout and formatting. The executed 44-page agreement remains the controlling document.
+    </div>
 
-    <article class="paper">
-      <div class="pageTitle" id="pageTitle">Loading cited page...</div>
-      <pre id="pageText">Loading...</pre>
-    </article>
-    <div class="foot">The executed PDF remains the controlling document. Use “Open full signed agreement” when you need to inspect the original page visually.</div>
+    <section class="viewerShell">
+      <div class="viewerTop">
+        <span id="viewerLabel">Official signed agreement</span>
+        <span id="pageLabel">Loading page…</span>
+      </div>
+      <iframe id="pdfViewer" title="Original signed BTA agreement citation page" allowfullscreen></iframe>
+    </section>
+
+    <div class="foot">If the embedded Google viewer does not load on your device, use “Open full signed agreement” above. The cited PDF page number remains shown at the top.</div>
   </main>
 
   <script>
-    (async () => {
+    (() => {
       const params = new URLSearchParams(location.search);
       const page = Number(params.get('page'));
       const label = String(params.get('label') || '').trim();
       const heading = document.getElementById('heading');
-      const pageTitle = document.getElementById('pageTitle');
-      const pageText = document.getElementById('pageText');
       const sourceLabel = document.getElementById('sourceLabel');
+      const pageLabel = document.getElementById('pageLabel');
+      const viewerLabel = document.getElementById('viewerLabel');
+      const iframe = document.getElementById('pdfViewer');
 
       if (!Number.isInteger(page) || page < 1 || page > 44) {
         heading.textContent = 'Invalid contract citation';
-        pageTitle.textContent = 'Citation error';
-        pageText.textContent = 'The requested PDF page number is invalid.';
-        pageText.className = 'error';
+        pageLabel.textContent = 'Invalid page';
+        iframe.remove();
         return;
       }
 
       heading.textContent = `Signed Agreement — PDF Page ${page}`;
       document.title = `BTA Contract — PDF Page ${page}`;
-      if (label) sourceLabel.textContent = label;
-      pageTitle.textContent = `Official signed agreement · PDF page ${page} of 44`;
-
-      try {
-        const res = await fetch('data/contract-text.txt', { cache: 'no-store' });
-        if (!res.ok) throw new Error('Could not load the signed contract source.');
-        const all = await res.text();
-        const marker = `=== PDF PAGE ${page} ===`;
-        const start = all.indexOf(marker);
-        if (start < 0) throw new Error(`Page ${page} was not found in the signed contract source.`);
-        const bodyStart = start + marker.length;
-        const next = all.indexOf('\n=== PDF PAGE ', bodyStart);
-        const text = all.slice(bodyStart, next >= 0 ? next : all.length).trim();
-        pageText.textContent = text || '[This signed PDF page contains no extractable text. Open the full signed agreement to view the page.]';
-      } catch (err) {
-        pageText.textContent = err && err.message ? err.message : 'The cited page could not be loaded.';
-        pageText.className = 'error';
+      pageLabel.textContent = `PDF page ${page} of 44`;
+      if (label) {
+        sourceLabel.textContent = label;
+        viewerLabel.textContent = label;
       }
+
+      const pdfUrl = 'https://drive.google.com/uc?export=download&id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-';
+      const viewerBase = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
+      const targetHash = `#:0.page.${page - 1}`;
+
+      // Load the actual signed PDF through Google's document viewer and target the cited page.
+      // Re-applying the page hash once after load improves page targeting in browsers that
+      // initially render the viewer before its internal page anchors are ready.
+      let reapplied = false;
+      iframe.src = viewerBase + targetHash;
+      iframe.addEventListener('load', () => {
+        if (reapplied) return;
+        reapplied = true;
+        window.setTimeout(() => {
+          iframe.src = viewerBase + targetHash;
+        }, 650);
+      });
     })();
   </script>
 </body>
