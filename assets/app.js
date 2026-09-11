@@ -924,12 +924,14 @@
     const app = $("#app");
     const config = await safeLoad("data/contract-assistant.json", {
       title: "2025-2030 BTA Agreement",
-      pdfPath: "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf",
+      pdfPath: "https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview",
+      citationPdfPath: "https://drive.google.com/uc?export=view&id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-",
       assistantEndpoint: "",
-      versionLabel: "Official clean copy",
+      versionLabel: "Official signed agreement — executed September 11, 2026",
     });
 
-    const pdfPath = config.pdfPath || "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf";
+    const pdfPath = config.pdfPath || "https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview";
+    const citationPdfPath = String(config.citationPdfPath || pdfPath).trim();
     const endpoint = String(config.assistantEndpoint || "").trim();
     const assistantReady = /^https?:\/\//i.test(endpoint);
     const suggestions = [
@@ -993,7 +995,10 @@
               <div class="name">Ask the BTA Contract Assistant</div>
               <div class="small">Grounded only in the 2025-2030 agreement and verified contract tables.</div>
             </div>
-            <button class="btn secondaryBtn" type="button" id="contractClearBtn">Clear conversation</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn secondaryBtn" type="button" id="contractPrintBtn">Print conversation</button>
+              <button class="btn secondaryBtn" type="button" id="contractClearBtn">Clear conversation</button>
+            </div>
           </div>
 
           <div class="contractSuggestionWrap" aria-label="Example contract questions">
@@ -1023,12 +1028,13 @@
                 id="contractQuestion"
                 rows="3"
                 maxlength="1600"
+                enterkeyhint="send"
                 placeholder="Example: Can I be required to give up my preparation period for a meeting?"
                 ${assistantReady ? "" : "disabled"}
               ></textarea>
             </label>
             <div class="contractAskActions">
-              <div class="small">Do not enter sensitive student information or other confidential personal information.</div>
+              <div class="small">Do not enter sensitive student information or other confidential personal information. Press <b>Enter</b> to send; use <b>Shift+Enter</b> for a new line.</div>
               <button class="btn" id="contractAskBtn" type="submit" ${assistantReady ? "" : "disabled"}>Ask the contract</button>
             </div>
           </form>
@@ -1046,6 +1052,7 @@
     const form = $("#contractAskForm");
     const textarea = $("#contractQuestion");
     const askButton = $("#contractAskBtn");
+    const printButton = $("#contractPrintBtn");
     const clearButton = $("#contractClearBtn");
     let history = [];
 
@@ -1140,8 +1147,8 @@
       if (source.label && !parts.includes(source.label)) parts.push(source.label);
       const label = parts.filter(Boolean).join(" · ") || "Contract source";
       const page = Number(source.pdf_page);
-      if (Number.isInteger(page) && page >= 1 && page <= 46) {
-        return `<a class="contractSource" href="${escapeHtml(pdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+      if (Number.isInteger(page) && page >= 1 && page <= 44) {
+        return `<a class="contractSource" href="${escapeHtml(citationPdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
       }
       return `<span class="contractSource"><span>${escapeHtml(label)}</span></span>`;
     }
@@ -1159,6 +1166,49 @@
       `;
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
+    }
+
+    function printConversation() {
+      const clone = chat.cloneNode(true);
+      clone.querySelectorAll(".thinking").forEach((el) => el.remove());
+
+      const printWindow = window.open("", "btaContractPrint", "width=900,height=700");
+      if (!printWindow) {
+        window.alert("Your browser blocked the print window. Please allow pop-ups for this site and try again.");
+        return;
+      }
+      try { printWindow.opener = null; } catch {}
+
+      const printedAt = new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date());
+
+      printWindow.document.open();
+      printWindow.document.write(`<!doctype html>
+        <html><head><meta charset="utf-8"><title>BTA Contract Assistant Conversation</title>
+        <style>
+          body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:36px;line-height:1.45}
+          h1{font-size:22px;margin:0 0 4px}.meta{color:#555;font-size:12px;margin-bottom:24px}
+          .contractMessage{border-top:1px solid #ddd;padding:14px 0;break-inside:avoid}
+          .contractMessageRole{font-weight:700;margin-bottom:6px}
+          .contractMessageText{white-space:normal}.contractSources{margin-top:10px}.contractSourcesLabel{font-weight:700;font-size:12px;margin-bottom:4px}
+          .contractSource{display:block;color:#0645ad;margin:3px 0;text-decoration:none}.contractSource b{margin-left:8px}
+          .contractCaveat,.contractFollowup{margin-top:10px;padding:8px 10px;background:#f4f4f4;border-left:3px solid #777;font-size:13px}
+          .footer{margin-top:26px;padding-top:12px;border-top:1px solid #bbb;font-size:11px;color:#555}
+          @media print{body{margin:.4in}a{color:#000;text-decoration:none}}
+        </style></head><body>
+        <h1>Bridgehampton Teachers Association</h1>
+        <div class="meta">Contract Assistant conversation · ${escapeHtml(printedAt)}</div>
+        ${clone.innerHTML}
+        <div class="footer">The 2025–2030 signed agreement controls. AI-generated explanations should be verified against the cited contract language. Contact a BTA officer for individualized guidance.</div>
+        </body></html>`);
+      printWindow.document.close();
+      printWindow.focus();
+      window.setTimeout(() => printWindow.print(), 250);
     }
 
     function addErrorMessage(message) {
@@ -1185,6 +1235,10 @@
       });
     });
 
+    if (printButton) {
+      printButton.addEventListener("click", printConversation);
+    }
+
     if (clearButton) {
       clearButton.addEventListener("click", () => {
         history = [];
@@ -1198,7 +1252,16 @@
       });
     }
 
-    if (form && assistantReady) {
+    if (form && textarea && assistantReady) {
+      textarea.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+          event.preventDefault();
+          if (!textarea.disabled && String(textarea.value || "").trim()) {
+            form.requestSubmit();
+          }
+        }
+      });
+
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const question = String(textarea.value || "").trim();
