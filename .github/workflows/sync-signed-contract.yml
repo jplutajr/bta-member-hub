@@ -22,7 +22,7 @@ jobs:
       - name: Download official signed agreement
         run: |
           mkdir -p assets/contracts
-          gdown --id "1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-" \
+          gdown "1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-" \
             -O assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf
 
       - name: Validate PDF and regenerate AI source files
