@@ -1,0 +1,26 @@
+name: Contract Assistant UI Polish
+
+on:
+  push:
+    paths:
+      - ".github/workflows/contract-assistant-ui-polish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Patch Contract Assistant UI
+        run: python scripts/patch-contract-assistant-ui.py
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/app.js data/contract-assistant.json
+          git diff --cached --quiet || git commit -m "Improve contract citations, Enter submit, and printing"
+          git push
