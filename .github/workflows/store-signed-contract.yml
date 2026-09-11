@@ -1,0 +1,83 @@
+name: Store Signed Contract on Website
+
+on:
+  push:
+    paths:
+      - ".github/workflows/store-signed-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  store:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PDF validator
+        run: python -m pip install --quiet pypdf
+
+      - name: Download official signed agreement
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/contracts
+          OUT="assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf"
+          FILE_ID="1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-"
+
+          # Google Drive's public media endpoint is intentionally used here because
+          # it returns the PDF bytes rather than the Drive preview wrapper.
+          curl -L --fail --retry 3 --retry-delay 2 \
+            "https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download&confirm=t" \
+            -o "$OUT"
+
+          python - <<'PY'
+          from pathlib import Path
+          from pypdf import PdfReader
+          p = Path('assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf')
+          data = p.read_bytes()
+          if not data.startswith(b'%PDF-'):
+              raise SystemExit('Downloaded file is not a PDF')
+          r = PdfReader(str(p))
+          if len(r.pages) != 44:
+              raise SystemExit(f'Expected 44 pages; got {len(r.pages)}')
+          print(f'Validated signed agreement: {len(data):,} bytes, {len(r.pages)} pages')
+          PY
+
+      - name: Point the website to the locally served signed PDF
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          local_pdf = 'assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf'
+
+          cfg_path = Path('data/contract-assistant.json')
+          cfg = json.loads(cfg_path.read_text(encoding='utf-8'))
+          cfg['pdfPath'] = local_pdf
+          cfg['citationPdfPath'] = local_pdf
+          cfg['versionLabel'] = 'Official signed agreement — executed September 11, 2026'
+          cfg_path.write_text(json.dumps(cfg, indent=2) + '\n', encoding='utf-8')
+
+          docs_path = Path('data/docs.json')
+          docs = json.loads(docs_path.read_text(encoding='utf-8'))
+          for d in docs:
+              if 'BTA Agreement' in str(d.get('title', '')):
+                  d['url'] = local_pdf
+                  d['note'] = 'Official signed agreement — executed September 11, 2026'
+          docs_path.write_text(json.dumps(docs, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Remove this one-time workflow and commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/store-signed-contract.yml
+          git add \
+            assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf \
+            data/contract-assistant.json \
+            data/docs.json
+          git commit -m "Serve official signed agreement directly from BTA website"
+          git push
