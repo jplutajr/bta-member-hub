@@ -1,0 +1,37 @@
+name: Sync Signed BTA Contract
+
+on:
+  push:
+    paths:
+      - ".github/workflows/sync-signed-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download official signed agreement from Google Drive
+        run: |
+          mkdir -p assets/contracts
+          curl -L --fail --retry 3 --retry-delay 2 \
+            "https://drive.usercontent.google.com/download?id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-&export=download&confirm=t" \
+            -o assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf
+
+      - name: Validate PDF
+        run: |
+          test "$(head -c 5 assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf)" = "%PDF-"
+          test "$(stat -c%s assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf)" -gt 100000
+
+      - name: Commit signed agreement if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Signed.pdf
+          git diff --cached --quiet || git commit -m "Add official signed 2025-2030 BTA agreement"
+          git push
