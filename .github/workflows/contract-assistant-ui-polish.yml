@@ -1,0 +1,193 @@
+name: Contract Assistant UI Polish
+
+on:
+  push:
+    paths:
+      - ".github/workflows/contract-assistant-ui-polish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update contract assistant UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          app_path = Path('assets/app.js')
+          text = app_path.read_text(encoding='utf-8')
+
+          # Signed contract fallbacks and citation path.
+          old = '''    const config = await safeLoad("data/contract-assistant.json", {
+              title: "2025-2030 BTA Agreement",
+              pdfPath: "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf",
+              assistantEndpoint: "",
+              versionLabel: "Official clean copy",
+            });
+
+            const pdfPath = config.pdfPath || "assets/contracts/Bridgehampton_BTA_Agreement_2025-2030_Official_Clean.pdf";'''
+          new = '''    const config = await safeLoad("data/contract-assistant.json", {
+              title: "2025-2030 BTA Agreement",
+              pdfPath: "https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview",
+              citationPdfPath: "https://drive.google.com/uc?export=view&id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-",
+              assistantEndpoint: "",
+              versionLabel: "Official signed agreement — executed September 11, 2026",
+            });
+
+            const pdfPath = config.pdfPath || "https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview";
+            const citationPdfPath = String(config.citationPdfPath || pdfPath).trim();'''
+          if old not in text:
+              raise SystemExit('Could not find contract config block')
+          text = text.replace(old, new, 1)
+
+          # Add print button next to clear conversation.
+          old = '''            <button class="btn secondaryBtn" type="button" id="contractClearBtn">Clear conversation</button>'''
+          new = '''            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn secondaryBtn" type="button" id="contractPrintBtn">Print conversation</button>
+              <button class="btn secondaryBtn" type="button" id="contractClearBtn">Clear conversation</button>
+            </div>'''
+          if old not in text:
+              raise SystemExit('Could not find clear conversation button')
+          text = text.replace(old, new, 1)
+
+          # Mobile keyboard hint and user-facing Enter guidance.
+          old = '''                maxlength="1600"
+                placeholder="Example: Can I be required to give up my preparation period for a meeting?"'''
+          new = '''                maxlength="1600"
+                enterkeyhint="send"
+                placeholder="Example: Can I be required to give up my preparation period for a meeting?"'''
+          if old not in text:
+              raise SystemExit('Could not find question textarea attributes')
+          text = text.replace(old, new, 1)
+
+          old = '''              <div class="small">Do not enter sensitive student information or other confidential personal information.</div>'''
+          new = '''              <div class="small">Do not enter sensitive student information or other confidential personal information. Press <b>Enter</b> to send; use <b>Shift+Enter</b> for a new line.</div>'''
+          if old not in text:
+              raise SystemExit('Could not find assistant privacy/help text')
+          text = text.replace(old, new, 1)
+
+          # Grab the new print button.
+          old = '''    const askButton = $("#contractAskBtn");
+            const clearButton = $("#contractClearBtn");'''
+          new = '''    const askButton = $("#contractAskBtn");
+            const printButton = $("#contractPrintBtn");
+            const clearButton = $("#contractClearBtn");'''
+          if old not in text:
+              raise SystemExit('Could not find contract button constants')
+          text = text.replace(old, new, 1)
+
+          # Source links: direct PDF endpoint, signed agreement max page 44.
+          old = '''      if (Number.isInteger(page) && page >= 1 && page <= 46) {
+                return `<a class="contractSource" href="${escapeHtml(pdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+              }'''
+          new = '''      if (Number.isInteger(page) && page >= 1 && page <= 44) {
+                return `<a class="contractSource" href="${escapeHtml(citationPdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+              }'''
+          if old not in text:
+              raise SystemExit('Could not find contract source link block')
+          text = text.replace(old, new, 1)
+
+          # Insert print function before addErrorMessage.
+          marker = '''    function addErrorMessage(message) {'''
+          insert = r'''    function printConversation() {
+              const clone = chat.cloneNode(true);
+              clone.querySelectorAll(".thinking").forEach((el) => el.remove());
+
+              const printWindow = window.open("", "btaContractPrint", "width=900,height=700");
+              if (!printWindow) {
+                window.alert("Your browser blocked the print window. Please allow pop-ups for this site and try again.");
+                return;
+              }
+              try { printWindow.opener = null; } catch {}
+
+              const printedAt = new Intl.DateTimeFormat("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              }).format(new Date());
+
+              printWindow.document.open();
+              printWindow.document.write(`<!doctype html>
+                <html><head><meta charset="utf-8"><title>BTA Contract Assistant Conversation</title>
+                <style>
+                  body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:36px;line-height:1.45}
+                  h1{font-size:22px;margin:0 0 4px}.meta{color:#555;font-size:12px;margin-bottom:24px}
+                  .contractMessage{border-top:1px solid #ddd;padding:14px 0;break-inside:avoid}
+                  .contractMessageRole{font-weight:700;margin-bottom:6px}.contractMessage.user .contractMessageRole{color:#333}
+                  .contractMessageText{white-space:normal}.contractSources{margin-top:10px}.contractSourcesLabel{font-weight:700;font-size:12px;margin-bottom:4px}
+                  .contractSource{display:block;color:#0645ad;margin:3px 0;text-decoration:none}.contractSource b{margin-left:8px}
+                  .contractCaveat,.contractFollowup{margin-top:10px;padding:8px 10px;background:#f4f4f4;border-left:3px solid #777;font-size:13px}
+                  .footer{margin-top:26px;padding-top:12px;border-top:1px solid #bbb;font-size:11px;color:#555}
+                  @media print{body{margin:.4in}a{color:#000;text-decoration:none}}
+                </style></head><body>
+                <h1>Bridgehampton Teachers Association</h1>
+                <div class="meta">Contract Assistant conversation · ${escapeHtml(printedAt)}</div>
+                ${clone.innerHTML}
+                <div class="footer">The 2025–2030 signed agreement controls. AI-generated explanations should be verified against the cited contract language. Contact a BTA officer for individualized guidance.</div>
+                </body></html>`);
+              printWindow.document.close();
+              printWindow.focus();
+              window.setTimeout(() => printWindow.print(), 250);
+            }
+
+'''
+          if marker not in text:
+              raise SystemExit('Could not find addErrorMessage marker')
+          text = text.replace(marker, insert + marker, 1)
+
+          # Bind the print button before clear conversation.
+          marker = '''    if (clearButton) {'''
+          insert = '''    if (printButton) {
+              printButton.addEventListener("click", printConversation);
+            }
+
+'''
+          if marker not in text:
+              raise SystemExit('Could not find clear button listener')
+          text = text.replace(marker, insert + marker, 1)
+
+          # Enter submits; Shift+Enter inserts a newline. Respect IME composition.
+          marker = '''    if (form && assistantReady) {
+              form.addEventListener("submit", async (event) => {'''
+          replacement = '''    if (form && textarea && assistantReady) {
+              textarea.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+                  event.preventDefault();
+                  if (!textarea.disabled && String(textarea.value || "").trim()) {
+                    form.requestSubmit();
+                  }
+                }
+              });
+
+              form.addEventListener("submit", async (event) => {'''
+          if marker not in text:
+              raise SystemExit('Could not find contract form listener')
+          text = text.replace(marker, replacement, 1)
+
+          app_path.write_text(text, encoding='utf-8')
+
+          config_path = Path('data/contract-assistant.json')
+          config = json.loads(config_path.read_text(encoding='utf-8'))
+          config['pdfPath'] = 'https://drive.google.com/file/d/1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-/preview'
+          config['citationPdfPath'] = 'https://drive.google.com/uc?export=view&id=1lnoJ27j9RpkF0gTwzAdNUCjTH04ML0H-'
+          config['versionLabel'] = 'Official signed agreement — executed September 11, 2026'
+          config_path.write_text(json.dumps(config, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/app.js data/contract-assistant.json
+          git diff --cached --quiet || git commit -m "Improve contract citations, Enter submit, and printing"
+          git push
