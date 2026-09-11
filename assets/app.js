@@ -1148,7 +1148,8 @@
       const label = parts.filter(Boolean).join(" · ") || "Contract source";
       const page = Number(source.pdf_page);
       if (Number.isInteger(page) && page >= 1 && page <= 44) {
-        return `<a class="contractSource" href="${escapeHtml(citationPdfPath)}#page=${page}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
+        const citationUrl = `contract-citation.html?page=${page}&label=${encodeURIComponent(label)}`;
+        return `<a class="contractSource" href="${escapeHtml(citationUrl)}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><b>PDF p. ${page}</b></a>`;
       }
       return `<span class="contractSource"><span>${escapeHtml(label)}</span></span>`;
     }
